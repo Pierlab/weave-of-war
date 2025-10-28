@@ -38,3 +38,4 @@ Establish the automation, documentation, and workflows required for coding agent
 Status: **In progress while this branch is open.**
 - Once merged, future missions should duplicate this file or the base template to continue the workflow.
 - Watch CI logs after the first merge to ensure the headless commands run correctly in GitHub Actions.
+- CI scripts now extend `SceneTree`, satisfying Godot's `--script` requirement for both local runs and CI.

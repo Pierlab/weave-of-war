@@ -5,6 +5,7 @@
 - Added automated Godot lint/build/test runners plus a GitHub Actions workflow mirroring the headless commands.
 - Introduced a generated context snapshot, changelog, and branch-level reporting routine for sustained continuity.
 - Documented the vertical slice planning checklists in `CHECKLISTS.md` and linked them from the onboarding flow.
+- Adjusted CI Godot scripts to extend `SceneTree` so headless `--script` execution works during merges.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
