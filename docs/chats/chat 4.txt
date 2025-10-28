@@ -1,0 +1,286 @@
+Il manquait 2 fichiers d’analyse et quelques annexes. Recommence ton analyse complète. Comme tu l’as compris, mon idée initiale était d’en faire un jeu de société avec carte, figurine, etc… j’avais quelques limitations liées au support physique, je compte sur toi pour exploiter le potentiel offert par la digitalisation du jeu. Rappelle toi que les documents que je te transmets sont des supports de travail et ne sont pas des règles finalisées. À toi de comprendre la philosophie que j’ai développé et de me proposer des mécaniques de jeu répondant à mes contraintes, notamment le triptique ftl/settlers/vandalhearts. 
+
+
+
+Génial, Pierre. J’ai tout relu (y compris les 2 fichiers manquants + annexes) et je repars de ta philosophie pour une **version numérique** alignée sur ton triptyque **FTL (simplicité & tension) / Settlers II (flux & éco visibles) / Vandal Hearts (lisibilité du tour par tour)**.
+Je t’expose d’abord une **vision “jeu vidéo” consolidée** de tes chapitres, puis — surtout — je te propose **plusieurs variantes mécaniques** par système, pour que tu choisisses.
+
+---
+
+# 🌌 Vision numérique (adaptée à tes docs)
+
+* **Tour structuré + planification cachée** ; révélations alternées pour le bluff (déjà présent dans ton Chap. 6) — on garde la séquence, mais on l’enrichit digitalement (aide visuelle, résolutions simultanées, logs d’actions). 
+* **Terrains & météo** sobres mais impactants, avec fréquence réglable (roue météo) et effets clairs — parfait pour un mapping visuel en jeu.
+* **Élan/momentum** comme ressource “vivante” des bataillons, plafonnée, dépensable en pics d’action. 
+* **Ravitaillement** matérialisé par des **flux animés** et “lignes” (réseau à optimiser, rupture pénalisante) — c’est ton pont naturel vers l’ADN Settlers. 
+* **Cartes** à double usage stratégique/tactique, préparées en séquence + main réactive (tes docs y insistent : commande, révélations, main limitée). 
+
+---
+
+# ⚙️ Déroulé d’un tour (version jeu vidéo)
+
+On part de ta trame, on l’adapte **UX** et **lisibilité** :
+
+1. **Initiative** (alterne) → UI: badge “Initiative” + tempo sonore. 
+2. **Météo** via roue pondérée → infobulle auto des impacts actuels (portée/visibilité/mobilité).
+3. **Pioche** & **limite de main** → surbrillance des cartes en excès, proposition de défausse “intelligente”. 
+4. **Allocation des compétences** (Commandement/Tactique/Logistique ou modèle 3-comp. simplifié) → sliders + tooltips d’effets.
+5. **Planification secrète** (poser X cartes “Stratégie”) + **main “Tactique”** gardée → tu l’as, on le garde, on outille la lisibilité. 
+6. **Révélation alternée & exécution** (résolutions locales + réactions tactiques) avec logs et replays courts. 
+7. **Vérif conditions de victoire** (scénario-dépendant). 
+
+---
+
+# 🔧 Systèmes clés — propositions de variantes
+
+## 1) **Élan (Momentum)**
+
+Base docs : gain sur succès (combat, manœuvre, prise de ville), ressource plafonnée, dépensable en bonus, tracée sur carte officier. 
+
+**A. Élan local (par bataillon)**
+
+* Chaque unité a sa jauge ; booste attaque/déplacement ; se purge en cas d’échec.
+* ✅ Lisibilité micro (“ce bataillon est en feu”) ; **game feel** nerveux.
+* ⚠️ Micro-gestion si beaucoup d’unités.
+
+**B. Réservoir global + ponts locaux**
+
+* Pot commun d’Empire (gain = succès majeurs). Tu peux “injecter” N points dans 1–2 bataillons avant une action.
+* ✅ Décisions macro (FTL) ; élimine la micro-gestion ; crée des **pics dramatiques**.
+* ⚠️ Moins de saveur “unités héroïques”.
+
+**C. Rythme synchronisé (“battements”)**
+
+* Jauge mondiale qui bat toutes les 3 révélations : si tu dépenses au bon **battement**, effets amplifiés.
+* ✅ Tension/rythme, maîtrise experte (skill ceiling).
+* ⚠️ Exige UI claire.
+
+> Reco : **B** (réservoir global) pour coller à FTL (ressource centrale, pics), + un léger marqueur local quand même pour la lisibilité.
+
+---
+
+## 2) **Ravitaillement (flux animés)**
+
+Base docs : villes produisent, jetons-ligne, rupture = malus. 
+
+**A. Réseau “pipe” (à la Settlers)**
+
+* Tu poses des **noeuds** et **liaisons** ; le jeu **route** l’or/nourriture/munitions ; vitesse animée ; **goulots** visibles.
+* ✅ Plaisir visuel + lisibilité ; optimisation douce.
+* ⚠️ Implé plus lourde.
+
+**B. Niveaux de projection (zone logistique)**
+
+* Chaque ville projette une **zone d’appro** en anneaux ; si unité dedans → ok ; sinon → malus progressifs.
+* ✅ Ultra lisible ; peu de clics ; scalable.
+* ⚠️ Moins de “jouet” que les tuyaux.
+
+**C. Convois physiqués**
+
+* Petits convois auto-générés ; l’ennemi peut les intercepter (espion/cavalerie).
+* ✅ Emergence, histoires (“raid sur convoi”).
+* ⚠️ Charge IA/perf.
+
+> Reco : **B** pour le VS (vertical slice), puis **A** en étape 2 si tu veux la magie “Settlers”.
+
+---
+
+## 3) **Cartes : planif vs réaction**
+
+Tes docs : cartes double usage strat/tact, main limitée, séquence cachée, influence commande/météo/terrain.
+
+**A. Deck fixe par doctrine**
+
+* Tu choisis un **doctrine deck** (siège, mobilité, ruse). Les cartes sont stables = apprentissage rapide.
+* ✅ Accessibilité ; lisibilité métagame.
+* ⚠️ Moins de variété brute.
+
+**B. Marché tournant (draft léger)**
+
+* Une rivière de cartes communes/tactiques renouvelée chaque tour.
+* ✅ Adaptation dynamique (FTL).
+* ⚠️ + RNG (à modérer).
+
+**C. Arbre de doctrines (semi-roguelite)**
+
+* Tu “déverrouilles” des paquets au fil d’une campagne (meta progression).
+* ✅ Rétention quotidienne (NSM).
+* ⚠️ Scope live plus grand.
+
+> Reco : **A + un mini-marché B** pour assouplir les choix sans noyer.
+
+---
+
+## 4) **Combat (lisible, nerveux, Vandal Hearts)**
+
+Docs : combat adjacence, terrain/météo, cartes et compétences, exemples de résolution.
+
+**A. Résolution “addition modifiée”**
+
+* Force = (type d’unités + formation) + bonus terrain/météo + carte + élan → test simple (D12 vs seuil/opp).
+* ✅ Hyper clair, rapide.
+* ⚠️ Peu d’interactions mid-résolution.
+
+**B. Résolution par “piliers”**
+
+* Trois mini-tests : **Position** (terrain/formation), **Impulsion** (élan), **Information** (espion/reco). 2/3 gagnés = victoire.
+* ✅ Lisibilité **pédagogique** des principes de Sun Tzu ; profondeur.
+* ⚠️ + 1 clic/par combat.
+
+**C. Actions alternées courtes (skirmish)**
+
+* Micro-phases : Attaque > Contre > Exploit ; chaque côté peut claquer une carte tactique.
+* ✅ Tension ; choix réactifs.
+* ⚠️ Plus long.
+
+> Reco : **B** (Position / Impulsion / Information) — c’est Sun Tzu dans la mécanique, très lisible.
+
+---
+
+## 5) **Espionnage & brouillard**
+
+Docs : espion local/double, risques, capture, info & désinfo ; besoin de bluff/positions cachées.
+
+**A. Fog of War + “Ping d’ombre”**
+
+* Faible visibilité hors zones d’influence ; actions d’“écoute” donnent des pings (probables cartes/intentions).
+* ✅ Surprise préservée ; bluff fertile.
+* ⚠️ UX à soigner.
+
+**B. Cartes Renseignement avec “probas”**
+
+* Investiguer révèle **X%** d’une séquence adverse (1 slot exact ou des contraintes type “mouvement/attaque”).
+* ✅ Thème “duperie” ; combine bien avec tes cartes probas. 
+* ⚠️ Doit rester simple.
+
+**C. Agents sur carte**
+
+* Pions discrets se déplacent ; peuvent manipuler convois/logistique.
+* ✅ Système vivant (stories).
+* ⚠️ Scope ↑.
+
+> Reco : **A + B** pour démarrer (fog + renseignements probabilistes).
+
+---
+
+## 6) **Terrains & météo (sobres, expressifs)**
+
+Docs : 3 terrains clés (plaines/forêts/collines) + météo simple (ensoleillé/pluie/brume) et variantes pondérées.
+
+**A. Minimal lisible (3×3)**
+
+* Terrains : plaine (neutre), forêt (couverture/embuscade), colline (portée/défense).
+* Météo : ensoleillé (0), pluie (-move), brume (-portée/+embuscade).
+* ✅ Ultra clean, tutorial-friendly.
+
+**B. Palette élargie pondérée**
+
+* Ajoute neige/orage rares (10% chacun), effets ciblés (siège, mobilité). 
+* ✅ Variété sans chaos.
+
+> Reco : **A** en VS, **B** plus tard.
+
+---
+
+## 7) **Compétences / Points par tour**
+
+Tes variantes : 3 compétences simplifiées (Commandement/Tactique/Logistique), points fixes & cap par compétence. 
+
+**A. 3 compétences “slider”**
+
+* 6 pts à répartir (0–3 par comp) → impacts directs (nb de cartes strat, bonus manœuvre/terrain, rayon logistique).
+* ✅ Décision courte, impact large.
+
+**B. “Main courante”**
+
+* Tu ne peux déplacer que **2 pts** par tour (inertie stratégique).
+* ✅ Lecture du plan adverse possible (mind games).
+
+---
+
+## 8) **Système de cartes (double usage)**
+
+Tu veux basique + avancé, posé vs tactique ; limite de main ; défausse & refill. 
+
+**A. Carte biface claire**
+
+* Haut = **Stratégie** (posée en séquence), Bas = **Tactique** (réaction instant). UI sépare les deux bandes avec icônes.
+* ✅ Fluide et lisible.
+
+**B. “Brûlure” d’effet**
+
+* Si tu joues l’effet **tactique** puissant, la carte sort du deck jusqu’à la fin du match.
+* ✅ Équilibrage soft, décisions lourdes. 
+
+---
+
+## 9) **Unités & formations**
+
+Notes : compositions bataillons (inf/archers/cav), limites par officier/général, promotions, formations et coûts de switch. 
+
+**A. 3 types d’unités “lisibles”**
+
+* Infanterie (front), Archers (portée, synergie colline), Cavalerie (mobilité, chasse convois). Bonus de “composition” par bataillon.
+* Formations : **Attaque / Défense / Marche** (coût de bascule).
+* ✅ Suffisant pour du VS.
+
+**B. Marqueurs doctrine**
+
+* Certaines cartes **débloquent** des formations avancées (encerclement, embuscade).
+* ✅ Progression sans gonfler l’UI.
+
+---
+
+## 🔭 Exemples concrets (alignés sur tes fichiers)
+
+* **Tour type** : Initiative → Météo (roulette pondérée) → Pioche (main max 10) → Allocation (6 pts, cap 3/comp) → Planif secrète (X cartes selon Commandement) → Révélations alternées + réactions (tactiques) → Ravitaillement (zones / pipes) → Check victoire.
+* **Combat “3 piliers”** :
+
+  * **Position** (forêt/colline/formation) ;
+  * **Impulsion** (Élan dépensé) ;
+  * **Information** (espion/renseignement).
+    2/3 remportés = victoire ; égalité → dés + modifs mineures.
+* **Rupture logistique** : malus immédiat à l’attaque/déplacement ; UI trace la coupure (rouge) ; la Logistique élevée permet un “pont” temporaire. 
+
+---
+
+# 🧪 Trois “packs” de design au choix
+
+**Pack Alpha (VS rapide, très FTL)**
+
+* Élan **global** (B), Ravitaillement **zones** (B), Combat **3 piliers** (B), Cartes **biface** (A), Terrains/Météo **minimal** (A), Compétences **3 sliders**.
+* Objectif : jouable en 6–8 semaines de dev “core”.
+
+**Pack Settlers (flux fort + stories)**
+
+* Élan **global** + **convois** (C), Ravitaillement **pipes** (A), Espions **agents** (C), Météo **palette élargie** (B).
+* Objectif : richesse visuelle et émergence.
+
+**Pack Vandal (combat tactique)**
+
+* Élan **local** (A), Combat **skirmish 3 phases** (C), Formations avancées & contres, Brouillard + “pings”.
+* Objectif : profondeur tactique forte, pacing un peu plus long.
+
+---
+
+# 🧠 Pourquoi ça colle à ta vision
+
+* **Richesse tactique + simplicité de prise en main** : sliders de compétences, 3 terrains, cartes biface — simples à lire ; profondeur via timing/élan/infos cachées.
+* **Richesse visuelle** : flux animés, pings de renseignements, météo lisible.
+* **Assistant IA** futur-ready : prioriser placement d’outposts logistiques, gestion séquence de cartes, et conseils (tooltips “Pourquoi ?”).
+* **Triptyque** :
+
+  * **FTL** → ressource centrale (Élan global), planif en séquence, surprises contrôlées.
+  * **Settlers II** → réseaux/logistique visibles et optimisables.
+  * **Vandal Hearts** → combat propre, lecture du terrain/formation.
+
+---
+
+# 🎯 Prochaine action
+
+Dis-moi **quel pack** tu veux pour le **Vertical Slice** (Alpha/Settlers/Vandal) — ou je te compose un **mix**.
+Ensuite je te fournis :
+
+1. une **liste de cartes** (20–30) équilibrées par rareté & probas,
+2. la **spéc complète de données** (JSON) pour unités/terrains/météo/compétences,
+3. la **boucle de tour** prête à coder (pseudo-code), avec intégration des règles issues de tes chapitres.

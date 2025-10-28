@@ -1,0 +1,251 @@
+1 - Pillars
+Fantasy d’expérience : richesse tactique + simplicité de prise en main + richesse visuelle. M  
+Core pillars : animation en temps réel des flux, lisibilité, réactivité. 
+Public cible : causal gamer, aimant la stratégie et la gestion, clavier souris. 
+Référence et différenciation : pour mla simplicité et la richesse, FTL. Pour la gestion, the settlers2. Pour la stratégie, les jeux au tour par tour style Vandal Hearts sur PS1. Différenciation : jeu tiré de l’art de la guerre de suntzu, gestion autonome de l’expansion via assistant IA. 
+North star metric : 30% des joueurs rejouent tous les jours. 
+Risques majeurs : gestion IA, multi?, richesse visuelle, rester accessible au plus grand nombre en restant technique pour les plus acharnés, intégrer les principes de l’art de la guerre de façon fluide dans les mac is mes du jeu. 
+
+A l’aide des réponse ci dessus à la section pillars, révise le contenu de ta réponse précédente en l’adaptant à ma vision. 
+
+
+
+
+Excellent, Pierre — tu as déjà une **base de vision très claire et cohérente**, ce qui est rare à ce stade.
+Je vais donc **réviser et personnaliser intégralement** l’analyse précédente pour qu’elle soit **alignée avec ta vision**, c’est-à-dire :
+
+> 🎯 Un jeu PC de stratégie/gestion inspiré de *L’Art de la Guerre*, combinant richesse tactique, simplicité d’accès et beauté visuelle.
+> Rejouable, vivant, avec un assistant IA qui gère l’expansion autonome du joueur.
+
+---
+
+# 🔱 VISION GLOBALE DU PROJET
+
+### 🎮 Fantasy d’expérience
+
+Le joueur ressent la **puissance d’un stratège éclairé**, capable d’orchestrer des armées et des territoires vivants.
+Chaque décision déclenche **un ballet fluide d’unités et de flux** : ressources, influences, approvisionnements, lignes de front.
+La beauté du jeu vient autant de **la logique tactique** que de **la visualisation des flux animés**.
+
+### 💎 Core pillars
+
+1. **Animation en temps réel des flux** – tout bouge, tout vit : routes commerciales, unités, influence.
+2. **Lisibilité** – aucune confusion : tout état, relation ou action est clairement identifiable.
+3. **Réactivité** – le monde répond immédiatement : clic → feedback visuel/sonore instantané.
+
+### 👥 Public cible
+
+* Joueurs **PC casual à midcore**, curieux, aimant réfléchir sans microgestion.
+* Fans de stratégie/gestion type *Settlers 2*, *FTL*, *Vandal Hearts*, mais cherchant une **approche moderne et fluide**.
+* Entrée simple, profondeur cachée.
+
+### 🧠 Références & différenciation
+
+* **FTL** → pour la simplicité d’accès et la profondeur tactique émergente.
+* **The Settlers 2** → pour la beauté des flux économiques et la gestion indirecte.
+* **Vandal Hearts (PS1)** → pour la clarté et la tension des combats au tour par tour.
+* **Différenciation** :
+
+  * Assistant IA intégré → expansion et développement autonomes.
+  * Fondations philosophiques issues de *L’Art de la Guerre* (anticipation, rythme, équilibre).
+  * Visualisation dynamique des principes tactiques (influence, équilibre, moral).
+
+### 🌟 North Star Metric
+
+> **30 % des joueurs rejouent chaque jour** pour observer l’évolution de leur empire et de leur IA.
+
+### ⚠️ Risques majeurs
+
+| Risque                              | Description                                 | Stratégie d’atténuation                                                 |
+| ----------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
+| IA d’expansion autonome             | Difficile à rendre crédible et contrôlable  | Itération IA modulaire, transparence visuelle, logs compréhensibles     |
+| Accessibilité                       | Complexité sous-jacente pourrait rebuter    | UI progressive, “mode mentor” (IA explique ses choix)                   |
+| Richesse visuelle                   | Beaucoup d’éléments animés                  | Budget artistique par couche, optimisation GPU, simplification stylisée |
+| Multi (si prévu)                    | Synchronisation IA + tour par tour complexe | D’abord solo, puis multi asynchrone (replay/ghost)                      |
+| Intégration de *L’Art de la Guerre* | Risque d’être trop conceptuel               | Traduction systémique : principes → mécaniques concrètes                |
+
+---
+
+# 🧩 BOUCLES DE JEU ADAPTÉES
+
+### ⚙️ Core Loop (30–90 s)
+
+**Observer → Décider → Réagir**
+Le joueur perçoit les flux (ressources, influence, troupes), prend une décision stratégique, observe l’effet immédiat.
+
+> Exemple : détourner un convoi, renforcer une frontière, influencer une cité.
+
+### 🔄 Mid Loop (5–20 min)
+
+**Cycle expansion – adaptation – conflit**
+L’IA gère la croissance mais sollicite le joueur à des moments-clés. Chaque cycle révèle un principe de Sun Tzu (“attaque l’ennemi faible”, “connais-toi toi-même”).
+
+### 🧭 Meta Loop (plusieurs heures)
+
+**Maîtrise des principes stratégiques** : le joueur développe son empire, débloque de nouvelles “maximes” (bonus philosophiques) et améliore son IA-assistante.
+
+---
+
+# 🧠 SYSTÈMES DE JEU PRINCIPAUX
+
+| Système                     | Description                                                | Objectif design                                               |
+| --------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------- |
+| **IA d’expansion autonome** | Gère colonisation, infrastructures, équilibre économique   | Déléguer la micro-gestion tout en gardant contrôle macro      |
+| **Flux animés**             | Visualisation dynamique des échanges                       | Rendre la stratégie tangible et esthétique                    |
+| **Influence et moral**      | Zones de confiance / peur / loyauté                        | Donner une profondeur psychologique au contrôle du territoire |
+| **Combat au tour par tour** | Résolution claire, rapide, lisible                         | Rappelle Vandal Hearts mais avec logique de flux              |
+| **Gestion indirecte**       | Donne des ordres de haut niveau (“priorise la logistique”) | Réduction de la charge mentale                                |
+| **Philosophie stratégique** | Débloquer et incarner des maximes de Sun Tzu               | Métagame narratif et mécanique                                |
+
+---
+
+# 🧱 TECHNIQUE & ARCHITECTURE
+
+### ⚙️ Moteur recommandé
+
+**Godot 4.3** (ou Unity si plus d’habitude) :
+
+* Excellente lisibilité 2D/2.5D.
+* Très bon moteur de signaux (utile pour flux animés).
+* Facile à interfacer avec un **agent codeur Python** (via API ou GDNative).
+* Légèreté parfaite pour un jeu de stratégie stylisé.
+
+### ⚙️ Langage / Stack
+
+* Godot GDScript ou C# (selon confort).
+* Python externe pour simulation IA / génération de données.
+* SQLite ou JSON pour stockage offline (suffisant au début).
+* FastAPI ou Flask si tu veux piloter la simulation via backend.
+
+### 🧩 Architecture logique
+
+* **ECS simplifié** : unités, bâtiments, flux = entités modulaires.
+* **Event bus / signaux** : évite couplage fort entre systèmes.
+* **Data-driven configs** : tous les paramètres dans YAML/JSON.
+* **Visual layer** : séparer logique et affichage (simulation headless possible).
+* **AI layer** : décision hiérarchique + feedback au joueur (“pourquoi j’ai fait cela”).
+
+---
+
+# 🤖 INTÉGRATION AVEC UN AGENT CODEUR + GITHUB
+
+### ⚙️ Flux de travail
+
+1. Tu écris une **feature card** (“ajouter simulation flux logistique”).
+2. L’agent codeur génère un **squelette Godot/Python**.
+3. CI exécute build/test, l’agent ne merge pas.
+4. Tu testes en jeu, ajustes, merges si cohérent.
+5. Chaque merge = artefact jouable automatique (build PC).
+
+### 🔒 Sécurité et garde-fous
+
+* L’agent **n’a jamais** accès à `main` ni aux secrets.
+* Les PR sont taguées `ai-generated`.
+* Chaque PR doit contenir un test + doc.
+* L’agent ne touche **ni aux assets artistiques** ni aux fichiers d’équilibrage.
+* Limite à 300 lignes diff / PR.
+
+### 💬 Prompts de rôle adaptés
+
+* **Architect Agent** : définit structure du système (IA, flux, combat).
+* **Implementer Agent** : code squelette minimal avec commentaires explicatifs.
+* **Visualizer Agent** : gère la partie affichage dynamique des flux.
+* **Tester Agent** : crée des tests unitaires pour IA & simulation.
+* **Tactician Agent** : suggère comment intégrer un principe de Sun Tzu dans la mécanique.
+
+---
+
+# 🎨 DIRECTION ARTISTIQUE & AUDIO
+
+* **Style visuel** : semi-isométrique stylisé, clair et fluide.
+  → ex : tons ocre et rouge, textures simples, silhouettes nettes.
+* **Animations** : minimalistes mais expressives (flux, champs de force, propagation d’influence).
+* **Audio direction** :
+
+  * Ambiances tactiques (tambours, vents, cornes).
+  * Feedback doux mais précis (son de validation/ordre, flux audible).
+  * Musique évolutive selon les principes utilisés (calme, offensive, dissimulation…).
+
+---
+
+# ⚖️ PROGRESSION & MÉTASYSTÈME
+
+* **Système de maximes** : chaque victoire débloque un aphorisme de Sun Tzu qui modifie le gameplay (ex. “Connais-toi toi-même” = meilleure lisibilité IA).
+* **Mode campagne** : carte du monde stylisée, progression de territoires.
+* **Mode libre** : IA adaptative, rejouabilité infinie.
+* **Mode “observation”** : l’IA joue seule — le joueur étudie les principes.
+
+---
+
+# 🧩 STRUCTURE DE REPO (ADAPTÉE À TON PROJET)
+
+```
+/art_de_la_guerre/
+  /game
+    /core/
+    /ai/
+    /simulation/
+    /ui/
+    /visuals/
+  /data/
+    configs/
+    quotes_suntzu.yaml
+    units.yaml
+    economy.yaml
+  /docs/
+    GDD.md
+    TDD.md
+    principles_mapping.md
+  /tests/
+  /tools/
+  /.github/
+    workflows/
+  README.md
+  LICENSE
+```
+
+---
+
+# 🧠 ROADMAP DE PRODUCTION (RÉALISTE)
+
+| Étape                         | Durée                                                              | Objectif                               |
+| ----------------------------- | ------------------------------------------------------------------ | -------------------------------------- |
+| **Prototype (2–4 sem.)**      | Boucle flux animés + IA basique d’expansion                        | Tester “lisibilité + réactivité”       |
+| **Vertical Slice (1–2 mois)** | Ajout d’un combat simple, 2 zones, 1 maxime                        | Première sensation de “Sun Tzu vivant” |
+| **Alpha (3 mois)**            | IA explicative, 5 maximes, 5 types de flux                         | Boucles riches mais accessibles        |
+| **Bêta (2 mois)**             | Optimisation, polish visuel, accessibilité, traduction             | Tests sur 30 joueurs externes          |
+| **Release (1 mois)**          | Build stable + marketing narratif (“La sagesse devient stratégie”) |                                        |
+
+---
+
+# 🔮 MÉTRIQUES DE SUCCÈS
+
+| Catégorie     | Indicateur                                                |
+| ------------- | --------------------------------------------------------- |
+| Engagement    | 30% des joueurs reviennent chaque jour                    |
+| Lisibilité    | < 3 secondes pour comprendre un changement visuel         |
+| IA crédible   | 70% des décisions IA perçues comme “logiques”             |
+| Performance   | 60 FPS constants sur PC milieu de gamme                   |
+| Accessibilité | > 80% des joueurs terminent le tutoriel sans aide externe |
+
+---
+
+# 🚀 PROCHAINE ÉTAPE
+
+Je te recommande de commencer maintenant par :
+
+1. **Créer le repo GitHub** `art-de-la-guerre/` avec la structure ci-dessus.
+2. **Rédiger ton GDD minimal** (je peux t’en générer un d’une page à partir de ce qu’on a ici).
+3. **Configurer ton agent codeur** avec trois rôles initiaux : Architect / Implementer / Visualizer.
+4. **Objectif vertical slice** → simulation visuelle d’un flux logistique entre deux villages autonomes, avec IA qui ajuste le trafic selon la demande.
+
+---
+
+Souhaites-tu que je te génère :
+
+* 🧱 Le **squelette GitHub complet** (arborescence + README + templates CI) ?
+* 📄 Le **GDD d’une page** basé sur la vision ci-dessus (ton manifeste de conception) ?
+* ⚙️ Un **ensemble de prompts de rôles** pour ton agent codeur (Architect, Implementer, etc.) ?
+
+Je peux te livrer les trois pour poser **la base solide de ton pipeline de développement**.
+Que veux-tu que je fasse en premier ?

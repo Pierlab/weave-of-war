@@ -1,0 +1,265 @@
+Répond comme un game designer expert. Je cherche à créer un jeu jouable sur pc. Je veux me servir d’un agent codeur pour le développer, dans l’idéal en le reliant à un repo github. Je veux une analyse compète de tout ce que je dois prendre en compte dans le moindre détail.
+
+Parfait, Pierre. Voici une **analyse complète, ultra-opérationnelle** pour bâtir un jeu PC en t’appuyant sur un **agent codeur** relié à un repo GitHub. Je structure tout comme un Game Design Director qui prépare la prod : vision → prototypage → vertical slice → prod → alpha/bêta → release/live. Tu peux quasiment copier-coller ces sections dans ton dossier de projet.
+
+# 1) Vision & Positionnement (Pillars)
+
+* **Fantasy d’expérience** : *Que ressent le joueur ?* (ex. “puissance tactique + tension permanente”).
+* **Core pillars (3–4 max)** : ce qui ne doit jamais casser (ex. lisibilité, réactivité, progression signifiante).
+* **Public cible** : profil (PC core gamer vs. midcore), tolérance à la complexité, préférences input (clavier/souris vs. pad).
+* **Références & différenciation** : 3 jeux références (pour le “triangle” qualité) + 2 features différenciantes claires.
+* **North Star Metric** : un KPI de fun simple (ex. *60% des sessions > 20 min*).
+* **Risques majeurs** : lister 5 risques (scope, perf, IA, multi, contenu) + mitigation.
+
+# 2) Boucles de jeu
+
+* **Core loop (30–90 s)** : actions répétées → récompense → réengagement.
+* **Mid loop (5–20 min)** : objectifs intermédiaires (missions/étages/chapitres).
+* **Meta loop (heures)** : progression longue (déblocages, arbres, économie, narration).
+* **Pacing & difficulté** : courbe de maîtrise (onboarding → skill checks → mastery), *difficulty gates* mesurables.
+
+# 3) Systèmes de jeu (design de features)
+
+* **Contrôles & feedback** : latence ressentie, “hit stop”, *coyote time*, vibrations/FX/audio cues.
+* **Économie** : sources/sinks, taux d’inflation, *price elasticity*, *soft caps*, anti-hoarding.
+* **Combat/IA** : archétypes ennemis, lisibilité des *tells*, *encounter design* (1 nouveau pattern à la fois).
+* **Level/Map design** : *golden path*, boucles de backtracking, lisibilité visuelle (silhouettes, contraste).
+* **Progression** : arbres (profondeur, largeur), *respec cost*, *power budget* par chapitre.
+* **UX & accessibilité** : remapping, daltonisme, sous-titres (taille/contraste), *text-to-speech*, *difficulty assists*.
+* **Sauvegarde** : atomicité, *rollback safety*, slots, *cloud save* optionnel.
+* **Modding (option)** : API data-driven, chargement d’assets externes, *content whitelisting*.
+* **Online (option)** : netcode (rollback vs. lockstep), *anti-cheat light*, latence cible, *host migration*.
+
+# 4) Choix techno (moteur & stack)
+
+* **Moteur** :
+
+  * *Unity* : rapide en 2D/3D stylisée, écosystème riche.
+  * *Unreal* : 3D haut niveau, Blueprints + C++, outils AAA.
+  * *Godot* : léger, OSS, 2D très rapide, GDScript/C#/C++.
+* **Critères** : pipeline assets, perf PC visée (60/120 FPS), rendu (forward/deferred), multithreading, licencing, équipe future.
+* **Langages & libs** : éviter exotique ; viser **maintenabilité + écosystème**.
+* **Architecture code** :
+
+  * *ECS ou component-based* (composition > héritage).
+  * *Data-driven configs* (YAML/JSON/TOML) pour tout ce qui est équilibrage.
+  * *State machines* (game states, AI).
+  * *Event bus* (faible couplage).
+  * *Determinism* (si multi/sim).
+
+# 5) Structure de repo & normes d’équipe
+
+```
+/game
+  /Assets (ou /Content)
+  /Art
+  /Audio
+  /Docs
+  /Design
+    economy/ sheets/
+    balance/ patches/
+  /Engine (wrappers, utils)
+  /Gameplay
+    ai/
+    combat/
+    progression/
+    levels/
+  /Data
+    configs/  (JSON/YAML)
+    localization/
+  /Build
+  /Tests
+  /Tools (editeurs, scripts)
+.github/
+  workflows/ (CI)
+  ISSUE_TEMPLATE/
+  PULL_REQUEST_TEMPLATE.md
+LICENSE
+README.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+```
+
+* **Branching** : `main` protégé, `develop`, `feature/*`, `hotfix/*`.
+* **Commit style** : *Conventional Commits* (`feat:`, `fix:`, `perf:`, `chore:`).
+* **Code Owners** : `CODEOWNERS` exige review de domaines clés (gameplay, engine, build).
+
+# 6) Pipeline CI/CD (GitHub)
+
+* **Checks automatiques** : build headless, linter, format (ex. clang-format/black), tests unitaires & *playmode tests*.
+* **Artefacts** : *nightly builds* (Windows), *canary* branch.
+* **Bump version** : *SemVer*, tag automatique, *release notes* générées.
+* **Qualité** : *static analysis*, duplication, taille binaire, temps de chargement, fps trace (micro-benchmarks).
+
+# 7) Intégration d’un Agent Codeur (LLM) relié à GitHub
+
+**Objectif** : accélérer prototypage/boilerplate tout en gardant **contrôle total**.
+
+* **Cadre d’exécution** : l’agent **n’a jamais** de *write* sur `main`. Il ouvre des **PR** uniquement.
+* **Garde-fous** :
+
+  * *Policies de PR* : tests passent, coverage minimal, *lint clean*, *description claire* (what/why/how).
+  * *Diff size* limité, labels automatiques (`ai-generated`, `needs-design-review`).
+  * *Secrets* : **jamais** fournis à l’agent ; appels externes mockés.
+  * *Training leakage* : pas de données privées dans prompts/logs.
+* **Prompts de rôle** (exemples à coller dans le système de l’agent) :
+
+  * *Architect* : propose structures, interfaces, diagrammes texte.
+  * *Implementer* : code minimal, orienté tests, documentation inline.
+  * *Refactorer* : réduction complexité cyclomatique, séparation des responsabilités.
+  * *Tester* : génère tests unitaires/integ + fixtures + *test data builders*.
+* **Flux de travail** :
+
+  1. Designer rédige *Design Note* (`/Docs/ADR/ADR-00X-Feature.md`).
+  2. Agent génère *squelette* + tests.
+  3. CI exécute ; tu review notamment **game feel** & perfs.
+  4. Merge si *Definition of Done* (DoD) satisfait.
+* **Limites à imposer** :
+
+  * L’agent ne touche pas aux **assets source** (art/audio) ni aux **fichiers de balance** sans issue dédiée.
+  * Pas d’optimisations prématurées ; benchmarks requis pour `perf:`.
+
+# 8) Documentation vivante
+
+* **GDD** (Game Design Doc) : vision, boucles, systèmes, contenus, KPIs.
+* **TDD** (Technical Design Doc) : archi, patterns, dépendances, budgets CPU/GPU/mémoire.
+* **EDD** (Economic Design Doc) : tables, taux, formules, antiboucles.
+* **Level Design Bible** : métriques (dimensions, vitesses, *jump arcs*).
+* **Art Bible** : palette, silhouettes, PBR params, LODs, *naming conventions*.
+* **Audio Bible** : bus, ducking, loudness target (LUFS), SFX taxonomy.
+* **ADR** : décisions d’architecture (1 ADR = 1 décision).
+
+# 9) Contenu & Data pipeline
+
+* **Nommage assets** : `type_theme_variant_vXX` (ex. `SFX_UI_Click_v03.wav`).
+* **Répertoires mirroirs** entre source (DCC) et runtime (moteur).
+* **Import rules** : compression, *max dimensions*, *polycount budgets*, taux d’échantillonnage audio.
+* **Localisation** : fichiers `strings.xx-XX.json`, *fallback locale*, test pseudo-localisation.
+* **Équilibrage** : table *data-driven* + *experiments* (A/B interne), *patch notes* sur chaque changement.
+
+# 10) Tests & QA
+
+* **Unit tests** : logique pure (maths, économie, AI util functions).
+* **Playmode/Integration tests** : scènes headless, *smoke tests* (charger 10 scènes, spawn 100 ennemis).
+* **Golden captures** : *screenshots hashés* pour régressions UI.
+* **Soak/Stress** : sessions 8h, fuite mémoire, *spawn storms*.
+* **Télémétrie interne** (opt-in) : temps par boucle, échecs, heatmaps.
+* **Bugs triage** : *severity* (S0–S3), SLA de correction, *bug bash* hebdo.
+
+# 11) Performance & Budgets
+
+* **Cibles** : 1080p60 (baseline), 1440p/120 option.
+* **Budgets** : ms par frame (CPU/GPU), draw calls, *overdraw*, mémoire (RAM/VRAM), temps de chargement.
+* **Techniques** : culling (frustum/occlusion), LOD, *batching*, *object pooling*, *jobs* multithread.
+* **Profiling cadence** : micro (par PR), macro (hebdo sur build canary).
+
+# 12) Audio/FX & Game Feel
+
+* **Priorités** : *response*, *impact*, *readability*.
+* **FX layers** : anticipation → impact → résidu (trail/sparks/screen shake mesuré).
+* **Audio** : *ducking* musique quand SFX critiques, *hit confirm* sonore, *spatial blend*.
+
+# 13) Accessibilité & UX (obligatoire)
+
+* **Options** : taille police, contrastes, colorblind presets, *camera assist*, *QTE leniency*, *toggle vs hold*.
+* **Lisibilité** : *safe zones*, *font fallback*, animations UI < 200 ms.
+
+# 14) Conformité & Légal (Europe/GDPR)
+
+* **Privacy by design** : télémétrie désactivée par défaut, consentement clair, *data minimization*.
+* **Licences assets** : traçabilité (fichier `CREDITS.md`), interdiction d’assets douteux.
+* **Âge/Rating** : anticiper PEGI/ESRB (contenus violents, langage).
+* **Accessibilité** : respecter bonnes pratiques (WCAG inspiration pour UI).
+
+# 15) Plan de prod & jalons
+
+* **Semaine 0–2 — Prototype jouable** : core loop minimale + 1 ennemi + 1 niveau gris.
+* **Semaine 3–6 — Vertical Slice** : 10–15 min *representative quality*, métriques stables, pipeline verrouillé.
+* **Semaine 7–12 — First Content Pass** : 3–5 niveaux/rencontres, progression basique, options accessibilité, profiling OK.
+* **Alpha (feature complete)** : tout est là, *content lock* proche.
+* **Bêta (content complete)** : bug fixing, polish, performance, localisation.
+* **Release** : *gold master*, store assets, support.
+
+# 16) Monétisation & Live (si pertinent)
+
+* **Premium** (sans F2P) : *value promise* claire, update roadmap.
+* **F2P (si choisi)** : cohérence économie, *fairness*, pas de *hard paywalls*.
+* **Live Ops** : *events* low-cost (modifs de paramètres), rotation contenu, *retention beats*.
+
+# 17) Outils & scripts indispensables
+
+* **Éditeurs internes** : config economy, spawner, *wave editor*, *dialogue tool*.
+* **Build tool** : un script CLI unique `build.py` (plateforme, version, *symbols on/off*).
+* **Balance checker** : détecte valeurs aberrantes, delta > x% sur patch.
+* **Diff assets** : outil de comparaison visuelle entre versions.
+
+# 18) Modèle “Definition of Done” (exemple)
+
+* Fonctionnel + tests verts + doc dans GDD/TDD + perf < budget + accessibilité validée + *no new warnings* + *profil capture* jointe à la PR.
+
+# 19) Templates utiles (copier-coller)
+
+**Issue (Feature)**
+
+```
+### Contexte
+### Objectif joueur (fantasy)
+### Acceptation (tests vérifiables)
+- [ ] ...
+### Risques
+### Métriques de succès
+```
+
+**Pull Request**
+
+```
+## What
+## Why (Design intent / player impact)
+## How (tech brief)
+## Tests
+## Perf (profil capture)
+## Risks / Rollback
+```
+
+**ADR (Decision)**
+
+```
+Contexte:
+Décision:
+Conséquences:
+Alternatives envisagées:
+```
+
+# 20) Roadmap d’intégration de l’agent (pas à pas)
+
+1. Mettre `CODEOWNERS`, *branch protection*, *required checks*.
+2. Ajouter workflows CI (build, tests, lints).
+3. Créer rôle “AI Contributor” en *read* + *PR create*.
+4. Définir *prompt charter* + *DoD*.
+5. Démarrer par tâches à faible risque : utilitaires, parseurs, tests, scripts d’outillage.
+6. Élargir progressivement : systèmes de gameplay *non-critiques* → systèmes centraux.
+7. Mesurer : % PR agent mergées, défauts post-merge, temps review.
+8. Rétro mensuelle : amélioration des prompts/garde-fous.
+
+# 21) Checklists “avant de coder”
+
+* [ ] Pillars & core loop écrits (1 page).
+* [ ] Vertical slice défini (objectifs mesurables).
+* [ ] Architectures validées (ECS/event/data-driven).
+* [ ] Repo + CI opérationnels.
+* [ ] DoD, templates, CODEOWNERS, protection de branches.
+* [ ] Budgets perf fixés, outils profiling prêts.
+* [ ] Accessibilité minimale planifiée.
+* [ ] Plan de tests (unit/integration/playmode).
+* [ ] Agent codeur bridé (PR-only), prompts prêts.
+
+---
+
+Si tu veux, je peux te générer :
+
+* un **squelette de repo** prêt à cloner (arborescence + templates + workflow CI),
+* un **ensemble de prompts** “rôle” pour ton agent,
+* un **GDD minimal** d’1 page basé sur la fantasy de ton jeu,
+* un **script build** et un **workflow GitHub Actions** types.
+
+Dis-moi ton **genre préféré** (ex. tactique 2D, rogue-lite, action-RPG), et je te sors un *vertical slice plan* + la structure de code/asset exacte pour démarrer aujourd’hui.
