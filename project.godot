@@ -1,0 +1,12 @@
+; Engine configuration file.
+; It's best edited using the Godot editor.
+; If you edit it manually, be aware that the syntax is GDScript-like.
+
+config_version=5
+
+[application]
+config/name="Weave of War"
+run/main_scene="res://scenes/main.tscn"
+
+[rendering]
+renderer/rendering_method="forward_plus"
