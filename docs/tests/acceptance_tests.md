@@ -1,0 +1,30 @@
+# Acceptance Tests — Weave of War Skeleton
+
+These checks validate the initial Godot project skeleton.
+
+## AT-01: Main scene boots with hex map
+- **Given** the project is opened in Godot 4.x
+- **When** `scenes/main.tscn` runs
+- **Then** a 10x10 hex grid is visible and the camera frames the map
+
+## AT-02: HUD controls are available
+- **Given** the main scene is running
+- **When** I inspect the CanvasLayer
+- **Then** I see buttons labelled "Next Turn" and "Show Logistics"
+
+## AT-03: Debug overlay actions
+- **Given** the main scene is running
+- **When** I interact with the debug overlay
+- **Then** buttons exist for "Next Turn", "Toggle Logistics", and "Spawn Unit"
+
+## AT-04: Turn loop logging
+- **Given** the main scene is running
+- **When** the game starts or I press "Next Turn"
+- **Then** the output console logs `Turn 1 started` followed by `Turn 1 ended` (incrementing on subsequent turns) without errors
+
+## AT-05: Logistics toggle feedback
+- **Given** the main scene is running
+- **When** I press "Show Logistics"
+- **Then** the console prints the new overlay state and the HUD button text flips between "Show Logistics" and "Hide Logistics"
+
+All tests must pass without Godot warnings or errors in the console.

@@ -1,96 +1,80 @@
-# Weave of War — Vibe Coding (agent orchestration)
+# Weave of War — Vibe Coding Playbook
 
-> Purpose: Make this repo “agent-friendly”: consistent context, safe PRs, automatic checks, and crisp missions.
+> Purpose: make the project comfortable for coding agents by combining lightweight rituals, living documentation, and detailed checklists that keep large features safe.
 
-## 1) Branching & PR policy
-- Protected `main`. Work on short-lived feature branches: `feature/<scope>`, `chore/<scope>`, `fix/<scope>`.
-- Conventional Commits in PR titles (`feat:`, `fix:`, `chore:`, `refactor:`, `test:`).
-- **Agent rule**: never push to `main`; always open a PR.
-- Max diff per PR: ~300 LOC (encourage small, reviewable changes).
+## 1. Core principles
+- **Clarity first** – every task starts with a shared understanding of the goal anchored in [`docs/project_spec.md`](project_spec.md).
+- **Iterative flow** – ship in small, verifiable steps, even when a feature spans multiple sessions.
+- **Checklist discipline** – before touching code on a sizeable effort, co-design a granular checklist with the agent. Each checklist item should be testable and have a single owner.
+- **Documentation is part of the work** – when a change lands, update the references that help the next agent (README, specs, tests, mission files).
 
-## 2) Required PR checklist
-- [ ] All tests green (gdUnit4 or scripted asserts).  
-- [ ] No Godot errors/warnings on run.  
-- [ ] Follows folder & naming conventions.  
-- [ ] Contains minimal docs: `docs/agents/<mission>.md` with context, assumptions, decisions.  
-- [ ] Updates `CHANGELOG.md` and emits telemetry events if relevant.  
-- [ ] Adds/updates `context_snapshot.md` (what changed, why, how to extend).
+## 2. Standard vibe-coding loop
+1. **Align**
+   - Review the active mission (`docs/agents/<mission>.md`) and confirm context from the last merged PR.
+   - Extract acceptance criteria and risks; if anything is unclear, pause and clarify before writing code.
+2. **Plan with a checklist**
+   - Draft a checklist covering analysis, implementation, tests, and documentation tasks.
+   - Include validation for edge cases and telemetry/log updates when relevant.
+   - Store the checklist alongside the mission or in the PR body; keep it visible to everyone.
+3. **Code in vibes**
+   - Implement one checklist item at a time.
+   - After finishing an item, run its associated tests, update docs, and tick it off with a short note.
+   - If scope changes, revise the checklist before proceeding.
+4. **Validate**
+   - Run acceptance tests from [`docs/tests/acceptance_tests.md`](tests/acceptance_tests.md) plus any feature-specific checks.
+   - Capture logs or screenshots when useful for reviewers.
+5. **Document & share**
+   - Summarise the work in the PR description using the template below.
+   - Mention any follow-up items discovered while coding.
 
-### PR template (paste in description)
+## 3. Checklist design guidelines
+- **Granularity** – steps must be small enough to complete within one agent iteration (think "create logistics overlay toggle" rather than "implement logistics").
+- **Traceability** – link each item to files, scenes, or systems (e.g., `scripts/core/game_manager.gd`, `scenes/ui/hud.tscn`).
+- **Validation** – append the validation command or expected observation ("Run `godot --headless --run-tests`", "Verify console shows 'Turn X started'").
+- **Lifecycle** – keep historical checklists in the PR conversation so future agents can learn from them.
+
+### Example checklist block
 ```
-## What
-## Why (player impact / Sun Tzu principle)
-## How (tech brief, files touched)
-## Tests (how to run, expected output)
-## Telemetry (events added/used)
-## Risks / Rollback plan
-```
-
-## 3) Repository layout (expected)
-- `assets/`, `scenes/`, `scripts/`, `data/`, `docs/`
-- Key scenes: `main.tscn`, `map.tscn`, `ui/hud.tscn`, `ui/debug_overlay.tscn`
-- Key scripts: `scripts/core/{game_manager,turn_manager,event_bus}.gd`, `scripts/systems/*.gd`
-- Data JSON: `data/{doctrines,orders,units,weather,logistics}.json`
-
-## 4) Missions for agents
-Store each mission in `docs/agents/` as a single self-contained file the agent can follow.
-
-### `docs/agents/agent_base.md` (template)
-```
-# Mission: <short title>
-## Goal
-Describe the desired player-facing result.
-
-## Inputs
-Links to `project_spec.md`, latest merged PRs, and any data files.
-
-## Acceptance tests (Given/When/Then)
-- Given ...
-- When ...
-- Then ...
-
-## Constraints
-- Do not touch assets outside this scope.
-- Keep diff < 300 LOC; include unit tests.
-
-## Deliverables
-- Feature branch name
-- Files to create/change
-- PR description (use template)
+- [ ] Analyse event flow for Next Turn button (`scripts/ui/hud_manager.gd`).
+- [ ] Wire HUD button to EventBus (`scripts/core/event_bus.gd`) and log the action.
+- [ ] Update acceptance tests to mention Next Turn behaviour (`docs/tests/acceptance_tests.md`).
+- [ ] Run scene in editor and capture console log.
 ```
 
-## 5) Testing
-- Prefer **gdUnit4**. Where not possible, use lightweight GDScript asserts and headless runs.
-- Minimal acceptance tests should run the main scene, press a few buttons, and validate logs/UI state.
-- Add a `docs/tests/acceptance_tests.md` and keep it updated.
+## 4. Branching, commits, and PRs
+- Branch naming: `feature/<scope>`, `fix/<scope>`, `chore/<scope>`.
+- Commit messages follow Conventional Commits (e.g., `feat: add logistics overlay toggle`).
+- Never push directly to `main`; every change flows through a PR.
+- Keep diffs reviewable (~300 LOC). Split work when the checklist grows too large for one PR.
+- Use this PR template:
+  ```
+  ## What
+  ## Why (player impact)
+  ## How (key files & systems)
+  ## Tests (commands + expected output)
+  ## Documentation updates
+  ## Risks / Rollback
+  ```
 
-## 6) CI (lightweight suggestion)
-GitHub Actions (suggested):
-- **build**: Godot headless export or at least load all scenes without error.
-- **test**: run gdUnit4 or scripted test scenes.
-- **lint**: optional GDScript formatter/checks.
+## 5. Mission files (`docs/agents/`)
+- Each initiative gets a mission file derived from [`docs/agents/agent_base.md`](agents/agent_base.md).
+- Missions must include: goal, inputs, acceptance tests, constraints, deliverables, and the authoritative checklist.
+- Update the mission file whenever the plan shifts; unchecked items should explain blockers.
 
-## 7) Context hygiene
-- Maintain `context_snapshot.md` at repo root; update each PR with a short bullet list of changes.
-- Keep `CHANGELOG.md` (Keep a Changelog). Tag releases with SemVer on VS milestones.
-- Use **ADR**s (`docs/adr/ADR-XXXX.md`) for decisive shifts (e.g., “cards → doctrines”).
+## 6. Documentation & knowledge hygiene
+- Update `README.md` when onboarding steps or acceptance expectations change.
+- Reflect system updates in `docs/project_spec.md` or add an ADR if the architecture evolves.
+- Keep `docs/tests/acceptance_tests.md` aligned with reality after every functional change.
+- When new terminology or workflows appear, document them immediately to preserve shared context.
 
-## 8) Secrets & data
-- No secrets in code or prompts. If needed, mock external calls. Keep repo private.
+## 7. Testing expectations
+- Minimum: run the acceptance flow described in `docs/tests/acceptance_tests.md` before requesting review.
+- Prefer automated checks (gdUnit4, headless scripts) when available; document any manual steps.
+- If a test is flaky or skipped, log it in the PR with rationale and a follow-up checklist item.
 
-## 9) Communication style for agents
-- Be explicit, cite files and line ranges; prefer small PRs; link to acceptance tests.
-- When uncertain, propose 2–3 options with pros/cons, defaulting to the simplest VS-compatible one.
+## 8. Communication style for agents
+- Cite files and line ranges when explaining changes.
+- Surface open questions early and propose clear options with trade-offs.
+- When blocked, record the state, update the checklist, and hand off with actionable next steps.
 
-## 10) Roadmap pointers
-- VS scope is defined in `project_spec.md` §3 and §6.
-- After VS, expand Logistics (pipes/convoys), weather palette, and formations advanced.
-
----
-
-**Quickstart for a new agent**
-1. Read `project_spec.md` fully.
-2. Read last 3 merged PRs + `context_snapshot.md`.
-3. Open a mission file under `docs/agents/`, commit plan as first PR comment.
-4. Implement small, testable steps; keep diffs small.
-5. Ensure acceptance tests pass locally and in CI.
+Following this playbook keeps the Weave of War project calm, transparent, and ready for larger systems work without losing our creative vibe.
