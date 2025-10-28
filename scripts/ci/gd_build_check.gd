@@ -1,10 +1,10 @@
-extends Node
+extends SceneTree
 
 const SCENES := [
     "res://scenes/main.tscn",
 ]
 
-func _ready() -> void:
+func _initialize() -> void:
     var failures: Array[String] = []
     for scene_path in SCENES:
         var packed_scene: PackedScene = ResourceLoader.load(scene_path)
@@ -18,8 +18,8 @@ func _ready() -> void:
             instance.queue_free()
     if failures.is_empty():
         print("gd_build_check: OK (%d scenes)" % SCENES.size())
-        get_tree().quit(0)
+        quit(0)
     else:
         for failure in failures:
             push_error(failure)
-        get_tree().quit(1)
+        quit(1)

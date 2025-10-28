@@ -1,8 +1,8 @@
-extends Node
+extends SceneTree
 
 const ROOT_DIR := "res://"
 
-func _ready() -> void:
+func _initialize() -> void:
     var scripts := _collect_scripts(ROOT_DIR)
     var failures: Array[String] = []
     for script_path in scripts:
@@ -11,11 +11,11 @@ func _ready() -> void:
             failures.append("Failed to load %s" % script_path)
     if failures.is_empty():
         print("gd_lint_runner: OK (%d scripts)" % scripts.size())
-        get_tree().quit(0)
+        quit(0)
     else:
         for failure in failures:
             push_error(failure)
-        get_tree().quit(1)
+        quit(1)
 
 
 func _collect_scripts(base_path: String) -> Array[String]:

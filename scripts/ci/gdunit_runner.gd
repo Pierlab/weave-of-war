@@ -1,4 +1,4 @@
-extends Node
+extends SceneTree
 
 const TEST_ROOT := "res://tests/gdunit"
 const SUPPORT_FILES := [
@@ -6,7 +6,7 @@ const SUPPORT_FILES := [
     "res://tests/gdunit/assertions.gd",
 ]
 
-func _ready() -> void:
+func _initialize() -> void:
     for support in SUPPORT_FILES:
         ResourceLoader.load(support)
     var test_files := _collect_test_files(TEST_ROOT)
@@ -41,7 +41,7 @@ func _ready() -> void:
             instance.free()
     if failures.is_empty():
         print("gdunit_runner: OK (%d tests)" % executed_tests)
-        get_tree().quit(0)
+        quit(0)
     else:
         for failure in failures:
             var failure_message := failure.get("name", "<unknown test>")
@@ -49,7 +49,7 @@ func _ready() -> void:
             if not details.is_empty():
                 failure_message += "\n  - " + "\n  - ".join(details)
             push_error(failure_message)
-        get_tree().quit(1)
+        quit(1)
 
 
 func _collect_test_files(base_path: String) -> Array[String]:

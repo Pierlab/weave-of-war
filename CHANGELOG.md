@@ -14,4 +14,4 @@ All notable changes to this project will be documented in this file.
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.
 
 ### Fixed
-- None.
+- CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.
