@@ -9,6 +9,7 @@ This repository now bundles the rituals and automation needed for agent-driven v
 3. Read [`AGENTS.md`](AGENTS.md) for the workflow rules, required documents, and test commands.
 4. Review the current mission briefs in [`docs/agents/missions/`](docs/agents/missions/) and the latest
    [`context_snapshot.md`](context_snapshot.md).
+5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks.
 
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`.
