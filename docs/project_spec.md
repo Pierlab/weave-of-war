@@ -79,7 +79,7 @@ Casual-to-midcore PC strategy players who enjoy planning, watching systems react
 - **Key scenes**: `main.tscn` (root), `map.tscn` (hex), `hud.tscn`, `debug_overlay.tscn`.  
 - **Key scripts**: `game_manager.gd`, `turn_manager.gd`, `event_bus.gd`, systems (`elan_system.gd`, `logistics_system.gd`, `combat_system.gd`, `doctrine_system.gd`, `espionage_system.gd`).  
 - **Data files** (VS): `doctrines.json`, `orders.json`, `units.json`, `weather.json`, `logistics.json`.  
-- **Testing**: gdUnit4 (preferred) or light script assertions; GitHub Actions for lint/build smoke tests.
+- **Testing**: lightweight gdUnit-style harness (`res://scripts/ci/*.gd`) plus GitHub Actions lint/build/test pipeline.
 
 ---
 
