@@ -14,9 +14,12 @@
 - Upgraded the CI workflow to install Godot 4.5.1 with cache cleanup to eliminate parser regressions on headless runners.
 - Normalised HUD and debug overlay scene parenting so UI nodes instantiate reliably during the build smoke check.
 - Replaced deprecated ternary syntax in HUD and game manager scripts so the project opens cleanly in Godot 4.5.1.
+- Repaired the HUD and debug overlay scripts after merge conflicts, restoring logistics toggle wiring and resolving Godot 4.5
+  preload warnings.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
 - Expand gdUnit-style tests beyond the initial smoke coverage as systems evolve.
 - Provision the `godot` executable in local dev containers so automated commands can run outside CI.
 - Re-run the full headless command suite once Godot 4.5.1 is available locally to confirm there are no lingering parse errors.
+- Confirm the fixed HUD/debug overlay parenting removes the missing node warnings during the next headless build run.

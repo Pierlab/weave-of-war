@@ -23,6 +23,11 @@ godot --headless --path . --script res://scripts/ci/gdunit_runner.gd
 These scripts now extend `SceneTree` directly so they can be executed with `--script` in both local shells and CI runners.
 They power local validation and the GitHub Actions workflow defined in `.github/workflows/ci.yml`.
 
+### Godot resource UID sidecars
+Godot 4.2+ stores stable resource identifiers in sidecar files that mirror the resource path with a `.uid` suffix (for example
+`scripts/ui/hud_manager.gd.uid`). These files must stay alongside their parent resources in version control—the engine uses them
+to resolve references when scenes or scripts are renamed. Do not delete them unless you also remove the associated resource.
+
 ### Troubleshooting build parsing
 - If the build smoke check reports missing class names (for example `HexTile` or `EventBus`), preload the corresponding script
   resource before using it for type annotations or `is` checks. See `scenes/map/map.gd` and the UI scripts under
