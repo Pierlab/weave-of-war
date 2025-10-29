@@ -21,8 +21,13 @@ func _on_next_turn_requested() -> void:
 	turn_manager.advance_turn()
 
 func _on_logistics_toggled(show: bool) -> void:
+<<<<<<< HEAD
 	var state := show ? "visible" : "hidden"
 	print("Logistics overlay is now %s" % state)
+=======
+    var state := "visible" if show else "hidden"
+    print("Logistics overlay is now %s" % state)
+>>>>>>> a78f34edb6284d35e754c9357bcbb1cac7bc39d9
 
 func _on_spawn_unit_requested() -> void:
 	print("Spawn unit requested (placeholder)")

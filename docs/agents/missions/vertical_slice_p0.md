@@ -42,4 +42,5 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 
 ## Handoff (fill when pausing or finishing)
 Pinned CI to Godot 4.5.1 and cleaned UI scene parenting so build smoke checks can run headless without crashes. Awaiting a full
-test pass once the new Godot binary is available locally.
+test pass once the new Godot binary is available locally. Updated HUD and GameManager scripts to the Python-style conditional
+syntax required by Godot 4.5.1 so the editor no longer reports parse errors on load.
