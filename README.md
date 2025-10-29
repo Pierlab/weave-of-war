@@ -21,6 +21,11 @@ godot --headless --path . --script res://scripts/ci/gdunit_runner.gd
 These scripts now extend `SceneTree` directly so they can be executed with `--script` in both local shells and CI runners.
 They power local validation and the GitHub Actions workflow defined in `.github/workflows/ci.yml`.
 
+### Troubleshooting build parsing
+- If the build smoke check reports missing class names (for example `HexTile` or `EventBus`), preload the corresponding script
+  resource before using it for type annotations or `is` checks. See `scenes/map/map.gd` and the UI scripts under
+  `scripts/ui/` for reference on the preferred preload pattern.
+
 ## Maintaining context for agents
 - After each iteration, run `python scripts/generate_context_snapshot.py` to refresh [`context_snapshot.md`](context_snapshot.md).
 - Document branch-level progress in [`context_update.md`](context_update.md) so the next agent can resume smoothly.

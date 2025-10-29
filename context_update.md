@@ -6,7 +6,9 @@
 - Introduced a generated context snapshot, changelog, and branch-level reporting routine for sustained continuity.
 - Documented the vertical slice planning checklists in `CHECKLISTS.md` and linked them from the onboarding flow.
 - Adjusted CI Godot scripts to extend `SceneTree` so headless `--script` execution works during merges.
+- Updated map and UI scripts to preload their dependencies, restoring the build smoke check after missing type parse errors.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
 - Expand gdUnit-style tests beyond the initial smoke coverage as systems evolve.
+- Provision the `godot` executable in local dev containers so automated commands can run outside CI.

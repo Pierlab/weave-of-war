@@ -1,6 +1,8 @@
 extends Node
 class_name TurnManager
 
+const EventBus := preload("res://scripts/core/event_bus.gd")
+
 var current_turn: int = 0
 var event_bus: EventBus
 
