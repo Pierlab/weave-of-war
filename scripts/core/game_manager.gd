@@ -1,5 +1,7 @@
 extends Node
 
+const EventBus := preload("res://scripts/core/event_bus.gd")
+
 var event_bus: EventBus
 var turn_manager: TurnManager
 

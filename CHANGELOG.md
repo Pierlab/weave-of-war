@@ -15,3 +15,4 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.
+- Preloaded map and UI dependencies so the build smoke check no longer fails on missing `HexTile` or `EventBus` types.

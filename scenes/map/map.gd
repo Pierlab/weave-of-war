@@ -2,6 +2,7 @@ extends Node2D
 
 const Utils := preload("res://scripts/core/utils.gd")
 const HexTileScene := preload("res://scenes/map/hex_tile.tscn")
+const HexTileScript := preload("res://scenes/map/hex_tile.gd")
 
 @export var columns := 10
 @export var rows := 10
@@ -12,11 +13,11 @@ func _ready() -> void:
 
 func _generate_map() -> void:
     for child in get_children():
-        if child is HexTile:
+        if child is HexTileScript:
             child.queue_free()
     for q in range(columns):
         for r in range(rows):
-            var hex := hex_scene.instantiate()
+            var hex: Node2D = hex_scene.instantiate()
             if hex.has_method("set_axial"):
                 hex.set_axial(q, r)
             add_child(hex)

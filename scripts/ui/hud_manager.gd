@@ -1,5 +1,7 @@
 extends Control
 
+const EventBus := preload("res://scripts/core/event_bus.gd")
+
 @onready var next_turn_button: Button = $MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $MarginContainer/VBoxContainer/ToggleLogisticsButton
 var event_bus: EventBus
