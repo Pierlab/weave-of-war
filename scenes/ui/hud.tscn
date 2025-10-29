@@ -11,23 +11,23 @@ offset_left = 16.0
 offset_top = 16.0
 script = ExtResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="HUD"]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 1
 offset_right = 200.0
 offset_bottom = 120.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HUD/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="NextTurnButton" type="Button" parent="HUD/MarginContainer/VBoxContainer"]
+[node name="NextTurnButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Next Turn"
 
-[node name="ToggleLogisticsButton" type="Button" parent="HUD/MarginContainer/VBoxContainer"]
+[node name="ToggleLogisticsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Show Logistics"

@@ -4,7 +4,7 @@ Weave of War is a strategy game prototype built with Godot 4.x that focuses on l
 This repository now bundles the rituals and automation needed for agent-driven vibe coding.
 
 ## Getting Started
-1. Install [Godot 4.x](https://godotengine.org/).
+1. Install [Godot 4.5.1](https://godotengine.org/) (headless-capable builds are required for CI parity).
 2. Open the project by launching Godot and selecting the `project.godot` file in this repository.
 3. Read [`AGENTS.md`](AGENTS.md) for the workflow rules, required documents, and test commands.
 4. Review the current mission briefs in [`docs/agents/missions/`](docs/agents/missions/)—start with
@@ -13,7 +13,8 @@ This repository now bundles the rituals and automation needed for agent-driven v
 5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks.
 
 ## Running automated checks
-All headless commands assume the Godot executable is available on your `PATH`.
+All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
+the `.godot/` metadata folder to avoid stale parser caches before running the commands below.
 ```bash
 godot --headless --path . --script res://scripts/ci/gd_lint_runner.gd
 godot --headless --path . --script res://scripts/ci/gd_build_check.gd
