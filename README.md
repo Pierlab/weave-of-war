@@ -10,7 +10,9 @@ This repository now bundles the rituals and automation needed for agent-driven v
 4. Review the current mission briefs in [`docs/agents/missions/`](docs/agents/missions/)—start with
    [`vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md) to align on the vertical slice scope—and the latest
    [`context_snapshot.md`](context_snapshot.md).
-5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks.
+5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks and the
+   one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) to stay aligned on vision, pillars, loops,
+   and risks.
 
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
@@ -44,6 +46,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - Use the locked SDS packages for [`Command Model`](docs/design/sds_command_model.md) and
   [`Élan`](docs/design/sds_elan.md) as the source of truth for acceptance criteria and telemetry requirements during the
   vertical slice build.
+- Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
+  fantasy, pillars, loops, and risks for the vertical slice.
 
 ## Acceptance Checks
 The high-level manual acceptance flow lives in [`docs/tests/acceptance_tests.md`](docs/tests/acceptance_tests.md). Keep it in sync

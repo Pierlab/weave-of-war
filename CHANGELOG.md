@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
   README.
 - Locked dedicated SDS documents for the Command Model and Élan systems with acceptance criteria under
   `docs/design/sds_command_model.md` and `docs/design/sds_elan.md`.
+- Authored a one-page vertical slice GDD synthèse in `docs/gdd_vertical_slice.md` to capture vision, fantasy, piliers, boucles,
+  et risques.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.

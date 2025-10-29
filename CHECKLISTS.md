@@ -4,9 +4,9 @@ These checklists consolidate the planning artefacts for the vertical slice descr
 
 ## Checklist A — Démarrage documentaire & mission (Semaine 0–1)
 - [x] Créer un nouveau brief `docs/agents/missions/vertical_slice_p0.md` à partir de `docs/agents/agent_base.md`, incluant les huit systèmes P0, les SDS à livrer et les validations attendues. (Voir mission `vertical_slice_p0.md`.)
-- [ ] Rédiger une page GDD synthèse (vision, fantasy, piliers, boucles, risques) conformément à la section 2.1.
+- [x] Rédiger une page GDD synthèse (vision, fantasy, piliers, boucles, risques) conformément à la section 2.1. (Livrable : [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md).)
 - [x] Produire les SDS prioritaires (`Commandement`, `Élan`) avec le template indiqué, en listant règles joueur/système, UX et télémétrie initiale. (Livrables: [`docs/design/sds_command_model.md`](docs/design/sds_command_model.md), [`docs/design/sds_elan.md`](docs/design/sds_elan.md).)
-- [ ] Mettre à jour `context_update.md`, `README.md` et `CHANGELOG.md` pour référencer les nouveaux artefacts et leur statut, puis régénérer `context_snapshot.md` via `python scripts/generate_context_snapshot.py` avant la revue.
+- [x] Mettre à jour `context_update.md`, `README.md` et `CHANGELOG.md` pour référencer les nouveaux artefacts et leur statut, puis régénérer `context_snapshot.md` via `python scripts/generate_context_snapshot.py` avant la revue.
 
 ## Checklist B — Architecture & données (TDD initial)
 - [ ] Définir le plan d’architecture data-driven dans un TDD, couvrant composants Godot, bus d’événements et interactions IA assistante comme mentionné en section 2.3.
