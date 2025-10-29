@@ -32,6 +32,8 @@ They power local validation and the GitHub Actions workflow defined in `.github/
 - After each iteration, run `python scripts/generate_context_snapshot.py` to refresh [`context_snapshot.md`](context_snapshot.md).
 - Document branch-level progress in [`context_update.md`](context_update.md) so the next agent can resume smoothly.
 - Append notable entries to [`CHANGELOG.md`](CHANGELOG.md) before requesting review.
+- Reference the draft SDS outlines for the eight P0 systems in [`docs/design/sds_outlines.md`](docs/design/sds_outlines.md) when
+  planning gameplay or telemetry changes.
 
 ## Acceptance Checks
 The high-level manual acceptance flow lives in [`docs/tests/acceptance_tests.md`](docs/tests/acceptance_tests.md). Keep it in sync
