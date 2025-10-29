@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 - Authored the `vertical_slice_p0` mission brief to drive Vertical Slice P0 delivery across the eight core systems.
 - Drafted SDS outlines for all eight P0 systems in `docs/design/sds_outlines.md` and linked them from the mission brief and
   README.
+- Locked dedicated SDS documents for the Command Model and Élan systems with acceptance criteria under
+  `docs/design/sds_command_model.md` and `docs/design/sds_elan.md`.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.

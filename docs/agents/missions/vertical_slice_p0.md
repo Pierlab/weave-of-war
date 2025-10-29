@@ -24,7 +24,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 
 ## Implementation checklist
 - [x] Draft SDS outlines for each system (Command Model, Élan, Logistics, Combat 3 Pillars, Espionage, Terrain & Weather, Competence Sliders, Unit Formations) capturing rules, UX, and telemetry needs. See [`docs/design/sds_outlines.md`](../../design/sds_outlines.md).
-- [ ] Lock Command Model + Élan SDS with acceptance criteria and share for review in `docs/design/`.
+- [x] Lock Command Model + Élan SDS with acceptance criteria and share for review in `docs/design/`. (See
+  [`sds_command_model.md`](../../design/sds_command_model.md) and [`sds_elan.md`](../../design/sds_elan.md) — status: Locked for
+  review.)
 - [ ] Define a delivery timeline across Semaine 0–6 with milestones mapped to the systems above.
 - [ ] Update Godot scenes/scripts incrementally per milestone, ensuring tests and telemetry hooks keep pace.
 - [ ] Run headless lint/build/test commands after each milestone and archive logs/screenshots as needed.
