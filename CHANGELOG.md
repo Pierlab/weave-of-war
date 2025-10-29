@@ -23,3 +23,4 @@ All notable changes to this project will be documented in this file.
 - CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.
 - Preloaded map and UI dependencies so the build smoke check no longer fails on missing `HexTile` or `EventBus` types.
 - Corrected UI scene node parenting so headless instantiation no longer drops children or crashes the build smoke check.
+- Updated HUD and game manager scripts to use Godot 4's Python-style conditional expressions, removing project load parse errors.
