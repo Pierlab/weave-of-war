@@ -7,7 +7,8 @@ This repository now bundles the rituals and automation needed for agent-driven v
 1. Install [Godot 4.x](https://godotengine.org/).
 2. Open the project by launching Godot and selecting the `project.godot` file in this repository.
 3. Read [`AGENTS.md`](AGENTS.md) for the workflow rules, required documents, and test commands.
-4. Review the current mission briefs in [`docs/agents/missions/`](docs/agents/missions/) and the latest
+4. Review the current mission briefs in [`docs/agents/missions/`](docs/agents/missions/)—start with
+   [`vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md) to align on the vertical slice scope—and the latest
    [`context_snapshot.md`](context_snapshot.md).
 5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks.
 

@@ -1,14 +1,15 @@
 # Context Snapshot
 
-- Generated on: 2025-10-29T08:14:03Z
+- Generated on: 2025-10-29T12:24:59Z
 - Branch: work
-- Commit when generated: 23fd07c3a75106b712a00342a73c24b3ebfcaff0
-- Subject: Merge pull request #4 from Pierlab/codex/resoudre-le-probleme-de-fusion-de-pr
+- Commit when generated: f1279aea1b8fe88ec7b24b89a06d74e94fd77d07
+- Subject: Merge pull request #5 from Pierlab/codex/fix-build-check-script-errors-lduyod
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
 ## Mission briefs
 - docs/agents/missions/bootstrap_vibe_coding.md
+- docs/agents/missions/vertical_slice_p0.md
 
 ## Godot scenes
 - scenes/main.tscn
