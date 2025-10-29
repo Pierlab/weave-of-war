@@ -26,6 +26,6 @@ func _on_toggle_logistics_pressed() -> void:
 	if event_bus:
 		event_bus.toggle_logistics()
 
-func _on_logistics_toggled(show: bool) -> void:
-    if toggle_logistics_button:
-        toggle_logistics_button.text = "Hide Logistics" if show else "Show Logistics"
+func _on_logistics_t	if toggle_logistics_button:
+		toggle_logistics_button.text = "Hide Logistics" if show else "Show Logistics"
+if show else "Show Logistics"

@@ -1,11 +1,11 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1761771557
+::res://::1761772409
 AGENTS.md::TextFile::-1::1761687403::0::1::::<><><>0<>0<><>::
-CHANGELOG.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
+CHANGELOG.md::TextFile::-1::1761772280::0::1::::<><><>0<>0<><>::
 CHECKLISTS.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
-context_snapshot.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
-context_update.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
-README.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
+context_snapshot.md::TextFile::-1::1761772280::0::1::::<><><>0<>0<><>::
+context_update.md::TextFile::-1::1761772280::0::1::::<><><>0<>0<><>::
+README.md::TextFile::-1::1761772280::0::1::::<><><>0<>0<><>::
 ::res://assets/::1761685061
 ::res://assets/audio/::1761685061
 ::res://assets/fonts/::1761685061
@@ -23,9 +23,9 @@ vibe_coding.md::TextFile::-1::1761687403::0::1::::<><><>0<>0<><>::
 ::res://docs/agents/::1761687403
 agent_base.md::TextFile::-1::1761687403::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1761687403::0::1::::<><><>0<>0<><>::
-::res://docs/agents/missions/::1761770727
+::res://docs/agents/missions/::1761772280
 bootstrap_vibe_coding.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
-vertical_slice_p0.md::TextFile::-1::1761770727::0::1::::<><><>0<>0<><>::
+vertical_slice_p0.md::TextFile::-1::1761772280::0::1::::<><><>0<>0<><>::
 ::res://docs/chats/::1761689127
 chat 1.txt::TextFile::-1::1761688915::0::1::::<><><>0<>0<><>::
 chat 2.txt::TextFile::-1::1761688950::0::1::::<><><>0<>0<><>::
@@ -54,9 +54,9 @@ hud.tscn::PackedScene::-1::1761770727::0::1::::<><><>0<>0<><>::res://scripts/ui/
 gdunit_runner.gd::GDScript::5100198895556309853::1761770727::0::1::::<>SceneTree<><>0<>0<><>::
 gd_build_check.gd::GDScript::7782385079782552185::1761770727::0::1::::<>SceneTree<><>0<>0<><>::
 gd_lint_runner.gd::GDScript::4847783931687592463::1761770727::0::1::::<>SceneTree<><>0<>0<><>::
-::res://scripts/core/::1761771114
+::res://scripts/core/::1761772280
 event_bus.gd::GDScript::6641453968836768830::1761685061::0::1::::EventBus<>Node<><>0<>0<><>::
-game_manager.gd::GDScript::3694397389605549028::1761771114::0::1::::<>Node<><>0<>0<><>::
+game_manager.gd::GDScript::3694397389605549028::1761772280::0::1::::<>Node<><>0<>0<><>::
 turn_manager.gd::GDScript::6585707726009801544::1761770727::0::1::::TurnManager<>Node<><>0<>0<><>::
 utils.gd::GDScript::556778760553069089::1761685061::0::1::::WoWUtils<>RefCounted<><>0<>0<><>::
 ::res://scripts/systems/::1761770799
@@ -65,9 +65,9 @@ doctrine_system.gd::GDScript::7293322976491971147::1761685061::0::1::::<>Node<><
 elan_system.gd::GDScript::6770770172134623941::1761685061::0::1::::<>Node<><>0<>0<><>::
 espionage_system.gd::GDScript::6076303225500237658::1761685061::0::1::::<>Node<><>0<>0<><>::
 logistics_system.gd::GDScript::874762582990616619::1761685061::0::1::::<>Node<><>0<>0<><>::
-::res://scripts/ui/::1761771114
+::res://scripts/ui/::1761772280
 debug_overlay.gd::GDScript::5068310818099841005::1761770727::0::1::::<>Control<><>0<>0<><>::
-hud_manager.gd::GDScript::9007371080836635000::1761771114::0::1::::<>Control<><>0<>0<><>::
+hud_manager.gd::GDScript::9007371080836635000::1761772336::0::1::::<>Control<><>0<>0<><>::
 ::res://tests/::1761687403
 ::res://tests/gdunit/::1761770799
 assertions.gd::GDScript::650027311852154693::1761687403::0::1::::GdUnitLiteAssertions<>RefCounted<><>0<>0<><>::
