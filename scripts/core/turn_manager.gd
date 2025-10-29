@@ -1,13 +1,13 @@
 extends Node
 class_name TurnManager
 
-const EventBus := preload("res://scripts/core/event_bus.gd")
+const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 
 var current_turn: int = 0
 var event_bus: EventBus
 
 func _ready() -> void:
-    event_bus = EventBus.get_instance()
+    event_bus = EVENT_BUS.get_instance()
     if event_bus == null:
         var buses := get_tree().get_nodes_in_group("event_bus")
         if buses.size() > 0:

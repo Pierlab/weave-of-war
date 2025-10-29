@@ -22,12 +22,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="NextTurnButton" type="Button" parent="VBoxContainer"]
+[node name="NextTurnButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Next Turn"
 
-[node name="ToggleLogisticsButton" type="Button" parent="VBoxContainer"]
+[node name="ToggleLogisticsButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Show Logistics"
