@@ -39,4 +39,5 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ## Handoff (fill when pausing or finishing)
-_Leave notes here describing the current milestone status, remaining blockers, and CI/Test outcomes._
+Pinned CI to Godot 4.5.1 and cleaned UI scene parenting so build smoke checks can run headless without crashes. Awaiting a full
+test pass once the new Godot binary is available locally.

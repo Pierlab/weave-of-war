@@ -13,7 +13,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.
+- Pinned the CI workflow to Godot 4.5.1 using the latest setup action and cache cleanup step for consistent headless runs.
 
 ### Fixed
 - CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.
 - Preloaded map and UI dependencies so the build smoke check no longer fails on missing `HexTile` or `EventBus` types.
+- Corrected UI scene node parenting so headless instantiation no longer drops children or crashes the build smoke check.
