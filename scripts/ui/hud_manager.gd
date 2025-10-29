@@ -28,4 +28,4 @@ func _on_toggle_logistics_pressed() -> void:
 
 func _on_logistics_toggled(show: bool) -> void:
     if toggle_logistics_button:
-        toggle_logistics_button.text = show ? "Hide Logistics" : "Show Logistics"
+        toggle_logistics_button.text = "Hide Logistics" if show else "Show Logistics"

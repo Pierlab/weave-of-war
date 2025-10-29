@@ -27,6 +27,8 @@ They power local validation and the GitHub Actions workflow defined in `.github/
 - If the build smoke check reports missing class names (for example `HexTile` or `EventBus`), preload the corresponding script
   resource before using it for type annotations or `is` checks. See `scenes/map/map.gd` and the UI scripts under
   `scripts/ui/` for reference on the preferred preload pattern.
+- Godot 4.5 removed the `condition ? a : b` ternary helper. Replace those expressions with the Python-style
+  `a if condition else b` form to avoid parse errors when opening the project or running the headless build script.
 
 ## Maintaining context for agents
 - After each iteration, run `python scripts/generate_context_snapshot.py` to refresh [`context_snapshot.md`](context_snapshot.md).
