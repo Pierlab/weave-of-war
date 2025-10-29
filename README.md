@@ -34,6 +34,9 @@ They power local validation and the GitHub Actions workflow defined in `.github/
 - Append notable entries to [`CHANGELOG.md`](CHANGELOG.md) before requesting review.
 - Reference the draft SDS outlines for the eight P0 systems in [`docs/design/sds_outlines.md`](docs/design/sds_outlines.md) when
   planning gameplay or telemetry changes.
+- Use the locked SDS packages for [`Command Model`](docs/design/sds_command_model.md) and
+  [`Élan`](docs/design/sds_elan.md) as the source of truth for acceptance criteria and telemetry requirements during the
+  vertical slice build.
 
 ## Acceptance Checks
 The high-level manual acceptance flow lives in [`docs/tests/acceptance_tests.md`](docs/tests/acceptance_tests.md). Keep it in sync
