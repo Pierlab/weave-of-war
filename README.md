@@ -48,6 +48,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   vertical slice build.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
   fantasy, pillars, loops, and risks for the vertical slice.
+- Align production pacing with the Semaine 0–6 milestone plan documented in
+  [`docs/agents/missions/vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md#delivery-timeline-semaine-0%E2%80%936)
+  so every iteration advances a tracked objective.
 
 ## Acceptance Checks
 The high-level manual acceptance flow lives in [`docs/tests/acceptance_tests.md`](docs/tests/acceptance_tests.md). Keep it in sync

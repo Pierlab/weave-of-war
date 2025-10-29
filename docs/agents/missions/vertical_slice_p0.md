@@ -27,7 +27,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [x] Lock Command Model + Élan SDS with acceptance criteria and share for review in `docs/design/`. (See
   [`sds_command_model.md`](../../design/sds_command_model.md) and [`sds_elan.md`](../../design/sds_elan.md) — status: Locked for
   review.)
-- [ ] Define a delivery timeline across Semaine 0–6 with milestones mapped to the systems above.
+- [x] Define a delivery timeline across Semaine 0–6 with milestones mapped to the systems above.
 - [ ] Update Godot scenes/scripts incrementally per milestone, ensuring tests and telemetry hooks keep pace.
 - [ ] Run headless lint/build/test commands after each milestone and archive logs/screenshots as needed.
 - [ ] Refresh `context_update.md`, `CHANGELOG.md`, and `context_snapshot.md` after every significant increment.
@@ -39,6 +39,15 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Logs or summaries for automated test runs.
 - New or updated telemetry schemas validating the covered systems.
 - Follow-up task list for remaining polish or stretch items.
+
+### Delivery timeline (Semaine 0–6)
+- **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, and set up logging scaffolding for Élan and Command Model prototypes. Validate onboarding rituals with the latest `AGENTS.md` updates.
+- **Semaine 1 — Command Model & Élan loop**: Implement doctrine selection, Élan accumulation caps, and command order validation with debug HUD feedback. Target gdUnit smoke coverage around Élan spend and doctrine toggles.
+- **Semaine 2 — Logistics backbone**: Prototype hybrid supply (rings + routes), animate convoy nodes, and track logistics state transitions in telemetry. Ensure data schemas in `data/` capture route types and supply thresholds.
+- **Semaine 3 — Terrain & weather layering**: Introduce Plains/Forest/Hill terrain with movement modifiers and Sun/Rain/Fog weather affecting logistics pipelines. Expose modifiers through HUD tooltips and log them via the telemetry bus.
+- **Semaine 4 — Combat 3 Piliers**: Deliver probabilistic resolution for Manoeuvre, Feu, and Moral pillars, surfacing outcomes through combat panels. Wire foundational automated tests to cover resolution edge cases and telemetry events.
+- **Semaine 5 — Espionage systems**: Add fog of war, probabilistic pings, and intention reveals, including counterplay hooks. Record espionage interactions in analytics payloads and document decision points via ADR drafts if scope shifts.
+- **Semaine 6 — Competence sliders & formations**: Ship turn-based competence budget management and unit formation postures (infantry/archers/cavalry). Integrate final telemetry events (Élan spent, pillar results, logistic breaks) and complete documentation updates (`context_update.md`, `CHANGELOG.md`, `context_snapshot.md`).
 
 ## Handoff (fill when pausing or finishing)
 Pinned CI to Godot 4.5.1 and cleaned UI scene parenting so build smoke checks can run headless without crashes. Awaiting a full

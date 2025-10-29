@@ -18,6 +18,8 @@
   preload warnings.
 - Authored a one-page GDD synthèse (`docs/gdd_vertical_slice.md`) summarising vision, fantasy, piliers, boucles et risques, et
   coché la Checklist A du vertical slice après avoir relié le document aux artefacts clés.
+- Séquencé la feuille de route vertical slice sur Semaine 0–6 dans `docs/agents/missions/vertical_slice_p0.md`, en reliant
+  chaque jalon aux systèmes P0 et aux artefacts de télémétrie/tests à préparer.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
