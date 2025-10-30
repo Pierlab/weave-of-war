@@ -21,7 +21,7 @@ This repository now bundles the rituals and automation needed for agent-driven v
 | Autoload | Script | Responsibilities |
 | --- | --- | --- |
 | `EventBus` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
-| `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, caches them by id, exposes helpers (`get_doctrine`, `list_orders`, etc.), and emits readiness/error payloads for the UI and telemetry. |
+| `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, caches them by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
 | `Telemetry` | `scripts/core/telemetry.gd` | Records emitted gameplay events for debugging and gdUnit assertions. Provides `log_event`, `get_buffer`, and `clear` helpers so tests can verify new Checklist C flows. |
 | `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
 

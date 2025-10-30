@@ -15,9 +15,9 @@ These checklists consolidate the planning artefacts for the vertical slice descr
 - [x] Ajouter des tests d’intégrité (unitaires ou gdUnit) pour s’assurer que les fichiers JSON se chargent et respectent le schéma avant de poursuivre le gameplay.
 
 ## Checklist C — Production du vertical slice (Semaine 0–6)
-- Préparation : Les autoloads `EventBus`, `DataLoader`, `Telemetry` et `AssistantAI` sont maintenant configurés dans `project.godot`
+- [x] Préparation : Les autoloads `EventBus`, `DataLoader`, `Telemetry` et `AssistantAI` sont maintenant configurés dans `project.godot`
   et émettent un signal `data_loader_ready` enregistré via la télémétrie. Les systèmes à implémenter peuvent s'y connecter sans
-  travail supplémentaire de plomberie.
+  travail supplémentaire de plomberie. (Validé par `test_autoload_preparation.gd`.)
 - [x] Semaine 0–1 : Implémenter la boucle commandement/élan (doctrine active, ordres autorisés, inertie) avec feedback visuel/sonore minimal et stockage d’élan plafonné. (HUD : sélection doctrine/ordres, jauge d’Élan, signaux audio)
 - [x] Semaine 2–3 : Mettre en place le ravitaillement hybride (anneaux, routes animées, convois interceptables) et terrain/météo (Plaine/Forêt/Colline + Soleil/Pluie/Brume) avec impacts sur mouvement/logistique. (Payloads `logistics_update`/`weather_changed` générés par `LogisticsSystem`, données enrichies dans `data/weather.json` et `data/logistics.json`, tests `test_logistics_system.gd`.)
 - [x] Semaine 4–5 : Développer la résolution Combat 3 Piliers et les mécaniques d’espionnage (brouillard, pings probabilistes, intentions) en suivant le test d’acceptation fourni pour les 3 piliers. (Livrables : `CombatSystem` calcule les piliers avec doctrine/météo/espionnage, `EspionageSystem` publie des pings et intentions, tests `test_combat_and_espionage_systems.gd`.)

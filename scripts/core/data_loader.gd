@@ -20,7 +20,7 @@ var _is_ready := false
 func _ready() -> void:
     _instance = self
     var result := load_all()
-    _notify_event_bus(result)
+    call_deferred("_notify_event_bus", result)
 
 static func get_instance() -> DataLoader:
     return _instance
