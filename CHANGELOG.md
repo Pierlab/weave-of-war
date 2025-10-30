@@ -39,6 +39,8 @@ All notable changes to this project will be documented in this file.
   `CombatSystem` formation/competence hooks validated by gdUnit coverage (`test_competence_and_formations.gd`).
 - Added telemetry for competence reallocations and formation changes, wiring the new events through `Telemetry`, the HUD bus,
   and data integrity checks for [`data/formations.json`](data/formations.json).
+- Documented a fallback JSON validation snippet in the README so agents can verify data integrity while provisioning a local
+  Godot binary.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.

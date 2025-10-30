@@ -70,6 +70,20 @@ godot --headless --path . --script res://scripts/ci/gd_lint_runner.gd
 godot --headless --path . --script res://scripts/ci/gd_build_check.gd
 godot --headless --path . --script res://scripts/ci/gdunit_runner.gd
 ```
+If your environment does not yet provide a `godot` executable, run the following Python snippet to confirm every vertical slice
+JSON file still parses cleanly while you provision the engine:
+
+```bash
+python - <<'PY'
+import json, os
+for root, _, files in os.walk("data"):
+    for name in files:
+        if name.endswith(".json"):
+            with open(os.path.join(root, name)) as fh:
+                json.load(fh)
+print("All JSON data files parsed successfully")
+PY
+```
 The gdUnit suite now includes data integrity coverage that loads each JSON data file under `data/` and validates required keys and types before gameplay logic consumes them.
 These scripts now extend `SceneTree` directly so they can be executed with `--script` in both local shells and CI runners.
 They power local validation and the GitHub Actions workflow defined in `.github/workflows/ci.yml`.
