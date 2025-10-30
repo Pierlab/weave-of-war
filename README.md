@@ -36,6 +36,14 @@ Checklist C should request dependencies from these singletons instead of reading
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
 
+## Logistics backbone & terrain feedback (Semaine 2–3)
+- `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads
+  that describe supply levels, terrain-driven flow modifiers, and convoy progress/interruptions for the HUD and telemetry.
+- Weather definitions (`sunny`, `rain`, `mist`) rotate automatically and apply movement/logistics multipliers sourced from
+  `data/weather.json`, enabling future systems to subscribe to `weather_changed` signals without bespoke plumbing.
+- Terrain defaults derived from `TerrainData` are combined with supply-center distance calculations to label tiles as `core`,
+  `fringe`, or `isolated`, ensuring movement costs and convoy interception odds reflect both geography and climate.
+
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
 the `.godot/` metadata folder to avoid stale parser caches before running the commands below.

@@ -1,4 +1,437 @@
 extends Node
+class_name LogisticsSystem
 
-## Placeholder for the logistics system implementation.
-## Will handle supply line visualization, resource propagation, and overlays driven by player toggles.
+const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
+const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
+const TERRAIN_DATA := preload("res://scenes/map/terrain_data.gd")
+
+@export var map_columns := 6
+@export var map_rows := 5
+
+var event_bus: EventBus
+var data_loader: DataLoader
+
+var _terrain_lookup: Dictionary = {}
+var _terrain_definitions: Dictionary = {}
+var _supply_centers: Array = []
+var _routes: Array = []
+var _convoys_by_route: Dictionary = {}
+var _logistics_by_id: Dictionary = {}
+var _weather_by_id: Dictionary = {}
+var _weather_sequence: Array = []
+var _current_logistics_id := ""
+var _current_weather_id := ""
+var _turn_counter := 0
+var _visible := false
+var _weather_rotation_turns := 0
+var _last_payload: Dictionary = {}
+var _rng := RandomNumberGenerator.new()
+
+func _ready() -> void:
+    setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
+
+func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
+    event_bus = event_bus_ref
+    data_loader = data_loader_ref
+    _terrain_definitions = TERRAIN_DATA.get_default()
+    _rng.randomize()
+
+    _generate_default_map()
+    _configure_default_routes()
+
+    if data_loader and data_loader.is_ready():
+        configure(data_loader.list_logistics_states(), data_loader.list_weather_states())
+
+    if event_bus:
+        if not event_bus.data_loader_ready.is_connected(_on_data_loader_ready):
+            event_bus.data_loader_ready.connect(_on_data_loader_ready)
+        if not event_bus.turn_started.is_connected(_on_turn_started):
+            event_bus.turn_started.connect(_on_turn_started)
+        if not event_bus.logistics_toggled.is_connected(_on_logistics_toggled):
+            event_bus.logistics_toggled.connect(_on_logistics_toggled)
+
+    _recalculate_state("ready")
+
+func configure(logistics_entries: Array, weather_entries: Array) -> void:
+    _logistics_by_id.clear()
+    _weather_by_id.clear()
+    _weather_sequence.clear()
+
+    for entry in logistics_entries:
+        if entry is Dictionary and entry.has("id"):
+            _logistics_by_id[entry.get("id")] = entry
+    for entry in weather_entries:
+        if entry is Dictionary and entry.has("id"):
+            var weather_id := str(entry.get("id"))
+            _weather_by_id[weather_id] = entry
+            if not _weather_sequence.has(weather_id):
+                _weather_sequence.append(weather_id)
+
+    if _current_logistics_id.is_empty() and not _logistics_by_id.is_empty():
+        _current_logistics_id = str(_logistics_by_id.keys()[0])
+    elif not _logistics_by_id.has(_current_logistics_id) and not _logistics_by_id.is_empty():
+        _current_logistics_id = str(_logistics_by_id.keys()[0])
+
+    if _current_weather_id.is_empty() and _weather_sequence.size() > 0:
+        _current_weather_id = str(_weather_sequence[0])
+    elif not _weather_by_id.has(_current_weather_id) and _weather_sequence.size() > 0:
+        _current_weather_id = str(_weather_sequence[0])
+
+    _update_weather_rotation_turns()
+    _ensure_convoy_states()
+    _recalculate_state("configure")
+
+func set_rng_seed(seed: int) -> void:
+    _rng.seed = seed
+
+func set_logistics_state(logistics_id: String) -> void:
+    if logistics_id.is_empty() or not _logistics_by_id.has(logistics_id):
+        return
+    _current_logistics_id = logistics_id
+    _update_weather_rotation_turns()
+    _ensure_convoy_states()
+    _recalculate_state("state_change")
+
+func set_weather_state(weather_id: String) -> void:
+    if weather_id.is_empty() or not _weather_by_id.has(weather_id):
+        return
+    _current_weather_id = weather_id
+    _recalculate_state("weather_change")
+    if event_bus:
+        event_bus.emit_weather_changed({
+            "weather_id": weather_id,
+            "name": _weather_by_id.get(weather_id, {}).get("name", weather_id),
+            "effects": _weather_by_id.get(weather_id, {}).get("effects", ""),
+            "turn": _turn_counter,
+        })
+
+func configure_map(terrain_tiles: Dictionary, supply_centers: Array, routes: Array) -> void:
+    _terrain_lookup = terrain_tiles.duplicate(true)
+    _supply_centers = supply_centers.duplicate(true)
+    _routes = routes.duplicate(true)
+    _ensure_convoy_states()
+    _recalculate_state("map_configured")
+
+func get_last_payload() -> Dictionary:
+    return _last_payload.duplicate(true)
+
+func advance_turn() -> void:
+    _turn_counter += 1
+    _maybe_rotate_weather()
+    _advance_convoys()
+    _recalculate_state("turn")
+
+func _on_data_loader_ready(payload: Dictionary) -> void:
+    var collections: Dictionary = payload.get("collections", {})
+    configure(collections.get("logistics", []), collections.get("weather", []))
+
+func _on_turn_started(_turn_number: int) -> void:
+    advance_turn()
+
+func _on_logistics_toggled(is_visible: bool) -> void:
+    _visible = is_visible
+    _recalculate_state("visibility")
+
+func _generate_default_map() -> void:
+    _terrain_lookup.clear()
+    var terrain_keys := _terrain_definitions.keys()
+    var terrain_count := terrain_keys.size()
+    for q in range(map_columns):
+        for r in range(map_rows):
+            var terrain_id := str(terrain_keys[(q + r) % terrain_count]) if terrain_count > 0 else "plains"
+            var terrain := _terrain_definitions.get(terrain_id, {"movement_cost": 1})
+            var movement := float(terrain.get("movement_cost", 1))
+            var tile_id := _tile_id(q, r)
+            _terrain_lookup[tile_id] = {
+                "q": q,
+                "r": r,
+                "terrain": terrain_id,
+                "base_movement_cost": movement,
+            }
+
+    _supply_centers = [
+        {"id": "capital", "q": 1, "r": 2, "type": "city"},
+        {"id": "forward_depot", "q": 4, "r": 1, "type": "depot"},
+        {"id": "harbor", "q": 5, "r": 3, "type": "harbor"},
+    ]
+
+func _configure_default_routes() -> void:
+    _routes = [
+        {
+            "id": "capital_ring",
+            "type": "ring",
+            "path": [
+                _tile_id(1, 2),
+                _tile_id(1, 1),
+                _tile_id(2, 1),
+                _tile_id(2, 2),
+                _tile_id(1, 3),
+                _tile_id(0, 2)
+            ]
+        },
+        {
+            "id": "forward_road",
+            "type": "road",
+            "path": [
+                _tile_id(1, 2),
+                _tile_id(2, 2),
+                _tile_id(3, 2),
+                _tile_id(4, 1)
+            ]
+        },
+        {
+            "id": "harbor_convoy",
+            "type": "convoy",
+            "path": [
+                _tile_id(4, 1),
+                _tile_id(5, 2),
+                _tile_id(5, 3)
+            ]
+        }
+    ]
+
+func _ensure_convoy_states() -> void:
+    for route in _routes:
+        if not (route is Dictionary):
+            continue
+        var route_id := route.get("id", "")
+        if route_id.is_empty():
+            continue
+        if not _convoys_by_route.has(route_id):
+            _convoys_by_route[route_id] = _new_convoy_state()
+
+func _new_convoy_state() -> Dictionary:
+    return {
+        "active": false,
+        "progress": 0.0,
+        "intercepted": false,
+        "completed": 0,
+        "spawn_timer": 0,
+        "last_speed": 0.0,
+        "last_event": "idle",
+    }
+
+func _recalculate_state(reason: String) -> void:
+    if _current_logistics_id.is_empty() or _terrain_lookup.is_empty():
+        return
+
+    var logistics_config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
+    var weather_config: Dictionary = _weather_by_id.get(_current_weather_id, {})
+
+    var flow_multiplier := _compute_flow_multiplier(logistics_config, weather_config)
+    var supply_radius := int(logistics_config.get("supply_radius", 0))
+    var supply_zones := _build_supply_payload(supply_radius, flow_multiplier, weather_config)
+    var routes_payload := _build_route_payload(flow_multiplier)
+
+    _last_payload = {
+        "reason": reason,
+        "turn": _turn_counter,
+        "visible": _visible,
+        "logistics_id": _current_logistics_id,
+        "weather_id": _current_weather_id,
+        "flow_multiplier": flow_multiplier,
+        "supply_zones": supply_zones,
+        "routes": routes_payload,
+    }
+
+    if event_bus:
+        event_bus.emit_logistics_update(_last_payload)
+
+func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_config: Dictionary) -> Array:
+    var zones: Array = []
+    var movement_modifier := float(weather_config.get("movement_modifier", 1.0))
+    for tile_id in _terrain_lookup.keys():
+        var tile: Dictionary = _terrain_lookup.get(tile_id, {})
+        var axial := Vector2i(int(tile.get("q", 0)), int(tile.get("r", 0)))
+        var distance := _distance_to_nearest_center(axial)
+        var base_movement := float(tile.get("base_movement_cost", 1.0))
+        var terrain_id := str(tile.get("terrain", "plains"))
+        var supply_level := _supply_level(distance, supply_radius)
+        var logistics_flow := _compute_tile_flow(flow_multiplier, terrain_id, distance, supply_radius)
+        zones.append({
+            "tile_id": tile_id,
+            "terrain": terrain_id,
+            "distance": distance,
+            "supply_level": supply_level,
+            "movement_cost": snapped(base_movement * movement_modifier, 0.01),
+            "logistics_flow": snapped(logistics_flow, 0.01),
+        })
+    return zones
+
+func _build_route_payload(flow_multiplier: float) -> Array:
+    var payload: Array = []
+    for route in _routes:
+        if not (route is Dictionary):
+            continue
+        var route_id := route.get("id", "")
+        if route_id.is_empty():
+            continue
+        var state: Dictionary = _convoys_by_route.get(route_id, _new_convoy_state())
+        var route_length := max(route.get("path", []).size() - 1, 1)
+        var eta := 0.0
+        if state.get("active", false) and state.get("last_speed", 0.0) > 0.0:
+            eta = max((route_length - state.get("progress", 0.0)) / state.get("last_speed", 0.01), 0.0)
+        payload.append({
+            "id": route_id,
+            "type": route.get("type", "road"),
+            "path": route.get("path", []),
+            "convoy": {
+                "active": state.get("active", false),
+                "progress": snapped(state.get("progress", 0.0), 0.01),
+                "intercepted": state.get("intercepted", false),
+                "completed": state.get("completed", 0),
+                "last_event": state.get("last_event", "idle"),
+                "eta_turns": snapped(eta, 0.01),
+            }
+        })
+    return payload
+
+func _advance_convoys() -> void:
+    var logistics_config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
+    var weather_config: Dictionary = _weather_by_id.get(_current_weather_id, {})
+    var flow_multiplier := _compute_flow_multiplier(logistics_config, weather_config)
+    var spawn_threshold := int(logistics_config.get("convoy_spawn_threshold", 4))
+
+    for route in _routes:
+        if not (route is Dictionary):
+            continue
+        var route_id := route.get("id", "")
+        if route_id.is_empty():
+            continue
+        var state: Dictionary = _convoys_by_route.get(route_id, _new_convoy_state())
+        var route_length := max(route.get("path", []).size() - 1, 1)
+        if not state.get("active", false):
+            state["spawn_timer"] = int(state.get("spawn_timer", 0)) + 1
+            if state.get("spawn_timer") >= spawn_threshold:
+                state["spawn_timer"] = 0
+                state["active"] = true
+                state["intercepted"] = false
+                state["progress"] = 0.0
+                state["last_event"] = "spawned"
+        if state.get("active", false):
+            var speed := _route_speed(route.get("type", "road"), flow_multiplier)
+            state["last_speed"] = speed
+            state["progress"] = min(state.get("progress", 0.0) + speed, route_length)
+            if not state.get("intercepted", false) and _should_intercept(route, logistics_config, flow_multiplier):
+                state["intercepted"] = true
+                state["active"] = false
+                state["last_event"] = "intercepted"
+            elif state.get("progress", 0.0) >= route_length:
+                state["completed"] = int(state.get("completed", 0)) + 1
+                state["active"] = false
+                state["last_event"] = "delivered"
+        _convoys_by_route[route_id] = state
+
+func _maybe_rotate_weather() -> void:
+    if _weather_rotation_turns <= 0:
+        return
+    if _weather_sequence.size() <= 1:
+        return
+    if _turn_counter % _weather_rotation_turns != 0:
+        return
+    var index := _weather_sequence.find(_current_weather_id)
+    if index == -1:
+        index = 0
+    index = (index + 1) % _weather_sequence.size()
+    _current_weather_id = str(_weather_sequence[index])
+    if event_bus:
+        event_bus.emit_weather_changed({
+            "weather_id": _current_weather_id,
+            "name": _weather_by_id.get(_current_weather_id, {}).get("name", _current_weather_id),
+            "turn": _turn_counter,
+            "reason": "rotation",
+        })
+
+func _route_speed(route_type: String, flow_multiplier: float) -> float:
+    var base_speed := 1.0
+    match route_type:
+        "ring":
+            base_speed = 0.5
+        "convoy":
+            base_speed = 0.8
+        _:
+            base_speed = 1.0
+    return max(base_speed * flow_multiplier, 0.0)
+
+func _compute_flow_multiplier(logistics_config: Dictionary, weather_config: Dictionary) -> float:
+    var base := float(weather_config.get("logistics_flow_modifier", 1.0))
+    var links: Dictionary = logistics_config.get("links", {})
+    if links.has("weather_modifiers"):
+        var weather_modifiers: Dictionary = links.get("weather_modifiers")
+        if weather_modifiers.has(_current_weather_id):
+            base += float(weather_modifiers.get(_current_weather_id))
+    return clamp(base, 0.2, 2.0)
+
+func _compute_tile_flow(flow_multiplier: float, terrain_id: String, distance: int, supply_radius: int) -> float:
+    var penalty := 0.0
+    match terrain_id:
+        "forest":
+            penalty = 0.15
+        "hill":
+            penalty = 0.25
+        _:
+            penalty = 0.0
+    var fringe_penalty := 0.0
+    if distance > supply_radius:
+        fringe_penalty = 0.1 * float(distance - supply_radius)
+    return clamp(flow_multiplier - penalty - fringe_penalty, 0.0, 2.0)
+
+func _should_intercept(route: Dictionary, logistics_config: Dictionary, flow_multiplier: float) -> bool:
+    var base := clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
+    var terrain_bonus := _route_terrain_bonus(route)
+    var flow_penalty := max(0.0, 1.0 - flow_multiplier)
+    var effective := clamp(base + terrain_bonus + flow_penalty, 0.0, 1.0)
+    if effective >= 1.0:
+        return true
+    return _rng.randf() < effective
+
+func _route_terrain_bonus(route: Dictionary) -> float:
+    var path: Array = route.get("path", [])
+    var bonus := 0.0
+    for tile_id in path:
+        if not _terrain_lookup.has(tile_id):
+            continue
+        var terrain_id := str(_terrain_lookup.get(tile_id, {}).get("terrain", "plains"))
+        match terrain_id:
+            "forest":
+                bonus += 0.05
+            "hill":
+                bonus += 0.08
+            _:
+                pass
+    return min(bonus, 0.5)
+
+func _distance_to_nearest_center(axial: Vector2i) -> int:
+    var min_distance := 9999
+    for center in _supply_centers:
+        if not (center is Dictionary):
+            continue
+        var q := int(center.get("q", 0))
+        var r := int(center.get("r", 0))
+        var distance := _hex_distance(axial, Vector2i(q, r))
+        if distance < min_distance:
+            min_distance = distance
+    return min_distance if min_distance != 9999 else 0
+
+func _hex_distance(a: Vector2i, b: Vector2i) -> int:
+    var dq := a.x - b.x
+    var dr := a.y - b.y
+    var ds := (-a.x - a.y) - (-b.x - b.y)
+    return int(max(abs(dq), max(abs(dr), abs(ds))))
+
+func _supply_level(distance: int, radius: int) -> String:
+    if distance <= radius:
+        return "core"
+    if distance <= radius + 1:
+        return "fringe"
+    return "isolated"
+
+func _tile_id(q: int, r: int) -> String:
+    return "%d,%d" % [q, r]
+
+func _update_weather_rotation_turns() -> void:
+    _weather_rotation_turns = 0
+    var config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
+    if config.has("weather_rotation_turns"):
+        _weather_rotation_turns = int(config.get("weather_rotation_turns"))
+

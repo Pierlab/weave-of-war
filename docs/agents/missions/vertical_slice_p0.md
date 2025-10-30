@@ -56,3 +56,5 @@ syntax required by Godot 4.5.1 so the editor no longer reports parse errors on l
 Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar files for future agents.
 - Semaine 0–1 complétée : boucle commandement/Élan jouable (DoctrineSystem + ElanSystem), HUD avec sélection doctrine/ordres,
   inertie affichée, feedback audio et tests gdUnit pour sécuriser la logique de verrouillage et de dépense d’Élan.
+- Semaine 2–3 complétée : socle logistique hybride opérationnel (`LogisticsSystem`, météo tournante `sunny/rain/mist`, anneaux
+  d'approvisionnement, routes/convoys, tests gdUnit dédiés) prêt à alimenter HUD et télémétrie.
