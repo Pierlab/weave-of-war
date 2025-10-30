@@ -1,4 +1,5 @@
 extends Node
+@warning_ignore("class_name_hides_autoload")
 class_name DataLoader
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
@@ -16,11 +17,11 @@ static var _instance: DataLoader
 
 var _collections: Dictionary = {}
 var _indexed: Dictionary = {}
-var _is_ready := false
+var _is_ready: bool = false
 
 func _ready() -> void:
     _instance = self
-    var result := load_all()
+    var result: Dictionary = load_all()
     call_deferred("_notify_event_bus", result)
 
 static func get_instance() -> DataLoader:
@@ -36,7 +37,7 @@ func load_all(emit_signals := false) -> Dictionary:
 
     for key in DATA_FILES.keys():
         var path: String = DATA_FILES[key]
-        var load_result := _load_json_array(path, key)
+        var load_result: Dictionary = _load_json_array(path, key)
         if load_result.success:
             _collections[key] = load_result.data
             _indexed[key] = _index_by_id(load_result.data, key)
@@ -47,7 +48,7 @@ func load_all(emit_signals := false) -> Dictionary:
 
     _is_ready = errors.is_empty()
 
-    var summary := {
+    var summary: Dictionary = {
         "collections": _collections.duplicate(true),
         "errors": errors,
         "ready": _is_ready,
@@ -108,15 +109,15 @@ func get_summary() -> Dictionary:
     }
 
 func _notify_event_bus(result: Dictionary) -> void:
-    var event_bus := EVENT_BUS.get_instance()
+    var event_bus: EventBus = EVENT_BUS.get_instance()
     if event_bus == null:
         return
 
     if result.get("errors", []).is_empty():
         var collections: Dictionary = result.get("collections", {})
-        var counts := {}
+        var counts: Dictionary = {}
         for key in collections.keys():
-            var value = collections.get(key)
+            var value: Variant = collections.get(key)
             if value is Array:
                 counts[key] = value.size()
             else:
@@ -142,7 +143,7 @@ func _load_json_array(path: String, label: String) -> Dictionary:
             }
         }
 
-    var file := FileAccess.open(path, FileAccess.READ)
+    var file: FileAccess = FileAccess.open(path, FileAccess.READ)
     if file == null:
         return {
             "success": false,
@@ -154,8 +155,8 @@ func _load_json_array(path: String, label: String) -> Dictionary:
             }
         }
 
-    var content := file.get_as_text()
-    var parsed := JSON.parse_string(content)
+    var content: String = file.get_as_text()
+    var parsed: Variant = JSON.parse_string(content)
     if parsed == null or typeof(parsed) != TYPE_ARRAY:
         return {
             "success": false,
@@ -172,7 +173,7 @@ func _load_json_array(path: String, label: String) -> Dictionary:
     }
 
 func _index_by_id(entries: Array, label: String) -> Dictionary:
-    var indexed := {}
+    var indexed: Dictionary = {}
     for entry in entries:
         if entry is Dictionary and entry.has("id"):
             indexed[entry.get("id")] = entry

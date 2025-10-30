@@ -41,14 +41,14 @@ func _on_next_turn_requested() -> void:
     turn_manager.advance_turn()
 
 func _on_logistics_toggled(should_show: bool) -> void:
-    var state := "visible" if should_show else "hidden"
+    var state: String = "visible" if should_show else "hidden"
     print("Logistics overlay is now %s" % state)
 
 func _on_spawn_unit_requested() -> void:
     print("Spawn unit requested (placeholder)")
 
 func _on_data_loader_ready(payload: Dictionary) -> void:
-    var counts := payload.get("counts", {})
+    var counts: Dictionary = payload.get("counts", {})
     print("DataLoader ready → doctrines=%d, orders=%d, units=%d" % [
         counts.get("doctrines", 0),
         counts.get("orders", 0),
@@ -56,5 +56,5 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
     ])
 
 func _on_data_loader_error(context: Dictionary) -> void:
-    var errors := context.get("errors", [])
+    var errors: Array = context.get("errors", [])
     push_warning("DataLoader reported %d error(s): %s" % [errors.size(), errors])

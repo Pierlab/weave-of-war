@@ -1,4 +1,5 @@
 extends Node
+@warning_ignore("class_name_hides_autoload")
 class_name Telemetry
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")

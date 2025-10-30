@@ -62,3 +62,5 @@ All notable changes to this project will be documented in this file.
 - Updated HUD and game manager scripts to use Godot 4's Python-style conditional expressions, removing project load parse errors.
 - Resolved new Godot 4.5 warnings by renaming EventBus preload constants, repairing logistics toggle handlers, and aligning HUD
   and debug overlay parenting so the UI buttons are found at runtime.
+- Silenced autoload/class name conflicts and added explicit type hints so Godot 4.5 no longer aborts on Variant inference errors
+  when loading autoloads and the HUD scene.
