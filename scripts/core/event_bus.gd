@@ -1,4 +1,5 @@
 extends Node
+@warning_ignore("class_name_hides_autoload")
 class_name EventBus
 
 signal turn_started(turn_number: int)
@@ -25,7 +26,7 @@ signal order_execution_requested(order_id: String)
 signal order_execution_failed(payload: Dictionary)
 
 static var _instance: EventBus
-var _logistics_visible := false
+var _logistics_visible: bool = false
 
 func _ready() -> void:
     _instance = self

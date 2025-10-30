@@ -20,7 +20,7 @@ var _doctrine_lookup: Dictionary = {}
 var _doctrine_names: Dictionary = {}
 var _order_lookup: Dictionary = {}
 var _order_costs: Dictionary = {}
-var _elan_state := {
+var _elan_state: Dictionary = {
     "current": 0.0,
     "max": 0.0,
     "income": 0.0,
@@ -83,13 +83,13 @@ func _populate_doctrines(entries: Array) -> void:
     doctrine_selector.clear()
     _doctrine_lookup.clear()
     _doctrine_names.clear()
-    var index := 0
+    var index: int = 0
     for entry in entries:
         if entry is Dictionary:
-            var id := str(entry.get("id", ""))
+            var id: String = str(entry.get("id", ""))
             if id.is_empty():
                 continue
-            var name := entry.get("name", id)
+            var name: String = str(entry.get("name", id))
             doctrine_selector.add_item(name)
             doctrine_selector.set_item_metadata(index, id)
             _doctrine_lookup[id] = index
@@ -102,7 +102,7 @@ func _populate_orders(entries: Array) -> void:
     _order_costs.clear()
     for entry in entries:
         if entry is Dictionary:
-            var id := str(entry.get("id", ""))
+            var id: String = str(entry.get("id", ""))
             if id.is_empty():
                 continue
             _order_lookup[id] = entry
@@ -113,14 +113,14 @@ func _refresh_order_selector(allowed_entries: Array) -> void:
     if order_selector == null:
         return
     order_selector.clear()
-    var index := 0
+    var index: int = 0
     for entry in allowed_entries:
         if entry is Dictionary:
-            var id := str(entry.get("id", ""))
+            var id: String = str(entry.get("id", ""))
             if id.is_empty():
                 continue
-            var name := entry.get("name", id)
-            var cost := float(entry.get("base_elan_cost", _order_costs.get(id, 0.0)))
+            var name: String = str(entry.get("name", id))
+            var cost: float = float(entry.get("base_elan_cost", _order_costs.get(id, 0.0)))
             _order_costs[id] = cost
             order_selector.add_item("%s (%.1f Élan)" % [name, cost])
             order_selector.set_item_metadata(index, id)
@@ -147,7 +147,7 @@ func _on_logistics_toggled(should_show: bool) -> void:
 func _on_doctrine_selector_item_selected(index: int) -> void:
     if doctrine_selector == null or event_bus == null:
         return
-    var metadata = doctrine_selector.get_item_metadata(index)
+    var metadata: Variant = doctrine_selector.get_item_metadata(index)
     if typeof(metadata) == TYPE_STRING:
         event_bus.request_doctrine_change(metadata)
 
@@ -157,9 +157,9 @@ func _on_order_selector_item_selected(_index: int) -> void:
 func _refresh_order_button_state() -> void:
     if execute_order_button == null:
         return
-    var order_id := _get_selected_order_id()
-    var cost := float(_order_costs.get(order_id, 0.0))
-    var can_execute := not order_id.is_empty() and _elan_state.get("current", 0.0) >= cost and cost >= 0.0
+    var order_id: String = _get_selected_order_id()
+    var cost: float = float(_order_costs.get(order_id, 0.0))
+    var can_execute: bool = not order_id.is_empty() and _elan_state.get("current", 0.0) >= cost and cost >= 0.0
     execute_order_button.disabled = not can_execute
     var label_text := "Exécuter l'ordre"
     if cost > 0.0:
@@ -169,7 +169,7 @@ func _refresh_order_button_state() -> void:
 func _on_execute_order_pressed() -> void:
     if event_bus == null:
         return
-    var order_id := _get_selected_order_id()
+    var order_id: String = _get_selected_order_id()
     if order_id.is_empty():
         _set_feedback("Choisissez un ordre à exécuter.", false)
         _play_feedback(200.0)
@@ -182,13 +182,13 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
     _populate_orders(collections.get("orders", []))
 
 func _on_doctrine_selected(payload: Dictionary) -> void:
-    var doctrine_id := payload.get("id", "")
+    var doctrine_id: String = payload.get("id", "")
     _update_doctrine_selector_state(doctrine_id)
-    var name := _doctrine_names.get(doctrine_id, payload.get("name", doctrine_id))
-    var inertia_remaining := int(payload.get("inertia_remaining", 0))
+    var name: String = _doctrine_names.get(doctrine_id, payload.get("name", doctrine_id))
+    var inertia_remaining: int = int(payload.get("inertia_remaining", 0))
     if doctrine_status_label:
         doctrine_status_label.text = "Doctrine : %s — Inertie %d tour(s)" % [name, inertia_remaining]
-    var allowed := payload.get("allowed_orders", [])
+    var allowed: Array = payload.get("allowed_orders", [])
     _refresh_order_selector(allowed)
     _set_feedback("Doctrine active : %s" % name, true)
     _play_feedback(660.0)
@@ -201,8 +201,8 @@ func _on_elan_updated(payload: Dictionary) -> void:
         "upkeep": float(payload.get("upkeep", 0.0)),
     }
     if elan_label:
-        var income := _elan_state.get("income", 0.0)
-        var upkeep := _elan_state.get("upkeep", 0.0)
+        var income: float = _elan_state.get("income", 0.0)
+        var upkeep: float = _elan_state.get("upkeep", 0.0)
         elan_label.text = "Élan : %.1f / %.1f (↗ %.1f | ↘ %.1f)" % [
             _elan_state.get("current", 0.0),
             max(_elan_state.get("max", 0.0), 0.0),
@@ -212,19 +212,19 @@ func _on_elan_updated(payload: Dictionary) -> void:
     _refresh_order_button_state()
 
 func _on_order_issued(payload: Dictionary) -> void:
-    var name := payload.get("order_name", payload.get("order_id", ""))
-    var remaining := float(payload.get("remaining", 0.0))
+    var name: String = payload.get("order_name", payload.get("order_id", ""))
+    var remaining: float = float(payload.get("remaining", 0.0))
     _set_feedback("Ordre '%s' exécuté (%.1f Élan restant)" % [name, remaining], true)
     _play_feedback(520.0)
 
 func _on_order_execution_failed(payload: Dictionary) -> void:
-    var reason := str(payload.get("reason", "unknown"))
+    var reason: String = str(payload.get("reason", "unknown"))
     match reason:
         "doctrine_locked":
             _set_feedback("Doctrine verrouillée par l'inertie (%d tour(s))." % int(payload.get("inertia_remaining", 0)), false)
         "insufficient_elan":
-            var needed := float(payload.get("required", 0.0))
-            var available := float(payload.get("available", 0.0))
+            var needed: float = float(payload.get("required", 0.0))
+            var available: float = float(payload.get("available", 0.0))
             _set_feedback("Élan insuffisant : %.1f requis, %.1f disponible." % [needed, available], false)
         _:
             _set_feedback("Ordre indisponible.", false)
@@ -243,10 +243,10 @@ func _update_doctrine_selector_state(selected_id := "") -> void:
 func _get_selected_order_id() -> String:
     if order_selector == null or order_selector.get_item_count() == 0:
         return ""
-    var index := order_selector.get_selected()
+    var index: int = order_selector.get_selected()
     if index < 0:
         return ""
-    var metadata = order_selector.get_item_metadata(index)
+    var metadata: Variant = order_selector.get_item_metadata(index)
     if typeof(metadata) == TYPE_STRING:
         return metadata
     return ""
@@ -255,25 +255,25 @@ func _set_feedback(message: String, positive: bool) -> void:
     if feedback_label == null:
         return
     feedback_label.text = message
-    var color := Color(0.7, 0.9, 1.0) if positive else Color(1.0, 0.65, 0.5)
+    var color: Color = Color(0.7, 0.9, 1.0) if positive else Color(1.0, 0.65, 0.5)
     feedback_label.add_theme_color_override("font_color", color)
 
 func _play_feedback(pitch_hz: float) -> void:
     if feedback_player == null:
         return
     if feedback_player.stream == null or not (feedback_player.stream is AudioStreamGenerator):
-        var generator := AudioStreamGenerator.new()
+        var generator: AudioStreamGenerator = AudioStreamGenerator.new()
         generator.mix_rate = 44100
         generator.buffer_length = 0.2
         feedback_player.stream = generator
-    var playback := feedback_player.get_stream_playback()
+    var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
         playback.clear_buffer()
         var generator: AudioStreamGenerator = feedback_player.stream
-        var frame_count := int(generator.mix_rate * 0.12)
+        var frame_count: int = int(generator.mix_rate * 0.12)
         for i in frame_count:
-            var t := float(i) / generator.mix_rate
-            var envelope := clamp(1.0 - t * 8.0, 0.0, 1.0)
-            var sample := sin(TAU * pitch_hz * t) * 0.2 * envelope
+            var t: float = float(i) / generator.mix_rate
+            var envelope: float = clamp(1.0 - t * 8.0, 0.0, 1.0)
+            var sample: float = sin(TAU * pitch_hz * t) * 0.2 * envelope
             playback.push_frame(Vector2(sample, sample))
         feedback_player.play()

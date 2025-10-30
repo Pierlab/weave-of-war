@@ -103,6 +103,11 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   `scripts/ui/` for reference on the preferred preload pattern.
 - Godot 4.5 removed the `condition ? a : b` ternary helper. Replace those expressions with the Python-style
   `a if condition else b` form to avoid parse errors when opening the project or running the headless build script.
+- Treating warnings as errors is intentional. When autoload singletons also declare a `class_name`, add
+  `@warning_ignore("class_name_hides_autoload")` (see `scripts/core/event_bus.gd`) so Godot 4.5+ loads without aborting.
+- When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
+  `:=` inference. Godot 4.5 infers such values as `Variant`, which now triggers blocking parse errors. Inspect
+  `scripts/core/data_loader.gd` and `scripts/ui/hud_manager.gd` for the preferred explicit typing pattern.
 
 ## Maintaining context for agents
 - After each iteration, run `python scripts/generate_context_snapshot.py` to refresh [`context_snapshot.md`](context_snapshot.md).
