@@ -2,10 +2,14 @@ extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
+const DOCTRINE_SYSTEM := preload("res://scripts/systems/doctrine_system.gd")
+const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
 
 var event_bus: EventBus
 var turn_manager: TurnManager
 var data_loader: DataLoader
+var doctrine_system: DoctrineSystem
+var elan_system: ElanSystem
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -14,6 +18,12 @@ func _ready() -> void:
         event_bus = EVENT_BUS.get_instance()
 
     data_loader = DATA_LOADER.get_instance()
+
+    doctrine_system = DOCTRINE_SYSTEM.new()
+    add_child(doctrine_system)
+
+    elan_system = ELAN_SYSTEM.new()
+    add_child(elan_system)
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)

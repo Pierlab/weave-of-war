@@ -12,11 +12,15 @@ signal doctrine_selected(payload: Dictionary)
 signal order_issued(payload: Dictionary)
 signal assistant_order_packet(payload: Dictionary)
 signal elan_spent(payload: Dictionary)
+signal elan_updated(payload: Dictionary)
 signal logistics_update(payload: Dictionary)
 signal combat_resolved(payload: Dictionary)
 signal espionage_ping(payload: Dictionary)
 signal weather_changed(payload: Dictionary)
 signal competence_reallocated(payload: Dictionary)
+signal doctrine_change_requested(doctrine_id: String)
+signal order_execution_requested(order_id: String)
+signal order_execution_failed(payload: Dictionary)
 
 static var _instance: EventBus
 var _logistics_visible := false
@@ -45,6 +49,9 @@ func emit_assistant_order_packet(payload: Dictionary) -> void:
 
 func emit_elan_spent(payload: Dictionary) -> void:
     elan_spent.emit(payload)
+
+func emit_elan_updated(payload: Dictionary) -> void:
+    elan_updated.emit(payload)
 
 func emit_logistics_update(payload: Dictionary) -> void:
     logistics_update.emit(payload)
@@ -76,3 +83,12 @@ func toggle_logistics() -> void:
 
 func request_spawn_unit() -> void:
     spawn_unit_requested.emit()
+
+func request_doctrine_change(doctrine_id: String) -> void:
+    doctrine_change_requested.emit(doctrine_id)
+
+func request_order_execution(order_id: String) -> void:
+    order_execution_requested.emit(order_id)
+
+func emit_order_execution_failed(payload: Dictionary) -> void:
+    order_execution_failed.emit(payload)

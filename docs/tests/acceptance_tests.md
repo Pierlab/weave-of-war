@@ -40,4 +40,9 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Then** the console prints a `DataLoader ready` summary and telemetry buffers contain an entry named `data_loader_ready`
   with doctrine/order/unit counts greater than zero
 
+### AT-07: Boucle commandement/Élan interactif
+- **Given** la scène principale est en cours d'exécution
+- **When** je sélectionne une doctrine différente puis exécute un ordre autorisé via la HUD
+- **Then** la HUD met à jour l'inertie, joue un signal sonore court, ajuste la jauge d'Élan et le journal console confirme l'émission de l'ordre
+
 All tests must pass without Godot warnings or errors in the console.

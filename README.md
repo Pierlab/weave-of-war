@@ -28,6 +28,14 @@ This repository now bundles the rituals and automation needed for agent-driven v
 The autoloads initialise automatically when the project starts (and during headless test runs). Systems being developed for
 Checklist C should request dependencies from these singletons instead of reading JSON files or crafting their own signal buses.
 
+## Command & Élan loop (Semaine 0–1)
+- The HUD now exposes a doctrine selector tied to the `DoctrineSystem`, displays inertia locks, and lists the orders authorised
+  by the active doctrine.
+- Order execution routes through the Élan system, enforcing Élan caps, doctrine-based restrictions, and inertia impacts before
+  emitting `order_issued` telemetry.
+- A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
+  orders change.
+
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
 the `.godot/` metadata folder to avoid stale parser caches before running the commands below.

@@ -1,10 +1,10 @@
 # Context Snapshot
 
-- Generated on: 2025-10-30T10:26:07Z
+- Generated on: 2025-10-30T10:49:52Z
 - Branch: work
-- Commit when generated: 6527b2beb4a42d91ea1e1c0b326a63b970b806ef
-- Subject: Merge pull request #17 from Pierlab/codex/update-checklist.md-with-completed-item
-- Working tree dirty: True
+- Commit when generated: fe571c5766864066e4941f759468eab6598d3128
+- Subject: Implement command and Élan loop for Semaine 0-1
+- Working tree dirty: False
 - Note: commit hash may differ once this file is included in a new commit.
 
 ## Mission briefs
@@ -46,6 +46,7 @@
 ## Automated tests
 - tests/gdunit/assertions.gd
 - tests/gdunit/test_case.gd
+- tests/gdunit/test_command_elan_loop.gd
 - tests/gdunit/test_data_integrity.gd
 - tests/gdunit/test_smoke.gd
 
