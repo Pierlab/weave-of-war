@@ -20,6 +20,8 @@
   coché la Checklist A du vertical slice après avoir relié le document aux artefacts clés.
 - Séquencé la feuille de route vertical slice sur Semaine 0–6 dans `docs/agents/missions/vertical_slice_p0.md`, en reliant
   chaque jalon aux systèmes P0 et aux artefacts de télémétrie/tests à préparer.
+- Rédigé le TDD d'architecture data-driven (`docs/design/tdd_architecture_data.md`) couvrant autoloads Godot, bus d'événements,
+  pipeline JSON et interactions avec l'IA assistante, puis coché la première action de la Checklist B.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
@@ -27,3 +29,5 @@
 - Provision the `godot` executable in local dev containers so automated commands can run outside CI.
 - Re-run the full headless command suite once Godot 4.5.1 is available locally to confirm there are no lingering parse errors.
 - Confirm the fixed HUD/debug overlay parenting removes the missing node warnings during the next headless build run.
+- Implémenter les autoloads `DataLoader`, `Telemetry` et `AssistantAI`, ajouter les schémas JSON et brancher les systèmes selon
+  le plan du TDD.
