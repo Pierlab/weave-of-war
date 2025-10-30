@@ -125,6 +125,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   costs, and supply interactions aligned with gameplay scripts.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
   fantasy, pillars, loops, and risks for the vertical slice.
+- Maintain shared vocabulary in the living glossary ([`docs/glossary.md`](docs/glossary.md)) so mission briefs, telemetry,
+  and data schemas stay consistent as systems evolve.
 - Align production pacing with the Semaine 0–6 milestone plan documented in
   [`docs/agents/missions/vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md#delivery-timeline-semaine-0%E2%80%936)
   so every iteration advances a tracked objective.
