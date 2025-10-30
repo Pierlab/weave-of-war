@@ -43,6 +43,7 @@ All notable changes to this project will be documented in this file.
   Godot binary.
 - Added a dedicated `logistics_break` telemetry signal with gdUnit coverage, README/TDD documentation, and a KPI dashboard
   starter in `docs/telemetry/dashboard_plan.md` to complete Checklist D instrumentation.
+- Logged the EventBus/Telemetry autoload synchronisation strategy in [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](docs/ADR_0002_event_bus_and_telemetry_autoloads.md) and wired the mission/checklist updates that close the ADR action item.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.

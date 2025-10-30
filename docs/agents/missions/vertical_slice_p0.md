@@ -31,7 +31,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [x] Update Godot scenes/scripts incrementally per milestone, ensuring tests and telemetry hooks keep pace. (Doctrine/Élan, Logistique, Combat/Espionnage et Compétence/Formations sont en place avec couverture gdUnit.)
 - [ ] Run headless lint/build/test commands after each milestone and archive logs/screenshots as needed. (Bloqué tant que l'exécutable Godot 4.5.1 n'est pas provisionné localement — voir `context_update.md`.)
 - [x] Refresh `context_update.md`, `CHANGELOG.md`, and `context_snapshot.md` after every significant increment. (Docs synchronisés après les jalons Semaine 0–6.)
-- [ ] Capture risks, open questions, and decision records in mission follow-ups or ADRs.
+- [x] Capture risks, open questions, and decision records in mission follow-ups or ADRs. (ADR ajouté : [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](../../ADR_0002_event_bus_and_telemetry_autoloads.md).)
 
 ## Deliverables
 - Branch name & PR link documenting the latest progress.
