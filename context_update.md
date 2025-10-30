@@ -37,6 +37,7 @@
 - Aligné le brief `docs/agents/missions/vertical_slice_p0.md` avec l'état réel : jalons Semaine 0–6 cochés, commandes headless notées comme bloquées en attendant l'exécutable Godot local.
 - Consolidé la télémétrie Checklist D : nouveau signal `logistics_break`, Telemetry/test gdUnit mis à jour, note KPI & dashboards dans `docs/telemetry/dashboard_plan.md`, et checklist cochée.
 - Documenté la stratégie de synchronisation EventBus/Telemetry/DataLoader dans un ADR (`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`) et coché l'action dédiée dans les checklists/mission.
+- Maintenu le glossaire vertical slice en ajoutant [`docs/glossary.md`](docs/glossary.md), en le reliant au README et en cochant la dernière action de la Checklist D.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
