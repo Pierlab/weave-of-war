@@ -32,6 +32,8 @@
 - Finalisé les systèmes Semaine 4–5 : `CombatSystem` calcule les trois piliers via doctrines/terrain/météo/espionnage, `EspionageSystem` maintient le brouillard, produit des pings probabilistes avec intentions révélées, et la télémétrie capture `combat_resolved`/`espionage_ping` avec tests `test_combat_and_espionage_systems.gd`.
 - Bouclé la Semaine 6 : `TurnManager` gère désormais un budget de compétences par tour, consomme automatiquement des points lors des ruptures logistiques, et `CombatSystem` combine formation active + allocations pour moduler les piliers avec publication `formation_changed`.
 - Livré le catalogue `data/formations.json`, la couverture gdUnit (`test_competence_and_formations.gd`) et l'enrichissement des payloads `logistics_update`/`Telemetry` afin que la boucle compétence/formation soit entièrement instrumentée.
+- Vérifié dans l'environnement local que tous les fichiers `data/*.json` se parsant sans erreur via un script Python pendant que
+  l'exécutable Godot est provisionné pour les commandes headless obligatoires.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.

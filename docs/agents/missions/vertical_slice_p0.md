@@ -66,3 +66,5 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
 - Préparation autoload validée : `DataLoader` reporte désormais le signal `data_loader_ready` après initialisation via
   `call_deferred`, télémétrie et `AssistantAI` s’y connectent automatiquement, et le test `tests/gdunit/test_autoload_preparation.gd`
   capture la preuve.
+- Vérification locale actuelle : les jeux de données sous `data/` sont parsés via un script Python partagé dans le README,
+  tandis que l'exécutable Godot reste à provisionner dans le conteneur pour relancer les commandes headless.
