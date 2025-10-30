@@ -2,6 +2,21 @@
   {
     "id": "force",
     "name": "Force",
-    "description": "Direct, overwhelming pressure on the enemy front."
+    "description": "Direct, overwhelming pressure on the enemy front.",
+    "tags": ["offense", "momentum"],
+    "inertia_lock_turns": 2,
+    "elan_upkeep": 1,
+    "elan_spend_modifiers": {
+      "assault": -1,
+      "forced_march": 0
+    },
+    "logistics_requirements": {
+      "minimum_supply_state": "stable",
+      "supply_ring_bonus": 1
+    },
+    "effects": {
+      "combat_pillar_focus": "impulse",
+      "intel_visibility_modifier": -0.1
+    }
   }
 ]

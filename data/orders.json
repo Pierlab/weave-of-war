@@ -2,6 +2,17 @@
   {
     "id": "advance",
     "name": "Advance",
-    "description": "Push forward cautiously to test the enemy line."
+    "description": "Push forward cautiously to test the enemy line.",
+    "base_elan_cost": 1,
+    "inertia_impact": 1,
+    "allowed_doctrines": ["force", "vitesse", "equilibre"],
+    "logistics_demand": {
+      "minimum_supply_state": "stable",
+      "convoy_usage": "optional"
+    },
+    "resolution_effects": {
+      "position_bias": 0.1,
+      "intel_reveal": "partial"
+    }
   }
 ]

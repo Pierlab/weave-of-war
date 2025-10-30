@@ -2,6 +2,21 @@
   {
     "id": "infantry",
     "name": "Infantry",
-    "role": "Line troops capable of holding ground."
+    "role": "Line troops capable of holding ground.",
+    "unit_class": "line",
+    "competence_synergy": {
+      "tactics": 2,
+      "strategy": 1,
+      "logistics": 1
+    },
+    "elan_generation": {
+      "base": 1,
+      "on_hold": 0.5
+    },
+    "logistics_load": {
+      "supply_consumption": 1,
+      "movement_profile": "foot"
+    },
+    "default_formations": ["shield_wall", "advance_column"]
   }
 ]

@@ -49,6 +49,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - Consult the data-driven architecture TDD in
   [`docs/design/tdd_architecture_data.md`](docs/design/tdd_architecture_data.md) when wiring systems to the event bus, data
   loader, or assistant AI interpreter.
+- Review the canonical JSON schemas in `data/` for doctrines, orders, units, weather, and logistics to keep inertia locks, Élan
+  costs, and supply interactions aligned with gameplay scripts.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
   fantasy, pillars, loops, and risks for the vertical slice.
 - Align production pacing with the Semaine 0–6 milestone plan documented in
