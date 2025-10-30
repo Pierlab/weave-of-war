@@ -17,6 +17,73 @@
       "supply_consumption": 1,
       "movement_profile": "foot"
     },
-    "default_formations": ["shield_wall", "advance_column"]
+    "default_formations": ["shield_wall", "advance_column"],
+    "combat_profile": {
+      "position": 1.1,
+      "impulse": 0.9,
+      "information": 0.6
+    },
+    "recon_profile": {
+      "detection": 0.3,
+      "counter_intel": 0.2
+    }
+  },
+  {
+    "id": "cavalry",
+    "name": "Cavalry",
+    "role": "Fast strike forces that exploit breakthroughs.",
+    "unit_class": "mobile",
+    "competence_synergy": {
+      "tactics": 3,
+      "strategy": 1,
+      "logistics": 2
+    },
+    "elan_generation": {
+      "base": 1.5,
+      "on_hold": 0.25
+    },
+    "logistics_load": {
+      "supply_consumption": 2,
+      "movement_profile": "mounted"
+    },
+    "default_formations": ["wedge", "screen"],
+    "combat_profile": {
+      "position": 0.9,
+      "impulse": 1.4,
+      "information": 0.7
+    },
+    "recon_profile": {
+      "detection": 0.45,
+      "counter_intel": 0.25
+    }
+  },
+  {
+    "id": "scout",
+    "name": "Scouts",
+    "role": "Screening detachments tasked with gathering intel.",
+    "unit_class": "support",
+    "competence_synergy": {
+      "tactics": 1,
+      "strategy": 2,
+      "logistics": 2
+    },
+    "elan_generation": {
+      "base": 0.5,
+      "on_hold": 0.75
+    },
+    "logistics_load": {
+      "supply_consumption": 0.5,
+      "movement_profile": "light"
+    },
+    "default_formations": ["skirmish", "observation"],
+    "combat_profile": {
+      "position": 0.7,
+      "impulse": 0.6,
+      "information": 1.4
+    },
+    "recon_profile": {
+      "detection": 0.65,
+      "counter_intel": 0.5
+    }
   }
 ]

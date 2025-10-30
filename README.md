@@ -44,6 +44,14 @@ Checklist C should request dependencies from these singletons instead of reading
 - Terrain defaults derived from `TerrainData` are combined with supply-center distance calculations to label tiles as `core`,
   `fringe`, or `isolated`, ensuring movement costs and convoy interception odds reflect both geography and climate.
 
+## Combat pillars & espionage intelligence (Semaine 4–5)
+- `CombatSystem` now resolves Manoeuvre/Feu/Moral contests by combining unit combat profiles, doctrine bonuses, terrain and
+  weather multipliers, and the latest espionage confidence. Each resolution emits a `combat_resolved` payload for telemetry and
+  upcoming HUD combat panels.
+- `EspionageSystem` maintains fog of war at the tile level, ingests logistics payloads to boost visibility, and fires
+  probabilistic pings that can reveal enemy intentions via `espionage_ping`. The dedicated gdUnit coverage in
+  `tests/gdunit/test_combat_and_espionage_systems.gd` locks behaviour under sunny vs. misty weather noise.
+
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
 the `.godot/` metadata folder to avoid stale parser caches before running the commands below.

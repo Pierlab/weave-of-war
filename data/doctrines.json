@@ -16,7 +16,37 @@
     },
     "effects": {
       "combat_pillar_focus": "impulse",
+      "combat_bonus": {
+        "impulse": 0.35,
+        "position": 0.05,
+        "information": -0.05
+      },
       "intel_visibility_modifier": -0.1
+    }
+  },
+  {
+    "id": "ruse",
+    "name": "Ruse",
+    "description": "Mask movements, manipulate intel, and punish over-extension.",
+    "tags": ["deception", "information"],
+    "inertia_lock_turns": 1,
+    "elan_upkeep": 0,
+    "elan_spend_modifiers": {
+      "assault": 0,
+      "forced_march": -1
+    },
+    "logistics_requirements": {
+      "minimum_supply_state": "flexible",
+      "supply_ring_bonus": 0
+    },
+    "effects": {
+      "combat_pillar_focus": "information",
+      "combat_bonus": {
+        "impulse": -0.05,
+        "position": 0.1,
+        "information": 0.4
+      },
+      "intel_visibility_modifier": 0.25
     }
   }
 ]

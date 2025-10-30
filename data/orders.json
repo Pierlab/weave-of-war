@@ -11,8 +11,70 @@
       "convoy_usage": "optional"
     },
     "resolution_effects": {
-      "position_bias": 0.1,
+      "position_bias": 0.15,
       "intel_reveal": "partial"
+    },
+    "intention": "offense",
+    "pillar_weights": {
+      "position": 0.35,
+      "impulse": 0.6,
+      "information": 0.25
+    },
+    "intel_profile": {
+      "signal_strength": 0.65,
+      "counter_intel": 0.1
+    }
+  },
+  {
+    "id": "fortify",
+    "name": "Fortify",
+    "description": "Dig in, reinforce, and prepare to absorb an assault.",
+    "base_elan_cost": 2,
+    "inertia_impact": 2,
+    "allowed_doctrines": ["force", "equilibre"],
+    "logistics_demand": {
+      "minimum_supply_state": "stable",
+      "convoy_usage": "required"
+    },
+    "resolution_effects": {
+      "position_bias": 0.4,
+      "intel_reveal": "limited"
+    },
+    "intention": "defense",
+    "pillar_weights": {
+      "position": 0.75,
+      "impulse": 0.3,
+      "information": 0.35
+    },
+    "intel_profile": {
+      "signal_strength": 0.45,
+      "counter_intel": 0.35
+    }
+  },
+  {
+    "id": "feint",
+    "name": "Feint",
+    "description": "Stage a misleading thrust to draw defenders out of position.",
+    "base_elan_cost": 1,
+    "inertia_impact": 1,
+    "allowed_doctrines": ["vitesse", "equilibre"],
+    "logistics_demand": {
+      "minimum_supply_state": "flexible",
+      "convoy_usage": "optional"
+    },
+    "resolution_effects": {
+      "position_bias": -0.1,
+      "intel_reveal": "misleading"
+    },
+    "intention": "deception",
+    "pillar_weights": {
+      "position": 0.2,
+      "impulse": 0.35,
+      "information": 0.55
+    },
+    "intel_profile": {
+      "signal_strength": 0.3,
+      "counter_intel": 0.55
     }
   }
 ]

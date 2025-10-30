@@ -58,3 +58,6 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
   inertie affichée, feedback audio et tests gdUnit pour sécuriser la logique de verrouillage et de dépense d’Élan.
 - Semaine 2–3 complétée : socle logistique hybride opérationnel (`LogisticsSystem`, météo tournante `sunny/rain/mist`, anneaux
   d'approvisionnement, routes/convoys, tests gdUnit dédiés) prêt à alimenter HUD et télémétrie.
+- Semaine 4–5 complétée : résolution Combat 3 Piliers alimentée par doctrines/météo/espionnage (`CombatSystem`), brouillard et
+  pings probabilistes opérationnels (`EspionageSystem`), télémétrie `combat_resolved`/`espionage_ping` vérifiée via
+  `tests/gdunit/test_combat_and_espionage_systems.gd`.

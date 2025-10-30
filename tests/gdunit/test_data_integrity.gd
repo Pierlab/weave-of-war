@@ -2,6 +2,8 @@ extends GdUnitLiteTestCase
 
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
+const COMBAT_PILLARS := ["position", "impulse", "information"]
+
 func test_doctrines_json_schema() -> void:
     var doctrines := _load_json_array("res://data/doctrines.json", "doctrines")
     asserts.is_true(doctrines.size() > 0, "doctrines should contain at least one entry")
@@ -28,6 +30,14 @@ func test_doctrines_json_schema() -> void:
         _assert_dictionary(entry.get("elan_spend_modifiers"), context, "elan_spend_modifiers")
         _assert_dictionary(entry.get("logistics_requirements"), context, "logistics_requirements")
         _assert_dictionary(entry.get("effects"), context, "effects")
+        var effects: Dictionary = entry.get("effects")
+        if effects is Dictionary:
+            _assert_string(effects.get("combat_pillar_focus"), context + ".effects", "combat_pillar_focus")
+            var combat_bonus := effects.get("combat_bonus")
+            _assert_dictionary(combat_bonus, context + ".effects", "combat_bonus")
+            if combat_bonus is Dictionary:
+                for pillar in COMBAT_PILLARS:
+                    _assert_number(combat_bonus.get(pillar), context + ".effects.combat_bonus", pillar)
 
 func test_orders_json_schema() -> void:
     var orders := _load_json_array("res://data/orders.json", "orders")
@@ -53,6 +63,17 @@ func test_orders_json_schema() -> void:
         _assert_array_of_strings(entry.get("allowed_doctrines"), context, "allowed_doctrines")
         _assert_dictionary(entry.get("logistics_demand"), context, "logistics_demand")
         _assert_dictionary(entry.get("resolution_effects"), context, "resolution_effects")
+        _assert_string(entry.get("intention"), context, "intention")
+        var pillar_weights := entry.get("pillar_weights")
+        _assert_dictionary(pillar_weights, context, "pillar_weights")
+        if pillar_weights is Dictionary:
+            for pillar in COMBAT_PILLARS:
+                _assert_number(pillar_weights.get(pillar), context + ".pillar_weights", pillar)
+        var intel_profile := entry.get("intel_profile")
+        _assert_dictionary(intel_profile, context, "intel_profile")
+        if intel_profile is Dictionary:
+            _assert_number(intel_profile.get("signal_strength"), context + ".intel_profile", "signal_strength")
+            _assert_number(intel_profile.get("counter_intel"), context + ".intel_profile", "counter_intel")
 
 func test_units_json_schema() -> void:
     var units := _load_json_array("res://data/units.json", "units")
@@ -78,6 +99,16 @@ func test_units_json_schema() -> void:
         _assert_dictionary(entry.get("elan_generation"), context, "elan_generation")
         _assert_dictionary(entry.get("logistics_load"), context, "logistics_load")
         _assert_array_of_strings(entry.get("default_formations"), context, "default_formations")
+        var combat_profile := entry.get("combat_profile")
+        _assert_dictionary(combat_profile, context, "combat_profile")
+        if combat_profile is Dictionary:
+            for pillar in COMBAT_PILLARS:
+                _assert_number(combat_profile.get(pillar), context + ".combat_profile", pillar)
+        var recon_profile := entry.get("recon_profile")
+        _assert_dictionary(recon_profile, context, "recon_profile")
+        if recon_profile is Dictionary:
+            _assert_number(recon_profile.get("detection"), context + ".recon_profile", "detection")
+            _assert_number(recon_profile.get("counter_intel"), context + ".recon_profile", "counter_intel")
 
 func test_weather_json_schema() -> void:
     var weather_states := _load_json_array("res://data/weather.json", "weather")
@@ -108,6 +139,11 @@ func test_weather_json_schema() -> void:
             asserts.is_true(duration.size() == 2, "%s.duration_turns should contain a min and max" % context)
             for turn_value in duration:
                 _assert_integerish(turn_value, context, "duration_turns[]")
+        var combat_modifiers := entry.get("combat_modifiers")
+        _assert_dictionary(combat_modifiers, context, "combat_modifiers")
+        if combat_modifiers is Dictionary:
+            for pillar in COMBAT_PILLARS:
+                _assert_number(combat_modifiers.get(pillar), context + ".combat_modifiers", pillar)
 
 func test_logistics_json_schema() -> void:
     var logistics_states := _load_json_array("res://data/logistics.json", "logistics")

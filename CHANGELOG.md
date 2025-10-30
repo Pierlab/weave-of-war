@@ -30,6 +30,9 @@ All notable changes to this project will be documented in this file.
   coverage for the systems interplay.
 - Implemented the hybrid logistics backbone with rotating weather states, convoy progress telemetry, and gdUnit coverage for
   supply rings, terrain penalties, and interception odds.
+- Delivered the Combat 3 Piliers + espionage milestone: `CombatSystem` resolves pillars with doctrine/weather/terrain inputs,
+  `EspionageSystem` maintains fog-of-war with probabilistic pings, and gdUnit coverage (`test_combat_and_espionage_systems.gd`)
+  guards telemetry events.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.
