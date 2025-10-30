@@ -30,7 +30,15 @@ func _initialize() -> void:
             var method_name: String = method_data.name
             if method_name.begins_with("test_"):
                 executed_tests += 1
-                var result: Dictionary = instance.run_test(method_name)
+                var result = instance.run_test(method_name)
+                if result is GDScriptFunctionState:
+                    result = await result
+                if typeof(result) != TYPE_DICTIONARY:
+                    failures.append({
+                        "name": "%s::%s" % [test_path, method_name],
+                        "messages": ["Test did not return a result dictionary."],
+                    })
+                    continue
                 if not result.get("passed", false):
                     var messages: Array = result.get("messages", [])
                     failures.append({

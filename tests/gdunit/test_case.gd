@@ -18,10 +18,16 @@ func after_each() -> void:
 func run_test(method_name: String) -> Dictionary:
     _reset_asserts()
     if has_method("before_each"):
-        call("before_each")
-    call(method_name)
+        var before_result = call("before_each")
+        if before_result is GDScriptFunctionState:
+            await before_result
+    var test_result = call(method_name)
+    if test_result is GDScriptFunctionState:
+        await test_result
     if has_method("after_each"):
-        call("after_each")
+        var after_result = call("after_each")
+        if after_result is GDScriptFunctionState:
+            await after_result
     var result := asserts.summary()
     return {
         "passed": result["passed"],

@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
   required for gameplay scripting.
 - Configured global autoload singletons (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`), emitted readiness telemetry, and
   updated tests/docs so Checklist C systems can plug into shared data and signals immediately.
+- Deferred the `DataLoader` readiness broadcast so `Telemetry`/`AssistantAI` reliably capture `data_loader_ready`, and added
+  gdUnit coverage (`tests/gdunit/test_autoload_preparation.gd`) to lock the handshake.
 - Delivered the initial command/Élan loop with doctrine selection, inertia tracking, Élan caps, HUD feedback, and gdUnit
   coverage for the systems interplay.
 - Implemented the hybrid logistics backbone with rotating weather states, convoy progress telemetry, and gdUnit coverage for
