@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-30T09:24:01Z
+- Generated on: 2025-10-30T10:26:07Z
 - Branch: work
-- Commit when generated: 6acfcda6365257fa63d1f0ee94e42e00a9b88cc6
-- Subject: Merge pull request #16 from Pierlab/codex/update-checklist.md-items
+- Commit when generated: 6527b2beb4a42d91ea1e1c0b326a63b970b806ef
+- Subject: Merge pull request #17 from Pierlab/codex/update-checklist.md-with-completed-item
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -22,8 +22,11 @@
 - scripts/ci/gd_build_check.gd
 - scripts/ci/gd_lint_runner.gd
 - scripts/ci/gdunit_runner.gd
+- scripts/core/assistant_ai.gd
+- scripts/core/data_loader.gd
 - scripts/core/event_bus.gd
 - scripts/core/game_manager.gd
+- scripts/core/telemetry.gd
 - scripts/core/turn_manager.gd
 - scripts/core/utils.gd
 - scripts/generate_context_snapshot.py

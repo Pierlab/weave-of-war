@@ -13,6 +13,20 @@ This repository now bundles the rituals and automation needed for agent-driven v
 5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks and the
    one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) to stay aligned on vision, pillars, loops,
    and risks.
+6. Familiarise yourself with the autoload singletons listed below—they provide the shared data, telemetry, and assistant hooks
+   required to deliver Checklist C systems without additional plumbing.
+
+## Core autoloads
+
+| Autoload | Script | Responsibilities |
+| --- | --- | --- |
+| `EventBus` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
+| `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, caches them by id, exposes helpers (`get_doctrine`, `list_orders`, etc.), and emits readiness/error payloads for the UI and telemetry. |
+| `Telemetry` | `scripts/core/telemetry.gd` | Records emitted gameplay events for debugging and gdUnit assertions. Provides `log_event`, `get_buffer`, and `clear` helpers so tests can verify new Checklist C flows. |
+| `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
+
+The autoloads initialise automatically when the project starts (and during headless test runs). Systems being developed for
+Checklist C should request dependencies from these singletons instead of reading JSON files or crafting their own signal buses.
 
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
@@ -49,7 +63,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   vertical slice build.
 - Consult the data-driven architecture TDD in
   [`docs/design/tdd_architecture_data.md`](docs/design/tdd_architecture_data.md) when wiring systems to the event bus, data
-  loader, or assistant AI interpreter, and follow the JSON→runtime mapping table when adding new fields or scripts.
+  loader, or assistant AI interpreter, and follow the JSON→runtime mapping table when adding new fields or scripts. The new
+  autoloads mirror this architecture so future Checklist C work can focus on behaviour, not plumbing.
 - Review the canonical JSON schemas in `data/` for doctrines, orders, units, weather, and logistics to keep inertia locks, Élan
   costs, and supply interactions aligned with gameplay scripts.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,

@@ -1,5 +1,7 @@
 extends GdUnitLiteTestCase
 
+const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
+
 func test_doctrines_json_schema() -> void:
     var doctrines := _load_json_array("res://data/doctrines.json", "doctrines")
     asserts.is_true(doctrines.size() > 0, "doctrines should contain at least one entry")
@@ -143,6 +145,26 @@ func test_logistics_json_schema() -> void:
                 for weather_id in weather_modifiers.keys():
                     _assert_string(weather_id, context + ".links.weather_modifiers", "key")
                     _assert_number(weather_modifiers.get(weather_id), context + ".links.weather_modifiers", weather_id)
+
+func test_data_loader_exposes_caches() -> void:
+    var loader: DataLoader = DATA_LOADER.new()
+    var result := loader.load_all()
+    asserts.is_true(result.get("ready", false), "DataLoader should report ready when assets load correctly")
+
+    var doctrine := loader.get_doctrine("force")
+    asserts.is_true(doctrine.size() > 0, "Doctrine 'force' should be accessible via DataLoader cache")
+
+    var orders := loader.list_orders()
+    asserts.is_true(orders.size() > 0, "Orders collection should not be empty")
+
+    var unit := loader.get_unit("infantry")
+    asserts.is_true(unit.size() > 0, "Unit 'infantry' should be cached for quick lookups")
+
+    var weather := loader.list_weather_states()
+    asserts.is_true(weather.size() > 0, "Weather definitions should load into DataLoader")
+
+    var logistics := loader.list_logistics_states()
+    asserts.is_true(logistics.size() > 0, "Logistics configurations should load into DataLoader")
 
 func _load_json_array(path: String, label: String) -> Array:
     var file := FileAccess.open(path, FileAccess.READ)

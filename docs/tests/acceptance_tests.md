@@ -34,4 +34,10 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **When** I press "Show Logistics"
 - **Then** the console prints the new overlay state and the HUD button text flips between "Show Logistics" and "Hide Logistics"
 
+### AT-06: Data loader readiness & telemetry capture
+- **Given** the main scene is running from a clean boot
+- **When** the game initialises
+- **Then** the console prints a `DataLoader ready` summary and telemetry buffers contain an entry named `data_loader_ready`
+  with doctrine/order/unit counts greater than zero
+
 All tests must pass without Godot warnings or errors in the console.
