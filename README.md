@@ -12,7 +12,9 @@ This repository now bundles the rituals and automation needed for agent-driven v
    [`context_snapshot.md`](context_snapshot.md).
 5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks and the
    one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) to stay aligned on vision, pillars, loops,
-   and risks.
+   and risks. Structural decisions are archived in Architecture Decision Records (ADRs); start with
+   [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](docs/ADR_0002_event_bus_and_telemetry_autoloads.md) for the autoload
+   signal contract governing Checklist C systems.
 6. Familiarise yourself with the autoload singletons listed below—they provide the shared data, telemetry, and assistant hooks
    required to deliver Checklist C systems without additional plumbing.
 
@@ -115,8 +117,10 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   vertical slice build.
 - Consult the data-driven architecture TDD in
   [`docs/design/tdd_architecture_data.md`](docs/design/tdd_architecture_data.md) when wiring systems to the event bus, data
-  loader, or assistant AI interpreter, and follow the JSON→runtime mapping table when adding new fields or scripts. The new
-  autoloads mirror this architecture so future Checklist C work can focus on behaviour, not plumbing.
+  loader, or assistant AI interpreter, and follow the JSON→runtime mapping table when adding new fields or scripts. Les ADRs
+  (`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`, etc.) enregistrent les décisions structurantes à prendre en compte
+  lors de toute extension de ces contrats. The new autoloads mirror this architecture so future Checklist C work can focus on
+  behaviour, not plumbing.
 - Review the canonical JSON schemas in `data/` for doctrines, orders, units, formations, weather, and logistics to keep inertia locks, Élan
   costs, and supply interactions aligned with gameplay scripts.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
