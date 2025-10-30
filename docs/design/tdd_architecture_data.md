@@ -31,7 +31,7 @@ JSON configs (data/) → DataLoader (autoload) → Runtime caches (Resources)
 ### Core Autoloads
 | Node | Path | Responsibilities |
 | --- | --- | --- |
-| `EventBus` | `scripts/core/event_bus.gd` | Defines typed signals for system interactions (`doctrine_selected`, `elan_spent`, `logistics_update`, `combat_resolved`, `espionage_ping`, etc.). Holds utility dispatch helpers so systems do not assume each other’s presence. |
+| `EventBus` | `scripts/core/event_bus.gd` | Defines typed signals for system interactions (`doctrine_selected`, `elan_spent`, `logistics_update`, `logistics_break`, `combat_resolved`, `espionage_ping`, etc.). Holds utility dispatch helpers so systems do not assume each other’s presence. |
 | `DataLoader` (new) | `scripts/core/data_loader.gd` | Loads JSON assets on project start, validates them against schemas, exposes typed accessors (e.g. `get_doctrine(id)`, `list_orders()`). Emits `data_loader_ready` on success and `data_loader_error` on failure with validation context. |
 | `Telemetry` (new) | `scripts/core/telemetry.gd` | Receives game events from `EventBus` and queues payloads for analytics/testing. Provides helpers like `log_event(name: StringName, payload: Dictionary)` that forward to file appenders or in-memory collectors during tests. |
 | `AssistantAI` (new) | `scripts/core/assistant_ai.gd` | Interprets player-issued orders and doctrine context. Subscribes to `EventBus` signals, pulls data from `DataLoader`, and outputs `assistant_order_packet` events used by combat/logistics systems. |
@@ -76,7 +76,8 @@ payload keys so affected systems can surface actionable HUD/debug overlay feedba
 | `order_issued` | HUD → `GameManager` | `{ order_id, unit_ids, target_hex, elan_cost }` | `AssistantAI`, `LogisticsSystem`, `CombatSystem` |
 | `assistant_order_packet` | `AssistantAI` | `{ orders: Array, intents: Dictionary, expected_outcomes: Dictionary }` | `CombatSystem`, `LogisticsSystem`, `Telemetry` |
 | `elan_spent` | `ElanSystem` | `{ amount, reason, remaining }` | `Telemetry`, `HUDManager`, `DebugOverlay` |
-| `logistics_update` | `LogisticsSystem` | `{ zone_id, supply_level, convoy_status }` | `Telemetry`, `HUDManager`, `EspionageSystem` |
+| `logistics_update` | `LogisticsSystem` | `{ logistics_id, weather_id, supply_zones, routes, breaks }` | `Telemetry`, `HUDManager`, `EspionageSystem` |
+| `logistics_break` (new) | `LogisticsSystem` | `{ type, tile_id/route_id, elan_penalty, competence_penalty, weather_id, logistics_id }` | `Telemetry`, `TurnManager`, `HUDManager` |
 | `combat_resolved` | `CombatSystem` | `{ engagement_id, pillars, victor, casualties }` | `Telemetry`, `HUDManager`, `TurnManager` |
 | `espionage_ping` | `EspionageSystem` | `{ source_hex, target_hex, confidence, revealed_intent }` | `Telemetry`, `HUDManager` |
 | `weather_changed` | `TerrainWeatherSystem` | `{ weather_id, duration, modifiers }` | `HUDManager`, `Telemetry`, `LogisticsSystem`, `CombatSystem` |
@@ -91,6 +92,7 @@ payload keys so affected systems can surface actionable HUD/debug overlay feedba
 
 ## Telemetry & Testing Hooks
 - `Telemetry` autoload buffers events and can write to `user://telemetry.log` during local runs. In tests it exposes `Telemetry.get_buffer()` so gdUnit cases can assert on sequences.
+- `logistics_break` events complement the existing `logistics_update` payloads by raising discrete analytics hooks whenever supply isolation or convoy interceptions occur. Downstream dashboards should use the outline in [`docs/telemetry/dashboard_plan.md`](../telemetry/dashboard_plan.md).
 - Headless CI checks subscribe to `Telemetry` and assert that critical events (`elan_spent`, `combat_resolved`, `logistics_update`) fire at least once during smoke scenarios.
 - Each system test seeds fixtures through `DataLoader` by loading JSON from `res://data/test/*.json`.
 
