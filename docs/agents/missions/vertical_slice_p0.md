@@ -41,7 +41,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Delivery timeline (Semaine 0–6)
-- **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, and set up logging scaffolding for Élan and Command Model prototypes. Validate onboarding rituals with the latest `AGENTS.md` updates.
+- **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
 - **Semaine 1 — Command Model & Élan loop**: Implement doctrine selection, Élan accumulation caps, and command order validation with debug HUD feedback. Target gdUnit smoke coverage around Élan spend and doctrine toggles.
 - **Semaine 2 — Logistics backbone**: Prototype hybrid supply (rings + routes), animate convoy nodes, and track logistics state transitions in telemetry. Ensure data schemas in `data/` capture route types and supply thresholds.
 - **Semaine 3 — Terrain & weather layering**: Introduce Plains/Forest/Hill terrain with movement modifiers and Sun/Rain/Fog weather affecting logistics pipelines. Expose modifiers through HUD tooltips and log them via the telemetry bus.

@@ -1,15 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource path="res://scenes/map/map.tscn" type="PackedScene" id="1"]
 [ext_resource path="res://scenes/ui/hud.tscn" type="PackedScene" id="2"]
 [ext_resource path="res://scenes/ui/debug_overlay.tscn" type="PackedScene" id="3"]
 [ext_resource path="res://scripts/core/game_manager.gd" type="Script" id="4"]
-[ext_resource path="res://scripts/core/event_bus.gd" type="Script" id="5"]
-
 [node name="Main" type="Node2D"]
-
-[node name="EventBus" type="Node" parent="."]
-script = ExtResource("5")
 
 [node name="Map" parent="." instance=ExtResource("1")]
 

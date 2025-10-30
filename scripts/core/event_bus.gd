@@ -6,6 +6,17 @@ signal turn_ended(turn_number: int)
 signal next_turn_requested()
 signal logistics_toggled(show: bool)
 signal spawn_unit_requested()
+signal data_loader_ready(payload: Dictionary)
+signal data_loader_error(context: Dictionary)
+signal doctrine_selected(payload: Dictionary)
+signal order_issued(payload: Dictionary)
+signal assistant_order_packet(payload: Dictionary)
+signal elan_spent(payload: Dictionary)
+signal logistics_update(payload: Dictionary)
+signal combat_resolved(payload: Dictionary)
+signal espionage_ping(payload: Dictionary)
+signal weather_changed(payload: Dictionary)
+signal competence_reallocated(payload: Dictionary)
 
 static var _instance: EventBus
 var _logistics_visible := false
@@ -16,6 +27,39 @@ func _ready() -> void:
 
 static func get_instance() -> EventBus:
     return _instance
+
+func emit_data_loader_ready(payload: Dictionary) -> void:
+    data_loader_ready.emit(payload)
+
+func emit_data_loader_error(context: Dictionary) -> void:
+    data_loader_error.emit(context)
+
+func emit_doctrine_selected(payload: Dictionary) -> void:
+    doctrine_selected.emit(payload)
+
+func emit_order_issued(payload: Dictionary) -> void:
+    order_issued.emit(payload)
+
+func emit_assistant_order_packet(payload: Dictionary) -> void:
+    assistant_order_packet.emit(payload)
+
+func emit_elan_spent(payload: Dictionary) -> void:
+    elan_spent.emit(payload)
+
+func emit_logistics_update(payload: Dictionary) -> void:
+    logistics_update.emit(payload)
+
+func emit_combat_resolved(payload: Dictionary) -> void:
+    combat_resolved.emit(payload)
+
+func emit_espionage_ping(payload: Dictionary) -> void:
+    espionage_ping.emit(payload)
+
+func emit_weather_changed(payload: Dictionary) -> void:
+    weather_changed.emit(payload)
+
+func emit_competence_reallocated(payload: Dictionary) -> void:
+    competence_reallocated.emit(payload)
 
 func request_next_turn() -> void:
     next_turn_requested.emit()

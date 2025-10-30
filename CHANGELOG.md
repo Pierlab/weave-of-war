@@ -24,6 +24,8 @@ All notable changes to this project will be documented in this file.
   scripts quickly when extending schemas.
 - Expanded the Vertical Slice JSON schemas under `data/` to include inertia locks, Élan costs, and logistics/weather interplays
   required for gameplay scripting.
+- Configured global autoload singletons (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`), emitted readiness telemetry, and
+  updated tests/docs so Checklist C systems can plug into shared data and signals immediately.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.

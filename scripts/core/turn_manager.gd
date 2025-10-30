@@ -9,9 +9,8 @@ var event_bus: EventBus
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
     if event_bus == null:
-        var buses := get_tree().get_nodes_in_group("event_bus")
-        if buses.size() > 0:
-            event_bus = buses[0]
+        await get_tree().process_frame
+        event_bus = EVENT_BUS.get_instance()
 
 func start_game() -> void:
     current_turn = 0
