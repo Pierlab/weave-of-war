@@ -28,6 +28,7 @@
 - Préparé l'entrée en Checklist C en configurant les autoloads `EventBus`, `DataLoader`, `Telemetry` et `AssistantAI`, en publiant un test gdUnit qui vérifie les caches du DataLoader et en ajoutant une acceptation `AT-06` pour contrôler le signal `data_loader_ready` et la télémétrie.
 - Livré la boucle commandement/Élan Semaine 0–1 : systèmes Doctrine/Élan interconnectés, HUD avec sélection doctrine/ordres, gestion de l'inertie et feedback audio, plus tests gdUnit dédiés.
 - Mis en service le socle logistique hybride Semaine 2–3 : calcul des anneaux d'approvisionnement, routes/convoys animés et rotation météo (`sunny`/`rain`/`mist`) émettant des payloads `logistics_update` et `weather_changed` exploitables par la HUD et la télémétrie.
+- Finalisé les systèmes Semaine 4–5 : `CombatSystem` calcule les trois piliers via doctrines/terrain/météo/espionnage, `EspionageSystem` maintient le brouillard, produit des pings probabilistes avec intentions révélées, et la télémétrie capture `combat_resolved`/`espionage_ping` avec tests `test_combat_and_espionage_systems.gd`.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
@@ -37,3 +38,4 @@
 - Confirm the fixed HUD/debug overlay parenting removes the missing node warnings during the next headless build run.
 - Ajouter la validation JSON Schema dans `DataLoader`, enrichir `AssistantAI` avec des prévisions simulées, et consigner les événements Checklist C (élan, combat, espionnage) dans `Telemetry` une fois les systèmes branchés.
 - Itérer sur les overlays HUD/logistiques pour visualiser les nouvelles données de terrain et de météo émises par `LogisticsSystem`.
+- Brancher `CombatSystem` et `EspionageSystem` sur la HUD (panneaux combat/intel) et préparer une boucle IA/assistant pour fournir des cibles et unités réelles aux engagements simulés.

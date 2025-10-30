@@ -7,7 +7,12 @@
     "logistics_flow_modifier": 1.0,
     "intel_noise": 0.0,
     "duration_turns": [1, 3],
-    "elan_regeneration_bonus": 0.1
+    "elan_regeneration_bonus": 0.1,
+    "combat_modifiers": {
+      "position": 1.0,
+      "impulse": 1.0,
+      "information": 1.0
+    }
   },
   {
     "id": "rain",
@@ -17,7 +22,12 @@
     "logistics_flow_modifier": 0.7,
     "intel_noise": 0.2,
     "duration_turns": [1, 2],
-    "elan_regeneration_bonus": -0.1
+    "elan_regeneration_bonus": -0.1,
+    "combat_modifiers": {
+      "position": 0.9,
+      "impulse": 0.85,
+      "information": 0.7
+    }
   },
   {
     "id": "mist",
@@ -27,6 +37,11 @@
     "logistics_flow_modifier": 0.8,
     "intel_noise": 0.35,
     "duration_turns": [1, 2],
-    "elan_regeneration_bonus": 0.0
+    "elan_regeneration_bonus": 0.0,
+    "combat_modifiers": {
+      "position": 0.95,
+      "impulse": 0.8,
+      "information": 0.55
+    }
   }
 ]

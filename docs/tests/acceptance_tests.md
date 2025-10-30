@@ -60,4 +60,14 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **When** plusieurs tours s'écoulent sous pluie ou brume
 - **Then** au moins un payload `logistics_update` signale `last_event = intercepted` et la télémétrie archive l'événement `logistics_update`
 
+### AT-11: Résolution Combat 3 Piliers
+- **Given** la boucle de commandement déclenche un ordre offensif
+- **When** `CombatSystem` reçoit un engagement avec doctrine active et météo en cours
+- **Then** un payload `combat_resolved` est émis avec les trois piliers (`position`, `impulse`, `information`) et une victoire déterminée par majorité
+
+### AT-12: Pings d'espionnage et intentions révélées
+- **Given** la carte dispose d'un brouillard initial et de niveaux de logistique hétérogènes
+- **When** `EspionageSystem` exécute un ping sous météo claire puis brumeuse
+- **Then** la télémétrie `espionage_ping` reflète la confiance, le bruit météo, et révèle les intentions connues lorsque le ping réussit
+
 All tests must pass without Godot warnings or errors in the console.
