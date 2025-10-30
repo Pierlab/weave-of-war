@@ -68,3 +68,4 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
   capture la preuve.
 - Vérification locale actuelle : les jeux de données sous `data/` sont parsés via un script Python partagé dans le README,
   tandis que l'exécutable Godot reste à provisionner dans le conteneur pour relancer les commandes headless.
+- Instrumentation télémétrie consolidée : `logistics_break` complète `elan_spent`, `combat_resolved` et `espionage_ping`, les tests gdUnit valident l'émission dédiée et le plan KPI/Dashboard vit dans `docs/telemetry/dashboard_plan.md`.

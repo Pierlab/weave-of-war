@@ -14,6 +14,7 @@ signal assistant_order_packet(payload: Dictionary)
 signal elan_spent(payload: Dictionary)
 signal elan_updated(payload: Dictionary)
 signal logistics_update(payload: Dictionary)
+signal logistics_break(payload: Dictionary)
 signal combat_resolved(payload: Dictionary)
 signal espionage_ping(payload: Dictionary)
 signal weather_changed(payload: Dictionary)
@@ -56,6 +57,9 @@ func emit_elan_updated(payload: Dictionary) -> void:
 
 func emit_logistics_update(payload: Dictionary) -> void:
     logistics_update.emit(payload)
+
+func emit_logistics_break(payload: Dictionary) -> void:
+    logistics_break.emit(payload)
 
 func emit_combat_resolved(payload: Dictionary) -> void:
     combat_resolved.emit(payload)

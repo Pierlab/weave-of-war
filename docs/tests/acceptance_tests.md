@@ -58,7 +58,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 ### AT-10: Interceptions sur routes exposées
 - **Given** un convoi démarre sur la route avant (config "forward_operating")
 - **When** plusieurs tours s'écoulent sous pluie ou brume
-- **Then** au moins un payload `logistics_update` signale `last_event = intercepted` et la télémétrie archive l'événement `logistics_update`
+- **Then** au moins un payload `logistics_update` signale `last_event = intercepted`, la télémétrie archive l'événement `logistics_update`, et un événement dédié `logistics_break` est présent dans le buffer
 
 ### AT-11: Résolution Combat 3 Piliers
 - **Given** la boucle de commandement déclenche un ordre offensif

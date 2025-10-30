@@ -39,6 +39,8 @@ Checklist C should request dependencies from these singletons instead of reading
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads
   that describe supply levels, terrain-driven flow modifiers, and convoy progress/interruptions for the HUD and telemetry.
+- Logistics disruptions now raise a dedicated `logistics_break` event for analytics, capturing the disrupted tile/route, Élan and
+  competence penalties, and current weather/logistics contexts for downstream dashboards.
 - Weather definitions (`sunny`, `rain`, `mist`) rotate automatically and apply movement/logistics multipliers sourced from
   `data/weather.json`, enabling future systems to subscribe to `weather_changed` signals without bespoke plumbing.
 - Terrain defaults derived from `TerrainData` are combined with supply-center distance calculations to label tiles as `core`,
@@ -106,6 +108,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - Append notable entries to [`CHANGELOG.md`](CHANGELOG.md) before requesting review.
 - Reference the draft SDS outlines for the eight P0 systems in [`docs/design/sds_outlines.md`](docs/design/sds_outlines.md) when
   planning gameplay or telemetry changes.
+- Align telemetry instrumentation and KPI tracking with the dashboard starter kit outlined in
+  [`docs/telemetry/dashboard_plan.md`](docs/telemetry/dashboard_plan.md) to keep analytics expectations visible during iteration.
 - Use the locked SDS packages for [`Command Model`](docs/design/sds_command_model.md) and
   [`Élan`](docs/design/sds_elan.md) as the source of truth for acceptance criteria and telemetry requirements during the
   vertical slice build.

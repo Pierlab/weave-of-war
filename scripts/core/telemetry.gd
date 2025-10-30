@@ -38,6 +38,7 @@ func _connect_signals() -> void:
     _event_bus.turn_ended.connect(_capture_event.bind("turn_ended"))
     _event_bus.elan_spent.connect(_capture_event.bind("elan_spent"))
     _event_bus.logistics_update.connect(_capture_event.bind("logistics_update"))
+    _event_bus.logistics_break.connect(_capture_event.bind("logistics_break"))
     _event_bus.combat_resolved.connect(_capture_event.bind("combat_resolved"))
     _event_bus.espionage_ping.connect(_capture_event.bind("espionage_ping"))
     _event_bus.weather_changed.connect(_capture_event.bind("weather_changed"))

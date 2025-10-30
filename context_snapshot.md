@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-30T16:08:56Z
+- Generated on: 2025-10-30T17:19:22Z
 - Branch: work
-- Commit when generated: 18eb26a1a9e8aca1ba9cef0b17dc1dc8d29f7037
-- Subject: Merge pull request #24 from Pierlab/codex/verifier-la-checklist-c-pour-fonctionnalite
+- Commit when generated: 8b6cd2565342f6267408855e560b9ed8118dafa7
+- Subject: Merge pull request #25 from Pierlab/codex/verify-project-state-against-vertical_slice_p0.md
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 

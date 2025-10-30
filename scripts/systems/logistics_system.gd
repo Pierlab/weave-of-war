@@ -265,6 +265,21 @@ func _recalculate_state(reason: String) -> void:
 
     if event_bus:
         event_bus.emit_logistics_update(_last_payload)
+        _emit_break_events()
+
+func _emit_break_events() -> void:
+    if event_bus == null:
+        return
+
+    for break_event in _pending_breaks:
+        if not (break_event is Dictionary):
+            continue
+        var payload := break_event.duplicate(true)
+        if not payload.has("turn"):
+            payload["turn"] = _turn_counter
+        payload["logistics_id"] = _current_logistics_id
+        payload["weather_id"] = _current_weather_id
+        event_bus.emit_logistics_break(payload)
 
 func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_config: Dictionary, logistics_config: Dictionary) -> Array:
     var zones: Array = []

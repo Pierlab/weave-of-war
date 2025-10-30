@@ -41,6 +41,8 @@ All notable changes to this project will be documented in this file.
   and data integrity checks for [`data/formations.json`](data/formations.json).
 - Documented a fallback JSON validation snippet in the README so agents can verify data integrity while provisioning a local
   Godot binary.
+- Added a dedicated `logistics_break` telemetry signal with gdUnit coverage, README/TDD documentation, and a KPI dashboard
+  starter in `docs/telemetry/dashboard_plan.md` to complete Checklist D instrumentation.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.

@@ -25,6 +25,6 @@ These checklists consolidate the planning artefacts for the vertical slice descr
 - [x] À chaque étape, tenir à jour `context_update.md`, ajouter des entrées à `CHANGELOG.md`, régénérer `context_snapshot.md`, et aligner `docs/tests/acceptance_tests.md` avec les nouvelles interactions (ex. boutons HUD, overlays).
 
 ## Checklist D — Télémetrie & ADR
-- [ ] Instrumenter les événements listés (dépenses d’élan, résultats piliers, ruptures logistiques, intentions espionnées) et noter les KPIs/dashboards initiaux.
+- [x] Instrumenter les événements listés (dépenses d’élan, résultats piliers, ruptures logistiques, intentions espionnées) et noter les KPIs/dashboards initiaux. (Ajout du signal `logistics_break`, mise à jour Telemetry/tests, note `docs/telemetry/dashboard_plan.md`.)
 - [ ] Documenter les décisions structurantes via des ADR (`docs/`), en suivant l’exemple fourni pour les doctrines sans cartes.
 - [ ] Maintenir un glossaire vivant (éventuellement dans `docs/`) pour les termes clés : Élan, Doctrine, Ordre, Zone logistique, Pilier, Ping, Posture, Inertie.

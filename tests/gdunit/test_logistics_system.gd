@@ -2,6 +2,16 @@ extends GdUnitLiteTestCase
 
 const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 
+class MockEventBus:
+    var updates: Array = []
+    var breaks: Array = []
+
+    func emit_logistics_update(payload: Dictionary) -> void:
+        updates.append(payload)
+
+    func emit_logistics_break(payload: Dictionary) -> void:
+        breaks.append(payload)
+
 func _baseline_logistics_entry() -> Dictionary:
     return {
         "id": "baseline",
@@ -97,6 +107,8 @@ func test_weather_updates_movement_and_flow() -> void:
 func test_convoys_can_be_intercepted() -> void:
     var system: LogisticsSystem = LOGISTICS_SYSTEM.new()
     system.set_rng_seed(42)
+    var mock_bus := MockEventBus.new()
+    system.event_bus = mock_bus
     system.configure([_forward_entry()], _weather_entries())
     system.configure_map(_simple_map(), _supply_centers(), _routes())
 
@@ -110,3 +122,4 @@ func test_convoys_can_be_intercepted() -> void:
     var intercept_breaks := breaks.filter(func(entry): return entry.get("type", "") == "convoy_intercept")
     asserts.is_true(intercept_breaks.size() > 0, "Intercepted convoys should emit break telemetry")
     asserts.is_true(float(payload.get("competence_penalty", 0.0)) > 0.0, "Break telemetry should quantify competence penalties")
+    asserts.is_true(mock_bus.breaks.size() > 0, "Dedicated logistics_break events should be emitted for analytics")
