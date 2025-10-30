@@ -35,11 +35,17 @@ All notable changes to this project will be documented in this file.
 - Delivered the Combat 3 Piliers + espionage milestone: `CombatSystem` resolves pillars with doctrine/weather/terrain inputs,
   `EspionageSystem` maintains fog-of-war with probabilistic pings, and gdUnit coverage (`test_combat_and_espionage_systems.gd`)
   guards telemetry events.
+- Completed the Semaine 6 competence & formations loop with a new formations dataset, `TurnManager` competence budget, and
+  `CombatSystem` formation/competence hooks validated by gdUnit coverage (`test_competence_and_formations.gd`).
+- Added telemetry for competence reallocations and formation changes, wiring the new events through `Telemetry`, the HUD bus,
+  and data integrity checks for [`data/formations.json`](data/formations.json).
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.
 - Pinned the CI workflow to Godot 4.5.1 using the latest setup action and cache cleanup step for consistent headless runs.
 - Documented the new Godot `.uid` companion files in the README to clarify their purpose in resource referencing.
+- Expanded logistics payloads with break summaries and competence penalty values so downstream systems can react to convoy
+  interceptions without bespoke polling.
 
 ### Fixed
 - CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.

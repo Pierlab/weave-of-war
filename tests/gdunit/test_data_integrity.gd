@@ -182,6 +182,33 @@ func test_logistics_json_schema() -> void:
                     _assert_string(weather_id, context + ".links.weather_modifiers", "key")
                     _assert_number(weather_modifiers.get(weather_id), context + ".links.weather_modifiers", weather_id)
 
+func test_formations_json_schema() -> void:
+    var formations := _load_json_array("res://data/formations.json", "formations")
+    asserts.is_true(formations.size() > 0, "formations should contain at least one entry")
+    for entry in formations:
+        var context := _entry_context(entry, "Formation")
+        _assert_is_dictionary(entry, context)
+        _assert_has_keys(entry, [
+            "id",
+            "name",
+            "posture",
+            "pillar_modifiers",
+            "competence_weight",
+        ], context)
+        _assert_string(entry.get("id"), context, "id")
+        _assert_string(entry.get("name"), context, "name")
+        _assert_string(entry.get("posture"), context, "posture")
+        var modifiers := entry.get("pillar_modifiers")
+        _assert_dictionary(modifiers, context, "pillar_modifiers")
+        if modifiers is Dictionary:
+            for pillar in COMBAT_PILLARS:
+                _assert_number(modifiers.get(pillar, 0.0), context + ".pillar_modifiers", pillar)
+        var competence_weight := entry.get("competence_weight")
+        _assert_dictionary(competence_weight, context, "competence_weight")
+        if competence_weight is Dictionary:
+            for key in competence_weight.keys():
+                _assert_number(competence_weight.get(key), context + ".competence_weight", key)
+
 func test_data_loader_exposes_caches() -> void:
     var loader: DataLoader = DATA_LOADER.new()
     var result := loader.load_all()
@@ -201,6 +228,12 @@ func test_data_loader_exposes_caches() -> void:
 
     var logistics := loader.list_logistics_states()
     asserts.is_true(logistics.size() > 0, "Logistics configurations should load into DataLoader")
+
+    var formations := loader.list_formations()
+    asserts.is_true(formations.size() > 0, "Formations catalogue should load into DataLoader")
+
+    var formation := loader.get_formation("shield_wall")
+    asserts.is_true(formation.size() > 0, "Formation 'shield_wall' should be cached for quick lookups")
 
 func _load_json_array(path: String, label: String) -> Array:
     var file := FileAccess.open(path, FileAccess.READ)

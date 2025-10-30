@@ -9,6 +9,7 @@ const DATA_FILES := {
     "units": "res://data/units.json",
     "weather": "res://data/weather.json",
     "logistics": "res://data/logistics.json",
+    "formations": "res://data/formations.json",
 }
 
 static var _instance: DataLoader
@@ -87,6 +88,12 @@ func list_logistics_states() -> Array:
 func get_logistics(id: String) -> Dictionary:
     return _indexed.get("logistics", {}).get(id, {})
 
+func list_formations() -> Array:
+    return _collections.get("formations", [])
+
+func get_formation(id: String) -> Dictionary:
+    return _indexed.get("formations", {}).get(id, {})
+
 func get_summary() -> Dictionary:
     return {
         "ready": _is_ready,
@@ -96,6 +103,7 @@ func get_summary() -> Dictionary:
             "units": list_units().size(),
             "weather": list_weather_states().size(),
             "logistics": list_logistics_states().size(),
+            "formations": list_formations().size(),
         }
     }
 

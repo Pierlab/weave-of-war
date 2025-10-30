@@ -15,6 +15,8 @@ const DEFENDER_POSTURES := {
     "ambush": {"position": 0.2, "impulse": 0.25, "information": 0.35},
     "screen": {"position": 0.15, "impulse": 0.15, "information": 0.25},
 }
+const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]
+const COMPETENCE_SCALAR := 0.05
 
 var event_bus: EventBus
 var data_loader: DataLoader
@@ -23,12 +25,19 @@ var _orders_by_id: Dictionary = {}
 var _units_by_id: Dictionary = {}
 var _doctrines_by_id: Dictionary = {}
 var _weather_by_id: Dictionary = {}
+var _formations_by_id: Dictionary = {}
 var _current_doctrine_id := ""
 var _current_weather_id := ""
 var _last_resolution: Dictionary = {}
 var _recent_intel: Dictionary = {}
 var _default_intel_confidence := 0.5
 var _rng := RandomNumberGenerator.new()
+var _unit_formations: Dictionary = {}
+var _competence_allocations := {
+    "tactics": 0.0,
+    "strategy": 0.0,
+    "logistics": 0.0,
+}
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -43,7 +52,8 @@ func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
             data_loader.list_units(),
             data_loader.list_orders(),
             data_loader.list_doctrines(),
-            data_loader.list_weather_states()
+            data_loader.list_weather_states(),
+            data_loader.list_formations()
         )
 
     if event_bus:
@@ -57,12 +67,15 @@ func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
             event_bus.espionage_ping.connect(_on_espionage_ping)
         if not event_bus.assistant_order_packet.is_connected(_on_assistant_packet):
             event_bus.assistant_order_packet.connect(_on_assistant_packet)
+        if not event_bus.competence_reallocated.is_connected(_on_competence_reallocated):
+            event_bus.competence_reallocated.connect(_on_competence_reallocated)
 
-func configure(unit_entries: Array, order_entries: Array, doctrine_entries: Array, weather_entries: Array) -> void:
+func configure(unit_entries: Array, order_entries: Array, doctrine_entries: Array, weather_entries: Array, formation_entries: Array) -> void:
     _units_by_id = _index_entries(unit_entries)
     _orders_by_id = _index_entries(order_entries)
     _doctrines_by_id = _index_entries(doctrine_entries)
     _weather_by_id = _index_entries(weather_entries)
+    _formations_by_id = _index_entries(formation_entries)
 
     if _current_doctrine_id.is_empty() and not _doctrines_by_id.is_empty():
         _current_doctrine_id = str(_doctrines_by_id.keys()[0])
@@ -75,6 +88,7 @@ func configure(unit_entries: Array, order_entries: Array, doctrine_entries: Arra
         _current_weather_id = str(_weather_by_id.keys()[0])
 
     _recalculate_doctrine_confidence()
+    _ensure_default_formations()
 
 func set_rng_seed(seed: int) -> void:
     _rng.seed = seed
@@ -89,6 +103,37 @@ func set_current_weather(weather_id: String) -> void:
     if weather_id.is_empty() or not _weather_by_id.has(weather_id):
         return
     _current_weather_id = weather_id
+
+func set_unit_formation(unit_id: String, formation_id: String) -> bool:
+    if unit_id.is_empty() or not _units_by_id.has(unit_id):
+        return false
+    if formation_id.is_empty() or not _formations_by_id.has(formation_id):
+        return false
+    var allowed: Array = _units_by_id.get(unit_id, {}).get("default_formations", [])
+    if allowed.size() > 0 and not allowed.has(formation_id):
+        return false
+    var previous := str(_unit_formations.get(unit_id, ""))
+    _unit_formations[unit_id] = formation_id
+    if previous != formation_id:
+        _emit_formation_update(unit_id, "manual")
+    return true
+
+func get_unit_formation(unit_id: String) -> String:
+    return str(_unit_formations.get(unit_id, ""))
+
+func _ensure_default_formations() -> void:
+    for unit_id in _units_by_id.keys():
+        var stored := str(_unit_formations.get(unit_id, ""))
+        if stored.is_empty() or not _formations_by_id.has(stored):
+            var resolved := _resolve_default_formation(unit_id)
+            if not resolved.is_empty():
+                _emit_formation_update(unit_id, "default")
+    var orphaned: Array = []
+    for stored_id in _unit_formations.keys():
+        if not _units_by_id.has(stored_id):
+            orphaned.append(stored_id)
+    for unit_id in orphaned:
+        _unit_formations.erase(unit_id)
 
 func get_last_resolution() -> Dictionary:
     return _last_resolution.duplicate(true)
@@ -121,8 +166,8 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
     var doctrine_effects := _doctrines_by_id.get(_current_doctrine_id, {}).get("effects", {})
     var doctrine_bonus: Dictionary = doctrine_effects.get("combat_bonus", {})
 
-    var attacker_base := _aggregate_unit_profile(attacker_unit_ids, "combat_profile")
-    var defender_base := _aggregate_unit_profile(defender_unit_ids, "combat_profile")
+    var attacker_base := _aggregate_unit_profile(attacker_unit_ids, "combat_profile", "attacker")
+    var defender_base := _aggregate_unit_profile(defender_unit_ids, "combat_profile", "defender")
     var attacker_detection := _aggregate_unit_value(attacker_unit_ids, "recon_profile", "detection")
     var defender_counter := _aggregate_unit_value(defender_unit_ids, "recon_profile", "counter_intel")
 
@@ -230,7 +275,7 @@ func _normalise_id_array(value) -> Array[String]:
         result.append(str(value))
     return result
 
-func _aggregate_unit_profile(unit_ids: Array, field: String) -> Dictionary:
+func _aggregate_unit_profile(unit_ids: Array, field: String, _side: String = "attacker") -> Dictionary:
     var totals := {}
     for unit_id in unit_ids:
         var unit: Dictionary = _units_by_id.get(unit_id, {})
@@ -238,6 +283,15 @@ func _aggregate_unit_profile(unit_ids: Array, field: String) -> Dictionary:
         if profile is Dictionary:
             for key in profile.keys():
                 totals[key] = float(totals.get(key, 0.0)) + float(profile.get(key, 0.0))
+
+    var formation_bonus := _formation_bonus_for_units(unit_ids)
+    for pillar in formation_bonus.keys():
+        totals[pillar] = float(totals.get(pillar, 0.0)) + float(formation_bonus.get(pillar, 0.0))
+
+    var competence_bonus := _competence_bonus_for_units(unit_ids)
+    for pillar in competence_bonus.keys():
+        totals[pillar] = float(totals.get(pillar, 0.0)) + float(competence_bonus.get(pillar, 0.0))
+
     return totals
 
 func _aggregate_unit_value(unit_ids: Array, field: String, key: String) -> float:
@@ -249,10 +303,87 @@ func _aggregate_unit_value(unit_ids: Array, field: String, key: String) -> float
             total += float(profile.get(key, 0.0))
     return total
 
+func _formation_bonus_for_units(unit_ids: Array) -> Dictionary:
+    var totals := {}
+    for pillar in PILLARS:
+        totals[pillar] = 0.0
+    for unit_id in unit_ids:
+        var formation_id := str(_unit_formations.get(unit_id, ""))
+        if formation_id.is_empty() and _units_by_id.has(unit_id):
+            formation_id = _resolve_default_formation(unit_id)
+        var formation: Dictionary = _formations_by_id.get(formation_id, {})
+        var modifiers := formation.get("pillar_modifiers", {})
+        if modifiers is Dictionary:
+            for pillar in modifiers.keys():
+                totals[pillar] = float(totals.get(pillar, 0.0)) + float(modifiers.get(pillar, 0.0))
+    return totals
+
+func _competence_bonus_for_units(unit_ids: Array) -> Dictionary:
+    var totals := {}
+    for pillar in PILLARS:
+        totals[pillar] = 0.0
+    for unit_id in unit_ids:
+        var unit: Dictionary = _units_by_id.get(unit_id, {})
+        if unit.is_empty():
+            continue
+        var synergy := unit.get("competence_synergy", {})
+        var formation_id := str(_unit_formations.get(unit_id, ""))
+        var formation: Dictionary = _formations_by_id.get(formation_id, {})
+        var formation_weight := formation.get("competence_weight", {})
+        for category in COMPETENCE_CATEGORIES:
+            var allocation := float(_competence_allocations.get(category, 0.0))
+            if allocation <= 0.0:
+                continue
+            var synergy_value := float(synergy.get(category, 0.0))
+            if synergy_value <= 0.0:
+                continue
+            var multiplier := 1.0 + float(formation_weight.get(category, 0.0))
+            var contribution := allocation * synergy_value * multiplier * COMPETENCE_SCALAR
+            match category:
+                "tactics":
+                    totals["impulse"] = float(totals.get("impulse", 0.0)) + contribution
+                "strategy":
+                    totals["information"] = float(totals.get("information", 0.0)) + contribution
+                "logistics":
+                    totals["position"] = float(totals.get("position", 0.0)) + contribution
+    return totals
+
 func _terrain_profile(terrain_id: String) -> Dictionary:
     if TERRAIN_PROFILES.has(terrain_id):
         return TERRAIN_PROFILES.get(terrain_id, {})
     return TERRAIN_PROFILES.get("plains", {})
+
+func _resolve_default_formation(unit_id: String) -> String:
+    var unit: Dictionary = _units_by_id.get(unit_id, {})
+    var defaults: Array = unit.get("default_formations", [])
+    for entry in defaults:
+        var candidate := str(entry)
+        if not candidate.is_empty() and _formations_by_id.has(candidate):
+            _unit_formations[unit_id] = candidate
+            return candidate
+    if not _formations_by_id.is_empty():
+        var fallback := str(_formations_by_id.keys()[0])
+        _unit_formations[unit_id] = fallback
+        return fallback
+    return ""
+
+func _formation_payload(unit_id: String, reason: String) -> Dictionary:
+    var formation_id := str(_unit_formations.get(unit_id, ""))
+    var formation: Dictionary = _formations_by_id.get(formation_id, {})
+    return {
+        "unit_id": unit_id,
+        "formation_id": formation_id,
+        "formation_name": formation.get("name", formation_id),
+        "posture": formation.get("posture", ""),
+        "pillar_modifiers": formation.get("pillar_modifiers", {}),
+        "competence_weight": formation.get("competence_weight", {}),
+        "reason": reason,
+    }
+
+func _emit_formation_update(unit_id: String, reason: String) -> void:
+    if event_bus == null:
+        return
+    event_bus.emit_formation_changed(_formation_payload(unit_id, reason))
 
 func _resolve_intel_confidence(engagement: Dictionary) -> float:
     var confidence := float(engagement.get("intel_confidence", _default_intel_confidence))
@@ -274,7 +405,8 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
         collections.get("units", []),
         collections.get("orders", []),
         collections.get("doctrines", []),
-        collections.get("weather", [])
+        collections.get("weather", []),
+        collections.get("formations", [])
     )
 
 func _on_doctrine_selected(payload: Dictionary) -> void:
@@ -299,3 +431,8 @@ func _on_assistant_order_packet(packet: Dictionary) -> void:
     for engagement in engagements:
         if engagement is Dictionary:
             resolve_engagement(engagement)
+
+func _on_competence_reallocated(payload: Dictionary) -> void:
+    var allocations: Dictionary = payload.get("allocations", {})
+    for category in COMPETENCE_CATEGORIES:
+        _competence_allocations[category] = float(allocations.get(category, 0.0))

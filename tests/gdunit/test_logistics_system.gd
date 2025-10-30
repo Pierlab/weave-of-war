@@ -106,3 +106,7 @@ func test_convoys_can_be_intercepted() -> void:
     var routes := payload.get("routes", [])
     var intercepted := routes.filter(func(route): return route.get("convoy", {}).get("last_event") == "intercepted")
     asserts.is_true(intercepted.size() > 0, "High interception chance should flag intercepted convoys")
+    var breaks := payload.get("breaks", [])
+    var intercept_breaks := breaks.filter(func(entry): return entry.get("type", "") == "convoy_intercept")
+    asserts.is_true(intercept_breaks.size() > 0, "Intercepted convoys should emit break telemetry")
+    asserts.is_true(float(payload.get("competence_penalty", 0.0)) > 0.0, "Break telemetry should quantify competence penalties")

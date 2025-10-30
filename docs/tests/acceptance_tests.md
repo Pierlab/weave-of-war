@@ -70,4 +70,9 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **When** `EspionageSystem` exécute un ping sous météo claire puis brumeuse
 - **Then** la télémétrie `espionage_ping` reflète la confiance, le bruit météo, et révèle les intentions connues lorsque le ping réussit
 
+### AT-13: Compétences et formations actives
+- **Given** la scène principale est en cours d'exécution avec les curseurs de compétences visibles et les unités dotées de formations par défaut
+- **When** je redistribue les points (`competence_reallocated`) puis déclenche une rupture logistique qui intercepte un convoi
+- **Then** la télémétrie enregistre la baisse de budget compétence, un événement `formation_changed` apparaît lorsque je sélectionne une nouvelle posture, et la résolution de combat suivante reflète les bonus/malus de la formation choisie
+
 All tests must pass without Godot warnings or errors in the console.

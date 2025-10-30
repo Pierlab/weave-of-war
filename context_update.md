@@ -30,6 +30,8 @@
 - Livré la boucle commandement/Élan Semaine 0–1 : systèmes Doctrine/Élan interconnectés, HUD avec sélection doctrine/ordres, gestion de l'inertie et feedback audio, plus tests gdUnit dédiés.
 - Mis en service le socle logistique hybride Semaine 2–3 : calcul des anneaux d'approvisionnement, routes/convoys animés et rotation météo (`sunny`/`rain`/`mist`) émettant des payloads `logistics_update` et `weather_changed` exploitables par la HUD et la télémétrie.
 - Finalisé les systèmes Semaine 4–5 : `CombatSystem` calcule les trois piliers via doctrines/terrain/météo/espionnage, `EspionageSystem` maintient le brouillard, produit des pings probabilistes avec intentions révélées, et la télémétrie capture `combat_resolved`/`espionage_ping` avec tests `test_combat_and_espionage_systems.gd`.
+- Bouclé la Semaine 6 : `TurnManager` gère désormais un budget de compétences par tour, consomme automatiquement des points lors des ruptures logistiques, et `CombatSystem` combine formation active + allocations pour moduler les piliers avec publication `formation_changed`.
+- Livré le catalogue `data/formations.json`, la couverture gdUnit (`test_competence_and_formations.gd`) et l'enrichissement des payloads `logistics_update`/`Telemetry` afin que la boucle compétence/formation soit entièrement instrumentée.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.

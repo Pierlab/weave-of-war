@@ -5,9 +5,13 @@ const ESPIONAGE_SYSTEM := preload("res://scripts/systems/espionage_system.gd")
 
 class StubCombatEventBus:
     var payloads: Array = []
+    var formations: Array = []
 
     func emit_combat_resolved(payload: Dictionary) -> void:
         payloads.append(payload)
+
+    func emit_formation_changed(payload: Dictionary) -> void:
+        formations.append(payload)
 
 class StubIntelEventBus:
     var payloads: Array = []
@@ -18,17 +22,48 @@ class StubIntelEventBus:
 func test_combat_system_resolves_three_pillars() -> void:
     var system: CombatSystem = COMBAT_SYSTEM.new()
     system.set_rng_seed(1)
+    var formations := [
+        {
+            "id": "shield_wall",
+            "pillar_modifiers": {"position": 0.4, "impulse": -0.2, "information": -0.1},
+            "posture": "defensive",
+            "competence_weight": {"logistics": 0.2},
+        },
+        {
+            "id": "advance_column",
+            "pillar_modifiers": {"position": -0.1, "impulse": 0.3, "information": 0.0},
+            "posture": "aggressive",
+            "competence_weight": {"tactics": 0.1},
+        },
+        {
+            "id": "wedge",
+            "pillar_modifiers": {"position": 0.1, "impulse": 0.4, "information": -0.05},
+            "posture": "aggressive",
+            "competence_weight": {"tactics": 0.25},
+        },
+        {
+            "id": "screen",
+            "pillar_modifiers": {"position": -0.05, "impulse": 0.1, "information": 0.2},
+            "posture": "balanced",
+            "competence_weight": {"strategy": 0.1},
+        }
+    ]
+
     system.configure(
         [
             {
                 "id": "infantry",
                 "combat_profile": {"position": 1.1, "impulse": 0.9, "information": 0.6},
                 "recon_profile": {"detection": 0.3, "counter_intel": 0.2},
+                "competence_synergy": {"tactics": 2, "strategy": 1, "logistics": 1},
+                "default_formations": ["shield_wall", "advance_column"],
             },
             {
                 "id": "cavalry",
                 "combat_profile": {"position": 0.9, "impulse": 1.4, "information": 0.7},
                 "recon_profile": {"detection": 0.45, "counter_intel": 0.25},
+                "competence_synergy": {"tactics": 3, "strategy": 1, "logistics": 2},
+                "default_formations": ["wedge", "screen"],
             }
         ],
         [
@@ -57,7 +92,8 @@ func test_combat_system_resolves_three_pillars() -> void:
                 "id": "sunny",
                 "combat_modifiers": {"position": 1.0, "impulse": 1.0, "information": 1.0},
             }
-        ]
+        ],
+        formations
     )
     system.set_active_doctrine("force")
     system.set_current_weather("sunny")
@@ -88,6 +124,20 @@ func test_combat_system_resolves_three_pillars() -> void:
     var intel := result.get("intel", {})
     asserts.is_equal(0.8, intel.get("confidence", 0.0), "Intel confidence should reflect base plus espionage bonus")
     asserts.is_true(stub_bus.payloads.size() == 1, "Combat system should emit a telemetry payload via the event bus")
+
+    var baseline_impulse := pillars.get("impulse", {}).get("attacker", 0.0)
+    system.set_rng_seed(1)
+    var changed := system.set_unit_formation("infantry", "advance_column")
+    asserts.is_true(changed, "Infantry formation should switch to advance column")
+    changed = system.set_unit_formation("cavalry", "wedge")
+    asserts.is_true(changed, "Cavalry formation should accept wedge posture")
+    system._on_competence_reallocated({
+        "allocations": {"tactics": 3.0, "strategy": 2.0, "logistics": 1.0},
+    })
+    var empowered := system.resolve_engagement(engagement)
+    var boosted_impulse := empowered.get("pillars", {}).get("impulse", {}).get("attacker", 0.0)
+    asserts.is_true(boosted_impulse > baseline_impulse, "Competence and formation bonuses should lift impulse strength")
+    asserts.is_true(stub_bus.formations.size() >= 2, "Formation changes should emit telemetry payloads")
 
 func test_espionage_ping_reflects_visibility_and_noise() -> void:
     var system: EspionageSystem = ESPIONAGE_SYSTEM.new()

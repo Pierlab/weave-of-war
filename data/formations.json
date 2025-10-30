@@ -1,0 +1,94 @@
+[
+  {
+    "id": "shield_wall",
+    "name": "Shield Wall",
+    "posture": "defensive",
+    "pillar_modifiers": {
+      "position": 0.4,
+      "impulse": -0.2,
+      "information": -0.1
+    },
+    "competence_weight": {
+      "logistics": 0.2
+    }
+  },
+  {
+    "id": "advance_column",
+    "name": "Advance Column",
+    "posture": "aggressive",
+    "pillar_modifiers": {
+      "position": -0.1,
+      "impulse": 0.3,
+      "information": 0.0
+    },
+    "competence_weight": {
+      "tactics": 0.15
+    }
+  },
+  {
+    "id": "wedge",
+    "name": "Cavalry Wedge",
+    "posture": "aggressive",
+    "pillar_modifiers": {
+      "position": 0.1,
+      "impulse": 0.4,
+      "information": -0.05
+    },
+    "competence_weight": {
+      "tactics": 0.25
+    }
+  },
+  {
+    "id": "screen",
+    "name": "Screen Formation",
+    "posture": "balanced",
+    "pillar_modifiers": {
+      "position": -0.05,
+      "impulse": 0.1,
+      "information": 0.2
+    },
+    "competence_weight": {
+      "strategy": 0.1
+    }
+  },
+  {
+    "id": "skirmish",
+    "name": "Skirmish Line",
+    "posture": "fluid",
+    "pillar_modifiers": {
+      "position": -0.1,
+      "impulse": 0.05,
+      "information": 0.35
+    },
+    "competence_weight": {
+      "strategy": 0.2
+    }
+  },
+  {
+    "id": "observation",
+    "name": "Observation Net",
+    "posture": "recon",
+    "pillar_modifiers": {
+      "position": 0.0,
+      "impulse": -0.05,
+      "information": 0.4
+    },
+    "competence_weight": {
+      "strategy": 0.25
+    }
+  },
+  {
+    "id": "volley_line",
+    "name": "Volley Line",
+    "posture": "ranged",
+    "pillar_modifiers": {
+      "position": 0.2,
+      "impulse": 0.0,
+      "information": 0.25
+    },
+    "competence_weight": {
+      "tactics": 0.1,
+      "strategy": 0.2
+    }
+  }
+]

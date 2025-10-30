@@ -52,6 +52,16 @@ Checklist C should request dependencies from these singletons instead of reading
   probabilistic pings that can reveal enemy intentions via `espionage_ping`. The dedicated gdUnit coverage in
   `tests/gdunit/test_combat_and_espionage_systems.gd` locks behaviour under sunny vs. misty weather noise.
 
+## Competence sliders & formations (Semaine 6)
+- `TurnManager` now maintains a per-turn competence budget across the `tactics`, `strategy`, and `logistics` sliders. Manual
+  reallocations emit `competence_reallocated` telemetry and logistics breaks consume available points automatically, keeping the
+  command economy responsive to convoy disruptions.
+- Unit formations are described in the new [`data/formations.json`](data/formations.json) catalogue. `CombatSystem` tracks the
+  active formation for each unit, publishes `formation_changed` events, and folds formation posture bonuses into pillar
+  resolution alongside competence allocations.
+- `DataLoader` exposes the formations dataset, while `Telemetry` records competence and formation events so gdUnit tests can
+  assert on the complete Semaine 6 loop.
+
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove
 the `.godot/` metadata folder to avoid stale parser caches before running the commands below.
@@ -89,7 +99,7 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   [`docs/design/tdd_architecture_data.md`](docs/design/tdd_architecture_data.md) when wiring systems to the event bus, data
   loader, or assistant AI interpreter, and follow the JSON→runtime mapping table when adding new fields or scripts. The new
   autoloads mirror this architecture so future Checklist C work can focus on behaviour, not plumbing.
-- Review the canonical JSON schemas in `data/` for doctrines, orders, units, weather, and logistics to keep inertia locks, Élan
+- Review the canonical JSON schemas in `data/` for doctrines, orders, units, formations, weather, and logistics to keep inertia locks, Élan
   costs, and supply interactions aligned with gameplay scripts.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
   fantasy, pillars, loops, and risks for the vertical slice.
