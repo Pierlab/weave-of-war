@@ -23,6 +23,7 @@
 - Rédigé le TDD d'architecture data-driven (`docs/design/tdd_architecture_data.md`) couvrant autoloads Godot, bus d'événements,
   pipeline JSON et interactions avec l'IA assistante, puis coché la première action de la Checklist B.
 - Étendu les schémas JSON `data/` avec les métadonnées d'inertie, de coûts d'Élan et d'interactions logistiques pour préparer le chargement data-driven des systèmes P0, puis documenté la référence dans le README et le changelog.
+- Complété la Checklist B en documentant dans le TDD le mapping JSON → scripts/scènes, avec une table de routage DataLoader et des références directes vers `scripts/core` et `scripts/systems`, puis relié ce guide dans le README et le changelog.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.

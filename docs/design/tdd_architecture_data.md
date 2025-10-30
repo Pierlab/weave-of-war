@@ -47,6 +47,28 @@ JSON configs (data/) → DataLoader (autoload) → Runtime caches (Resources)
 3. `DataLoader` converts JSON dictionaries into lightweight `Resource` subclasses (e.g. `DoctrineConfig`, `OrderConfig`) stored in caches so systems can request typed data.
 4. Systems observe `EventBus.data_ready` before using the caches. If validation fails, a global `ProjectState` flag marks the build as unsafe, causing headless checks to fail fast.
 
+## JSON → Runtime Mapping
+The table below anchors every JSON asset to its loading path and in-game consumers so future agents know where to plug new fields
+or validations. Each consumer script is listed with its repository path for quick navigation.
+
+| JSON source | DataLoader entry points | Cached resource / dictionary | Primary consumers |
+| --- | --- | --- | --- |
+| `data/doctrines.json` | `DataLoader._load_doctrines()` validates against `data/schemas/doctrine.schema.json`. | `DoctrineConfig` resources indexed by doctrine id. | `scripts/systems/doctrine_system.gd` (applies modifiers), `scripts/core/game_manager.gd` (exposes available doctrines to the HUD), `scripts/core/assistant_ai.gd` (anticipates doctrine impacts in previews). |
+| `data/orders.json` | `DataLoader._load_orders()` validates command payload structure and Élan costs. | `OrderConfig` resources grouped by unit archetype. | `scripts/core/assistant_ai.gd` (builds `assistant_order_packet` payloads), `scripts/core/turn_manager.gd` (enforces inertia locks), `scripts/systems/logistics_system.gd` (routes movement orders), `scripts/systems/combat_system.gd` (reads combat intent hints). |
+| `data/units.json` | `DataLoader._load_units()` enforces stat/formation schema. | `UnitConfig` resources keyed by archetype. | `scripts/systems/combat_system.gd` (calculates pillar strength), `scripts/systems/logistics_system.gd` (derives convoy capacity), `scripts/core/game_manager.gd` (spawns unit nodes). |
+| `data/weather.json` | `DataLoader._load_weather()` validates modifier dictionaries. | `WeatherConfig` resources and lookup dictionaries. | `scripts/systems/logistics_system.gd` (alters supply throughput), `scripts/systems/combat_system.gd` (adjusts pillar resolution), `scripts/systems/espionage_system.gd` (affects intel noise), `scripts/systems/terrain_weather_system.gd` (drives transitions broadcast via `weather_changed`). |
+| `data/logistics.json` | `DataLoader._load_logistics()` checks zone, route, and convoy definitions. | `LogisticsConfig` resources: `SupplyZoneConfig`, `RouteConfig`, `ConvoyConfig`. | `scripts/systems/logistics_system.gd` (builds the hybrid supply map), `scripts/ui/hud_manager.gd` (renders overlays), `scripts/core/telemetry.gd` (derives baseline supply events), `scripts/core/assistant_ai.gd` (plans order feasibility). |
+
+During validation failures the loader raises `data_loader_error` with the offending file path, schema section, and offending
+payload keys so affected systems can surface actionable HUD/debug overlay feedback. Successful loads emit
+`data_loader_ready({
+    "doctrines": Array,
+    "orders": Array,
+    "units": Array,
+    "weather": Array,
+    "logistics": Array
+})`, enabling consumers to opt-in lazily rather than performing redundant disk reads.
+
 ## Event Bus Contracts
 | Signal | Emitter | Payload | Consumers |
 | --- | --- | --- | --- |
