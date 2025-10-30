@@ -4,6 +4,7 @@
 - Established agent onboarding artefacts (`AGENTS.md`, refreshed vibe-coding playbook, mission workspace).
 - Added automated Godot lint/build/test runners plus a GitHub Actions workflow mirroring the headless commands.
 - Introduced a generated context snapshot, changelog, and branch-level reporting routine for sustained continuity.
+- Ajouté des tests d’intégrité gdUnit pour valider le chargement et la structure des fichiers JSON `data/` avant d’étendre le gameplay.
 - Documented the vertical slice planning checklists in `CHECKLISTS.md` and linked them from the onboarding flow.
 - Adjusted CI Godot scripts to extend `SceneTree` so headless `--script` execution works during merges.
 - Updated map and UI scripts to preload their dependencies, restoring the build smoke check after missing type parse errors.

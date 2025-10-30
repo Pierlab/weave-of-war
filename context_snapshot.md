@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-30T09:02:41Z
+- Generated on: 2025-10-30T09:24:01Z
 - Branch: work
-- Commit when generated: 0217c2dc2fcb2564e6873e88da46fca3c4b59fe3
-- Subject: Merge pull request #15 from Pierlab/codex/update-checklist.md-with-completed-action-x6gzwx
+- Commit when generated: 6acfcda6365257fa63d1f0ee94e42e00a9b88cc6
+- Subject: Merge pull request #16 from Pierlab/codex/update-checklist.md-items
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -43,6 +43,7 @@
 ## Automated tests
 - tests/gdunit/assertions.gd
 - tests/gdunit/test_case.gd
+- tests/gdunit/test_data_integrity.gd
 - tests/gdunit/test_smoke.gd
 
 ## Key documentation
