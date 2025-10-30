@@ -14,6 +14,25 @@
         "rain": -0.2,
         "mist": -0.1
       }
-    }
+    },
+    "weather_rotation_turns": 3
+  },
+  {
+    "id": "forward_operating",
+    "description": "Extended depots push supply lines forward with hybrid convoys.",
+    "supply_radius": 3,
+    "route_types": ["ring", "road", "convoy"],
+    "convoy_spawn_threshold": 3,
+    "intercept_chance": 0.2,
+    "elan_penalty_on_break": 3,
+    "recovery_per_turn": 2,
+    "links": {
+      "doctrine_synergy": ["audace", "force"],
+      "weather_modifiers": {
+        "rain": -0.3,
+        "mist": -0.05
+      }
+    },
+    "weather_rotation_turns": 2
   }
 ]

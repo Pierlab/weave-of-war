@@ -28,6 +28,8 @@ All notable changes to this project will be documented in this file.
   updated tests/docs so Checklist C systems can plug into shared data and signals immediately.
 - Delivered the initial command/Élan loop with doctrine selection, inertia tracking, Élan caps, HUD feedback, and gdUnit
   coverage for the systems interplay.
+- Implemented the hybrid logistics backbone with rotating weather states, convoy progress telemetry, and gdUnit coverage for
+  supply rings, terrain penalties, and interception odds.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.
