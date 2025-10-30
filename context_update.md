@@ -34,6 +34,7 @@
 - Livré le catalogue `data/formations.json`, la couverture gdUnit (`test_competence_and_formations.gd`) et l'enrichissement des payloads `logistics_update`/`Telemetry` afin que la boucle compétence/formation soit entièrement instrumentée.
 - Vérifié dans l'environnement local que tous les fichiers `data/*.json` se parsant sans erreur via un script Python pendant que
   l'exécutable Godot est provisionné pour les commandes headless obligatoires.
+- Aligné le brief `docs/agents/missions/vertical_slice_p0.md` avec l'état réel : jalons Semaine 0–6 cochés, commandes headless notées comme bloquées en attendant l'exécutable Godot local.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
