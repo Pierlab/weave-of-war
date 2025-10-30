@@ -61,6 +61,8 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
 - Semaine 4–5 complétée : résolution Combat 3 Piliers alimentée par doctrines/météo/espionnage (`CombatSystem`), brouillard et
   pings probabilistes opérationnels (`EspionageSystem`), télémétrie `combat_resolved`/`espionage_ping` vérifiée via
   `tests/gdunit/test_combat_and_espionage_systems.gd`.
+- Semaine 6 complétée : budget de compétences par tour (`TurnManager`), formations actives (`data/formations.json`) et bonus de
+  piliers via `CombatSystem`, avec télémétrie `competence_reallocated`/`formation_changed` et tests `test_competence_and_formations.gd`.
 - Préparation autoload validée : `DataLoader` reporte désormais le signal `data_loader_ready` après initialisation via
   `call_deferred`, télémétrie et `AssistantAI` s’y connectent automatiquement, et le test `tests/gdunit/test_autoload_preparation.gd`
   capture la preuve.

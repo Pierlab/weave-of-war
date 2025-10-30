@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-30T14:27:20Z
+- Generated on: 2025-10-30T14:58:47Z
 - Branch: work
-- Commit when generated: ea8253d6ab998fdb9c0a5ad087e824101bd52d90
-- Subject: Merge pull request #21 from Pierlab/codex/update-checklist.md-with-completed-action-0d7twm
+- Commit when generated: b73033e311794aaed7bcbc9265d3888fac0d3847
+- Subject: Merge pull request #22 from Pierlab/codex/update-checklist-and-mark-completed-actions
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -49,6 +49,7 @@
 - tests/gdunit/test_case.gd
 - tests/gdunit/test_combat_and_espionage_systems.gd
 - tests/gdunit/test_command_elan_loop.gd
+- tests/gdunit/test_competence_and_formations.gd
 - tests/gdunit/test_data_integrity.gd
 - tests/gdunit/test_logistics_system.gd
 - tests/gdunit/test_smoke.gd

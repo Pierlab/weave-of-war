@@ -26,6 +26,8 @@ var _visible := false
 var _weather_rotation_turns := 0
 var _last_payload: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
+var _pending_breaks: Array = []
+var _previous_supply_levels: Dictionary = {}
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -200,6 +202,28 @@ func _ensure_convoy_states() -> void:
         if not _convoys_by_route.has(route_id):
             _convoys_by_route[route_id] = _new_convoy_state()
 
+func _maybe_flag_isolation_break(tile_id: String, supply_level: String, logistics_config: Dictionary) -> void:
+    var previous := str(_previous_supply_levels.get(tile_id, ""))
+    _previous_supply_levels[tile_id] = supply_level
+    if supply_level != "isolated":
+        return
+    if previous == "isolated":
+        return
+    _pending_breaks.append({
+        "type": "supply_isolated",
+        "tile_id": tile_id,
+        "turn": _turn_counter,
+        "competence_penalty": 1.0,
+        "elan_penalty": int(logistics_config.get("elan_penalty_on_break", 0)),
+    })
+
+func _aggregate_break_penalty() -> float:
+    var total := 0.0
+    for entry in _pending_breaks:
+        if entry is Dictionary:
+            total += float(entry.get("competence_penalty", 0.0))
+    return total
+
 func _new_convoy_state() -> Dictionary:
     return {
         "active": false,
@@ -209,6 +233,7 @@ func _new_convoy_state() -> Dictionary:
         "spawn_timer": 0,
         "last_speed": 0.0,
         "last_event": "idle",
+        "intercept_reported": true,
     }
 
 func _recalculate_state(reason: String) -> void:
@@ -220,8 +245,10 @@ func _recalculate_state(reason: String) -> void:
 
     var flow_multiplier := _compute_flow_multiplier(logistics_config, weather_config)
     var supply_radius := int(logistics_config.get("supply_radius", 0))
-    var supply_zones := _build_supply_payload(supply_radius, flow_multiplier, weather_config)
-    var routes_payload := _build_route_payload(flow_multiplier)
+    _pending_breaks.clear()
+    var supply_zones := _build_supply_payload(supply_radius, flow_multiplier, weather_config, logistics_config)
+    var routes_payload := _build_route_payload(flow_multiplier, logistics_config)
+    var total_competence_penalty := _aggregate_break_penalty()
 
     _last_payload = {
         "reason": reason,
@@ -232,12 +259,14 @@ func _recalculate_state(reason: String) -> void:
         "flow_multiplier": flow_multiplier,
         "supply_zones": supply_zones,
         "routes": routes_payload,
+        "breaks": _pending_breaks.duplicate(true),
+        "competence_penalty": total_competence_penalty,
     }
 
     if event_bus:
         event_bus.emit_logistics_update(_last_payload)
 
-func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_config: Dictionary) -> Array:
+func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_config: Dictionary, logistics_config: Dictionary) -> Array:
     var zones: Array = []
     var movement_modifier := float(weather_config.get("movement_modifier", 1.0))
     for tile_id in _terrain_lookup.keys():
@@ -256,9 +285,10 @@ func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_c
             "movement_cost": snapped(base_movement * movement_modifier, 0.01),
             "logistics_flow": snapped(logistics_flow, 0.01),
         })
+        _maybe_flag_isolation_break(tile_id, supply_level, logistics_config)
     return zones
 
-func _build_route_payload(flow_multiplier: float) -> Array:
+func _build_route_payload(flow_multiplier: float, logistics_config: Dictionary) -> Array:
     var payload: Array = []
     for route in _routes:
         if not (route is Dictionary):
@@ -284,6 +314,15 @@ func _build_route_payload(flow_multiplier: float) -> Array:
                 "eta_turns": snapped(eta, 0.01),
             }
         })
+        if state.get("last_event", "") == "intercepted" and not state.get("intercept_reported", false):
+            state["intercept_reported"] = true
+            _pending_breaks.append({
+                "type": "convoy_intercept",
+                "route_id": route_id,
+                "turn": _turn_counter,
+                "elan_penalty": int(logistics_config.get("elan_penalty_on_break", 0)),
+                "competence_penalty": max(1.0, float(logistics_config.get("elan_penalty_on_break", 0)) * 0.5),
+            })
     return payload
 
 func _advance_convoys() -> void:
@@ -308,6 +347,7 @@ func _advance_convoys() -> void:
                 state["intercepted"] = false
                 state["progress"] = 0.0
                 state["last_event"] = "spawned"
+                state["intercept_reported"] = true
         if state.get("active", false):
             var speed := _route_speed(route.get("type", "road"), flow_multiplier)
             state["last_speed"] = speed
@@ -316,10 +356,12 @@ func _advance_convoys() -> void:
                 state["intercepted"] = true
                 state["active"] = false
                 state["last_event"] = "intercepted"
+                state["intercept_reported"] = false
             elif state.get("progress", 0.0) >= route_length:
                 state["completed"] = int(state.get("completed", 0)) + 1
                 state["active"] = false
                 state["last_event"] = "delivered"
+                state["intercept_reported"] = true
         _convoys_by_route[route_id] = state
 
 func _maybe_rotate_weather() -> void:
