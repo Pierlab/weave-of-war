@@ -22,6 +22,7 @@ godot --headless --path . --script res://scripts/ci/gd_lint_runner.gd
 godot --headless --path . --script res://scripts/ci/gd_build_check.gd
 godot --headless --path . --script res://scripts/ci/gdunit_runner.gd
 ```
+The gdUnit suite now includes data integrity coverage that loads each JSON data file under `data/` and validates required keys and types before gameplay logic consumes them.
 These scripts now extend `SceneTree` directly so they can be executed with `--script` in both local shells and CI runners.
 They power local validation and the GitHub Actions workflow defined in `.github/workflows/ci.yml`.
 
