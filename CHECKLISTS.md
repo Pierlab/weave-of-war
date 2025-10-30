@@ -18,7 +18,7 @@ These checklists consolidate the planning artefacts for the vertical slice descr
 - Préparation : Les autoloads `EventBus`, `DataLoader`, `Telemetry` et `AssistantAI` sont maintenant configurés dans `project.godot`
   et émettent un signal `data_loader_ready` enregistré via la télémétrie. Les systèmes à implémenter peuvent s'y connecter sans
   travail supplémentaire de plomberie.
-- [ ] Semaine 0–1 : Implémenter la boucle commandement/élan (doctrine active, ordres autorisés, inertie) avec feedback visuel/sonore minimal et stockage d’élan plafonné.
+- [x] Semaine 0–1 : Implémenter la boucle commandement/élan (doctrine active, ordres autorisés, inertie) avec feedback visuel/sonore minimal et stockage d’élan plafonné. (HUD : sélection doctrine/ordres, jauge d’Élan, signaux audio)
 - [ ] Semaine 2–3 : Mettre en place le ravitaillement hybride (anneaux, routes animées, convois interceptables) et terrain/météo (Plaine/Forêt/Colline + Soleil/Pluie/Brume) avec impacts sur mouvement/logistique.
 - [ ] Semaine 4–5 : Développer la résolution Combat 3 Piliers et les mécaniques d’espionnage (brouillard, pings probabilistes, intentions) en suivant le test d’acceptation fourni pour les 3 piliers.
 - [ ] Semaine 6 : Finaliser les compétences/points par tour et les formations d’unités (infanterie/archers/cavalerie avec postures), raccorder la télémétrie minimale (élan dépensé, résultats piliers, ruptures logistiques) et valider la boucle complète via tests automatisés + mise à jour des acceptances.

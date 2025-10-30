@@ -54,3 +54,5 @@ Pinned CI to Godot 4.5.1 and cleaned UI scene parenting so build smoke checks ca
 test pass once the new Godot binary is available locally. Updated HUD and GameManager scripts to the Python-style conditional
 syntax required by Godot 4.5.1 so the editor no longer reports parse errors on load. Follow-up pass resolved lingering HUD/Debug
 Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar files for future agents.
+- Semaine 0–1 complétée : boucle commandement/Élan jouable (DoctrineSystem + ElanSystem), HUD avec sélection doctrine/ordres,
+  inertie affichée, feedback audio et tests gdUnit pour sécuriser la logique de verrouillage et de dépense d’Élan.
