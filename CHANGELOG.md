@@ -48,6 +48,7 @@ All notable changes to this project will be documented in this file.
 - Documented the new Godot `.uid` companion files in the README to clarify their purpose in resource referencing.
 - Expanded logistics payloads with break summaries and competence penalty values so downstream systems can react to convoy
   interceptions without bespoke polling.
+- Realigned the `vertical_slice_p0` mission brief checklist with delivered systems and documented the pending headless command blocage.
 
 ### Fixed
 - CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.

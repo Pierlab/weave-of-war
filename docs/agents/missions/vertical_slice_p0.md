@@ -28,9 +28,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   [`sds_command_model.md`](../../design/sds_command_model.md) and [`sds_elan.md`](../../design/sds_elan.md) — status: Locked for
   review.)
 - [x] Define a delivery timeline across Semaine 0–6 with milestones mapped to the systems above.
-- [ ] Update Godot scenes/scripts incrementally per milestone, ensuring tests and telemetry hooks keep pace.
-- [ ] Run headless lint/build/test commands after each milestone and archive logs/screenshots as needed.
-- [ ] Refresh `context_update.md`, `CHANGELOG.md`, and `context_snapshot.md` after every significant increment.
+- [x] Update Godot scenes/scripts incrementally per milestone, ensuring tests and telemetry hooks keep pace. (Doctrine/Élan, Logistique, Combat/Espionnage et Compétence/Formations sont en place avec couverture gdUnit.)
+- [ ] Run headless lint/build/test commands after each milestone and archive logs/screenshots as needed. (Bloqué tant que l'exécutable Godot 4.5.1 n'est pas provisionné localement — voir `context_update.md`.)
+- [x] Refresh `context_update.md`, `CHANGELOG.md`, and `context_snapshot.md` after every significant increment. (Docs synchronisés après les jalons Semaine 0–6.)
 - [ ] Capture risks, open questions, and decision records in mission follow-ups or ADRs.
 
 ## Deliverables
