@@ -1,6 +1,19 @@
 [
   {
     "id": "baseline",
-    "description": "Represents minimal supply coverage from cities."
+    "description": "Represents minimal supply coverage from cities.",
+    "supply_radius": 2,
+    "route_types": ["ring", "road"],
+    "convoy_spawn_threshold": 4,
+    "intercept_chance": 0.1,
+    "elan_penalty_on_break": 2,
+    "recovery_per_turn": 1,
+    "links": {
+      "doctrine_synergy": ["equilibre", "patience"],
+      "weather_modifiers": {
+        "rain": -0.2,
+        "mist": -0.1
+      }
+    }
   }
 ]

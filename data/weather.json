@@ -2,6 +2,11 @@
   {
     "id": "sunny",
     "name": "Sunny",
-    "effects": "Baseline visibility and movement."
+    "effects": "Baseline visibility and movement.",
+    "movement_modifier": 1.0,
+    "logistics_flow_modifier": 1.0,
+    "intel_noise": 0.0,
+    "duration_turns": [1, 3],
+    "elan_regeneration_bonus": 0.1
   }
 ]

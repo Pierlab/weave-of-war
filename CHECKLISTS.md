@@ -10,7 +10,7 @@ These checklists consolidate the planning artefacts for the vertical slice descr
 
 ## Checklist B — Architecture & données (TDD initial)
 - [x] Définir le plan d’architecture data-driven dans un TDD, couvrant composants Godot, bus d’événements et interactions IA assistante comme mentionné en section 2.3. (Livrable : [`docs/design/tdd_architecture_data.md`](docs/design/tdd_architecture_data.md))
-- [ ] Élargir les schémas JSON (`data/`) avec les champs nécessaires pour doctrines, ordres, unités, météo et logistique, y compris métadonnées pour inertie, coûts d’élan, interactions logistiques.
+- [x] Élargir les schémas JSON (`data/`) avec les champs nécessaires pour doctrines, ordres, unités, météo et logistique, y compris métadonnées pour inertie, coûts d’élan, interactions logistiques. (Ajout des champs de référence dans `data/*.json`.)
 - [ ] Documenter le mapping JSON → scènes/scripts dans le TDD afin que les agents sachent où charger et valider les données (référencer les scripts cibles sous `scripts/core` et `scripts/systems`).
 - [ ] Ajouter des tests d’intégrité (unitaires ou gdUnit) pour s’assurer que les fichiers JSON se chargent et respectent le schéma avant de poursuivre le gameplay.
 
