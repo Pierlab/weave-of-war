@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-31T23:02:35Z
+- Generated on: 2025-10-31T23:12:24Z
 - Branch: work
-- Commit when generated: f87026ae6e8208c6df22e9ba57e7fa16c4f96619
-- Subject: Delete errors.log
+- Commit when generated: 5e6ef2877fe93efc2a35e5c63a07e1c39b72e0eb
+- Subject: Merge pull request #35 from Pierlab/codex/investigate-error-logs-and-update-documentation
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
