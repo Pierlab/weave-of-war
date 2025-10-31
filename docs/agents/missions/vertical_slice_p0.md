@@ -76,3 +76,5 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
   sur la commande PowerShell utilisée pour lancer le projet.
 - Rafraîchi le cache `.godot/global_script_class_cache.cfg` pour refléter ces nouveaux `class_name` et lever les erreurs de
   parsing "Could not find type ...Autoload" lors du démarrage.
+- Corrigé l'erreur de compilation `Variant` dans `ElanSystem` et amorcé le générateur audio HUD pour éliminer les logs "Player
+  is inactive" lors des interactions doctrines/ordres.

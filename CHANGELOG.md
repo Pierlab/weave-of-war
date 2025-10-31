@@ -70,3 +70,7 @@ All notable changes to this project will be documented in this file.
   when loading autoloads and the HUD scene.
 - Renamed autoload script classes to follow the `*Autoload` pattern and hardened Élan/TurnManager typing so warnings-as-errors no
   longer block startup when launching the project in Godot 4.5.1.
+- Restored the Élan system's turn income calculation by casting doctrine/unit dictionaries explicitly, removing the Variant
+  inference warning that Godot elevated to a blocking error on project load.
+- Primed the HUD's procedural audio generator before requesting playback so doctrine/order interactions no longer emit inactive
+  audio player errors in the console.

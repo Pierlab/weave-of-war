@@ -137,9 +137,9 @@ func _calculate_turn_income(unit_entries: Array) -> float:
     var total: float = 0.0
     for entry in unit_entries:
         if entry is Dictionary:
-            var generation: Variant = entry.get("elan_generation", {})
-            if generation is Dictionary:
-                var generation_data: Dictionary = generation
+            var generation_value := entry.get("elan_generation")
+            if generation_value is Dictionary:
+                var generation_data: Dictionary = generation_value as Dictionary
                 total += float(generation_data.get("base", 0))
     return total
 

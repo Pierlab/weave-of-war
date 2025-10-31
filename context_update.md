@@ -43,6 +43,8 @@
 - Rétabli le chargement de l'éditeur en neutralisant l'avertissement `class_name_hides_autoload` et en ajoutant des annotations de types explicites dans la HUD et le DataLoader pour éviter les inférences `Variant` bloquantes de Godot 4.5.
 - Renommé les classes des autoloads en `EventBusAutoload`/`DataLoaderAutoload`/`TelemetryAutoload`/`AssistantAIAutoload`, renforcé les hints typés d'Élan et du TurnManager pour qu'aucun avertissement Godot 4.5 ne bloque le chargement, et documenté dans le README la commande PowerShell utilisée pour lancer le projet (répliquée dans `errors.log`).
 - Actualisé le cache `global_script_class_cache.cfg` de Godot pour refléter les suffixes `Autoload`, supprimant les erreurs de parsing "Could not find type ...Autoload" rencontrées au démarrage.
+- Réaligné `ElanSystem` pour typer explicitement les dictionnaires `elan_generation`, levant l'erreur Godot "Variant" qui empêchait la compilation des scripts dépendants.
+- Amorçé le générateur audio de la HUD avant l'injection des frames pour supprimer les erreurs "Player is inactive" lors des interactions doctrines/ordres.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.
