@@ -1,5 +1,5 @@
-extends RefCounted
 class_name WoWUtils
+extends RefCounted
 
 ## Utility helpers for the Weave of War prototype.
 

@@ -1,6 +1,6 @@
-extends Node
 @warning_ignore("class_name_hides_autoload")
 class_name EventBus
+extends Node
 
 signal turn_started(turn_number: int)
 signal turn_ended(turn_number: int)

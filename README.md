@@ -103,6 +103,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   `scripts/ui/` for reference on the preferred preload pattern.
 - Godot 4.5 removed the `condition ? a : b` ternary helper. Replace those expressions with the Python-style
   `a if condition else b` form to avoid parse errors when opening the project or running the headless build script.
+- If you encounter `Unexpected "class_name" here` parse errors, declare the `class_name` **before** the `extends` line. The
+  core systems and autoloads (for example `scripts/core/event_bus.gd`) now follow this order for compatibility with older
+  editor builds that still read the project.
 - Treating warnings as errors is intentional. When autoload singletons also declare a `class_name`, add
   `@warning_ignore("class_name_hides_autoload")` (see `scripts/core/event_bus.gd`) so Godot 4.5+ loads without aborting.
 - When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
