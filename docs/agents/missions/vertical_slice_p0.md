@@ -80,3 +80,5 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
   is inactive" lors des interactions doctrines/ordres.
 - Dégagé la boucle audio HUD en stoppant et purgeant le générateur avant relance, supprimant les erreurs `AudioStreamGeneratorPlayback.clear_buffer`
   répétées et la fuite d'instances `AudioStreamGeneratorPlayback` constatée à la fermeture du jeu.
+- Consolidé cette boucle audio en vérifiant que le `AudioStreamGeneratorPlayback` est inactif avant chaque purge afin d'éliminer
+  l'assertion `Condition "active" is true` apparue lors des changements de doctrine et des avances de tour.

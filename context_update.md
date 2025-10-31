@@ -47,6 +47,9 @@
 - Renforcé `ElanSystem` en annotant le résultat de `clamp()` et la récupération `elan_generation` afin de supprimer les nouveaux avertissements "Cannot infer" que Godot 4.5 traite désormais comme des erreurs au chargement.
 - Amorçé le générateur audio de la HUD avant l'injection des frames pour supprimer les erreurs "Player is inactive" lors des interactions doctrines/ordres.
 - Arrêté et vidangé le générateur audio de la HUD avant chaque nouveau ton afin de supprimer les erreurs `AudioStreamGeneratorPlayback.clear_buffer` récurrentes et la fuite d'instances observées à la fermeture du jeu.
+- Consolidé ce correctif audio en imposant que le `AudioStreamGeneratorPlayback` soit complètement inactif avant de purger le
+  buffer, ce qui élimine l'assertion `Condition "active" is true` constatée lors des changements de doctrine et des avances de
+  tour.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.

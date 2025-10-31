@@ -78,3 +78,5 @@ All notable changes to this project will be documented in this file.
   audio player errors in the console.
 - Stopped and drained the HUD feedback generator before clearing frames so repeated doctrine/turn interactions no longer spam
   `AudioStreamGeneratorPlayback.clear_buffer` errors or leak playback instances at shutdown.
+- Guarded the HUD feedback generator's stop-and-clear sequence so `clear_buffer()` only runs once playback is fully inactive,
+  eliminating the `Condition "active" is true` assertions that resurfaced during doctrine changes and turn advances.

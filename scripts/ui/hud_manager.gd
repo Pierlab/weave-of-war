@@ -270,8 +270,10 @@ func _play_feedback(pitch_hz: float) -> void:
     if playback is AudioStreamGeneratorPlayback:
         if feedback_player.playing:
             feedback_player.stop()
-        elif playback.active:
+        if playback.active:
             playback.stop()
+        if playback.active:
+            return
         playback.clear_buffer()
         var generator: AudioStreamGenerator = feedback_player.stream
         var frame_count: int = int(generator.mix_rate * 0.12)
@@ -292,4 +294,6 @@ func _exit_tree() -> void:
     if playback is AudioStreamGeneratorPlayback:
         if playback.active:
             playback.stop()
+        if playback.active:
+            return
         playback.clear_buffer()
