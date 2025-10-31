@@ -76,3 +76,5 @@ All notable changes to this project will be documented in this file.
   parse errors when loading the project.
 - Primed the HUD's procedural audio generator before requesting playback so doctrine/order interactions no longer emit inactive
   audio player errors in the console.
+- Stopped and drained the HUD feedback generator before clearing frames so repeated doctrine/turn interactions no longer spam
+  `AudioStreamGeneratorPlayback.clear_buffer` errors or leak playback instances at shutdown.
