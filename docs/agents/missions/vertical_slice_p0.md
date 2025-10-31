@@ -78,3 +78,5 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
   parsing "Could not find type ...Autoload" lors du démarrage.
 - Corrigé l'erreur de compilation `Variant` dans `ElanSystem` et amorcé le générateur audio HUD pour éliminer les logs "Player
   is inactive" lors des interactions doctrines/ordres.
+- Dégagé la boucle audio HUD en stoppant et purgeant le générateur avant relance, supprimant les erreurs `AudioStreamGeneratorPlayback.clear_buffer`
+  répétées et la fuite d'instances `AudioStreamGeneratorPlayback` constatée à la fermeture du jeu.

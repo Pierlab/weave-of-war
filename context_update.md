@@ -46,6 +46,7 @@
 - Réaligné `ElanSystem` pour typer explicitement les dictionnaires `elan_generation`, levant l'erreur Godot "Variant" qui empêchait la compilation des scripts dépendants.
 - Renforcé `ElanSystem` en annotant le résultat de `clamp()` et la récupération `elan_generation` afin de supprimer les nouveaux avertissements "Cannot infer" que Godot 4.5 traite désormais comme des erreurs au chargement.
 - Amorçé le générateur audio de la HUD avant l'injection des frames pour supprimer les erreurs "Player is inactive" lors des interactions doctrines/ordres.
+- Arrêté et vidangé le générateur audio de la HUD avant chaque nouveau ton afin de supprimer les erreurs `AudioStreamGeneratorPlayback.clear_buffer` récurrentes et la fuite d'instances observées à la fermeture du jeu.
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.

@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-31T22:54:05Z
+- Generated on: 2025-10-31T23:02:35Z
 - Branch: work
-- Commit when generated: e9ee372b935302ec0cd975c105ba16879df83e7c
-- Subject: Merge pull request #33 from Pierlab/codex/fix-script-errors-during-launch
+- Commit when generated: f87026ae6e8208c6df22e9ba57e7fa16c4f96619
+- Subject: Delete errors.log
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
