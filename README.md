@@ -127,7 +127,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   naming pattern for any new autoload services to keep the parser clean without suppressing warnings.
 - When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
   `:=` inference. Godot 4.5 infers such values as `Variant`, which now triggers blocking parse errors. Inspect
-  `scripts/core/data_loader.gd` and `scripts/ui/hud_manager.gd` for the preferred explicit typing pattern.
+  `scripts/core/data_loader.gd`, `scripts/systems/elan_system.gd`, and `scripts/ui/hud_manager.gd` for the preferred explicit
+  typing pattern, including casting results from helpers such as `clamp()`.
 
 ## Maintaining context for agents
 - After each iteration, run `python scripts/generate_context_snapshot.py` to refresh [`context_snapshot.md`](context_snapshot.md).

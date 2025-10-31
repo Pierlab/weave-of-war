@@ -44,6 +44,7 @@
 - Renommé les classes des autoloads en `EventBusAutoload`/`DataLoaderAutoload`/`TelemetryAutoload`/`AssistantAIAutoload`, renforcé les hints typés d'Élan et du TurnManager pour qu'aucun avertissement Godot 4.5 ne bloque le chargement, et documenté dans le README la commande PowerShell utilisée pour lancer le projet (répliquée dans `errors.log`).
 - Actualisé le cache `global_script_class_cache.cfg` de Godot pour refléter les suffixes `Autoload`, supprimant les erreurs de parsing "Could not find type ...Autoload" rencontrées au démarrage.
 - Réaligné `ElanSystem` pour typer explicitement les dictionnaires `elan_generation`, levant l'erreur Godot "Variant" qui empêchait la compilation des scripts dépendants.
+- Renforcé `ElanSystem` en annotant le résultat de `clamp()` et la récupération `elan_generation` afin de supprimer les nouveaux avertissements "Cannot infer" que Godot 4.5 traite désormais comme des erreurs au chargement.
 - Amorçé le générateur audio de la HUD avant l'injection des frames pour supprimer les erreurs "Player is inactive" lors des interactions doctrines/ordres.
 
 ## Follow-ups / Open Questions

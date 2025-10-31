@@ -72,5 +72,7 @@ All notable changes to this project will be documented in this file.
   longer block startup when launching the project in Godot 4.5.1.
 - Restored the Élan system's turn income calculation by casting doctrine/unit dictionaries explicitly, removing the Variant
   inference warning that Godot elevated to a blocking error on project load.
+- Hardened Élan type hints further by annotating clamp results and dictionary lookups so Godot no longer reports "Cannot infer"
+  parse errors when loading the project.
 - Primed the HUD's procedural audio generator before requesting playback so doctrine/order interactions no longer emit inactive
   audio player errors in the console.
