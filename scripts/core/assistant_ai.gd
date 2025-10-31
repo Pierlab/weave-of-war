@@ -1,14 +1,13 @@
-@warning_ignore("class_name_hides_autoload")
-class_name AssistantAI
+class_name AssistantAIAutoload
 extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
-static var _instance: AssistantAI
+static var _instance: AssistantAIAutoload
 
-var _event_bus: EventBus
-var _data_loader: DataLoader
+var _event_bus: EventBusAutoload
+var _data_loader: DataLoaderAutoload
 
 func _ready() -> void:
     _instance = self
@@ -16,7 +15,7 @@ func _ready() -> void:
     _data_loader = DATA_LOADER.get_instance()
     _connect_signals()
 
-static func get_instance() -> AssistantAI:
+static func get_instance() -> AssistantAIAutoload:
     return _instance
 
 func _connect_signals() -> void:

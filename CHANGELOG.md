@@ -66,3 +66,5 @@ All notable changes to this project will be documented in this file.
   and debug overlay parenting so the UI buttons are found at runtime.
 - Silenced autoload/class name conflicts and added explicit type hints so Godot 4.5 no longer aborts on Variant inference errors
   when loading autoloads and the HUD scene.
+- Renamed autoload script classes to follow the `*Autoload` pattern and hardened Élan/TurnManager typing so warnings-as-errors no
+  longer block startup when launching the project in Godot 4.5.1.

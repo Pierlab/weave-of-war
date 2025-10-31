@@ -1,5 +1,4 @@
-@warning_ignore("class_name_hides_autoload")
-class_name DataLoader
+class_name DataLoaderAutoload
 extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
@@ -13,7 +12,7 @@ const DATA_FILES := {
     "formations": "res://data/formations.json",
 }
 
-static var _instance: DataLoader
+static var _instance: DataLoaderAutoload
 
 var _collections: Dictionary = {}
 var _indexed: Dictionary = {}
@@ -24,7 +23,7 @@ func _ready() -> void:
     var result: Dictionary = load_all()
     call_deferred("_notify_event_bus", result)
 
-static func get_instance() -> DataLoader:
+static func get_instance() -> DataLoaderAutoload:
     return _instance
 
 func is_ready() -> bool:
@@ -109,7 +108,7 @@ func get_summary() -> Dictionary:
     }
 
 func _notify_event_bus(result: Dictionary) -> void:
-    var event_bus: EventBus = EVENT_BUS.get_instance()
+    var event_bus: EventBusAutoload = EVENT_BUS.get_instance()
     if event_bus == null:
         return
 

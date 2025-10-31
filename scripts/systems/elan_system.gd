@@ -6,8 +6,8 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
 @export var max_elan: float = 6.0
 
-var event_bus: EventBus
-var data_loader: DataLoader
+var event_bus: EventBusAutoload
+var data_loader: DataLoaderAutoload
 
 var _orders_by_id: Dictionary = {}
 var _allowed_order_ids: Array[String] = []
@@ -19,7 +19,7 @@ var _current_doctrine_id := ""
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
+func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
 
@@ -86,7 +86,7 @@ func get_state_payload(reason := "status") -> Dictionary:
     }
 
 func can_issue_order(order_id: String) -> Dictionary:
-    var result := {
+    var result: Dictionary = {
         "success": false,
         "reason": "unknown_order",
     }
@@ -96,7 +96,7 @@ func can_issue_order(order_id: String) -> Dictionary:
         result.reason = "doctrine_locked"
         return result
     var order: Dictionary = _orders_by_id.get(order_id, {})
-    var cost := float(order.get("base_elan_cost", 0))
+    var cost: float = float(order.get("base_elan_cost", 0))
     if cost > _current_elan:
         result.reason = "insufficient_elan"
         result["required"] = cost
@@ -110,10 +110,10 @@ func can_issue_order(order_id: String) -> Dictionary:
     return result
 
 func issue_order(order_id: String) -> Dictionary:
-    var result := can_issue_order(order_id)
+    var result: Dictionary = can_issue_order(order_id)
     if not result.get("success", false):
         return result
-    var cost := float(result.get("cost", 0.0))
+    var cost: float = float(result.get("cost", 0.0))
     spend_elan(cost)
     result["remaining"] = _current_elan
     return result
@@ -123,7 +123,7 @@ func _apply_doctrine_upkeep() -> void:
         return
     if _current_elan <= 0.0:
         return
-    var new_value := max(_current_elan - _current_upkeep, 0.0)
+    var new_value: float = max(_current_elan - _current_upkeep, 0.0)
     if !is_equal_approx(new_value, _current_elan):
         _current_elan = new_value
         _emit_state("upkeep_tick")
@@ -134,12 +134,13 @@ func _emit_state(reason: String) -> void:
     event_bus.emit_elan_updated(get_state_payload(reason))
 
 func _calculate_turn_income(unit_entries: Array) -> float:
-    var total := 0.0
+    var total: float = 0.0
     for entry in unit_entries:
         if entry is Dictionary:
-            var generation := entry.get("elan_generation", {})
+            var generation: Variant = entry.get("elan_generation", {})
             if generation is Dictionary:
-                total += float(generation.get("base", 0))
+                var generation_data: Dictionary = generation
+                total += float(generation_data.get("base", 0))
     return total
 
 func _on_data_loader_ready(payload: Dictionary) -> void:
@@ -157,18 +158,19 @@ func _on_turn_started(_turn_number: int) -> void:
 func _on_doctrine_selected(payload: Dictionary) -> void:
     _current_doctrine_id = payload.get("id", "")
     set_doctrine_upkeep(float(payload.get("elan_upkeep", 0)))
-    var allowed_orders_payload: Array = payload.get("allowed_orders", [])
-    var allowed_ids: Array = []
+    var allowed_orders_variant: Variant = payload.get("allowed_orders", [])
+    var allowed_orders_payload: Array = allowed_orders_variant if allowed_orders_variant is Array else []
+    var allowed_ids: Array[String] = []
     for entry in allowed_orders_payload:
         if entry is Dictionary:
-            allowed_ids.append(entry.get("id", ""))
+            allowed_ids.append(str(entry.get("id", "")))
     set_allowed_orders(allowed_ids)
     _emit_state("doctrine")
 
 func _on_order_execution_requested(order_id: String) -> void:
     if order_id.is_empty():
         return
-    var result := issue_order(order_id)
+    var result: Dictionary = issue_order(order_id)
     if not result.get("success", false):
         if event_bus:
             event_bus.emit_order_execution_failed({
@@ -180,7 +182,7 @@ func _on_order_execution_requested(order_id: String) -> void:
         return
 
     var order: Dictionary = result.get("order", {})
-    var payload := {
+    var payload: Dictionary = {
         "order_id": order_id,
         "order_name": order.get("name", order_id),
         "cost": result.get("cost", 0.0),

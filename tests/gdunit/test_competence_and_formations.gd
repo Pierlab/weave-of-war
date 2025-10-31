@@ -5,7 +5,7 @@ const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const COMBAT_SYSTEM := preload("res://scripts/systems/combat_system.gd")
 
 func test_turn_manager_competence_budget_and_penalties() -> void:
-    var event_bus: EventBus = EVENT_BUS.new()
+    var event_bus: EventBusAutoload = EVENT_BUS.new()
     event_bus._ready()
 
     var manager: TurnManager = TURN_MANAGER.new()

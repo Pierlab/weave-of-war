@@ -18,6 +18,17 @@ This repository now bundles the rituals and automation needed for agent-driven v
 6. Familiarise yourself with the autoload singletons listed below—they provide the shared data, telemetry, and assistant hooks
    required to deliver Checklist C systems without additional plumbing.
 
+### Launching the project locally
+
+When launching the editor on Windows, the following PowerShell command opens the project from its workspace directory while
+capturing verbose logs (update the base path if you installed Godot elsewhere):
+
+```powershell
+c:\Users\plab7\Downloads\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64.exe -v --path 'C:\Users\plab7\Desktop\Weave of War\weave-of-war'
+```
+
+The logs above are mirrored in `errors.log` at the repository root to help future agents diagnose renderer/device warnings.
+
 ## Core autoloads
 
 | Autoload | Script | Responsibilities |
@@ -106,8 +117,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - If you encounter `Unexpected "class_name" here` parse errors, declare the `class_name` **before** the `extends` line. The
   core systems and autoloads (for example `scripts/core/event_bus.gd`) now follow this order for compatibility with older
   editor builds that still read the project.
-- Treating warnings as errors is intentional. When autoload singletons also declare a `class_name`, add
-  `@warning_ignore("class_name_hides_autoload")` (see `scripts/core/event_bus.gd`) so Godot 4.5+ loads without aborting.
+- Treating warnings as errors is intentional. To avoid the `class_name`/autoload conflict introduced in Godot 4.5, autoload
+  scripts now declare distinct `class_name` identifiers (for example `EventBusAutoload`, `DataLoaderAutoload`). Follow that
+  naming pattern for any new autoload services to keep the parser clean without suppressing warnings.
 - When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
   `:=` inference. Godot 4.5 infers such values as `Variant`, which now triggers blocking parse errors. Inspect
   `scripts/core/data_loader.gd` and `scripts/ui/hud_manager.gd` for the preferred explicit typing pattern.

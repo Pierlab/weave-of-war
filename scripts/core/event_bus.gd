@@ -1,5 +1,4 @@
-@warning_ignore("class_name_hides_autoload")
-class_name EventBus
+class_name EventBusAutoload
 extends Node
 
 signal turn_started(turn_number: int)
@@ -25,14 +24,14 @@ signal doctrine_change_requested(doctrine_id: String)
 signal order_execution_requested(order_id: String)
 signal order_execution_failed(payload: Dictionary)
 
-static var _instance: EventBus
+static var _instance: EventBusAutoload
 var _logistics_visible: bool = false
 
 func _ready() -> void:
     _instance = self
     add_to_group("event_bus")
 
-static func get_instance() -> EventBus:
+static func get_instance() -> EventBusAutoload:
     return _instance
 
 func emit_data_loader_ready(payload: Dictionary) -> void:
