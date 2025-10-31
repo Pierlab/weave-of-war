@@ -14,7 +14,7 @@ var _allowed_order_ids: Array[String] = []
 var _current_elan: float = 0.0
 var _turn_income: float = 0.0
 var _current_upkeep: float = 0.0
-var _current_doctrine_id := ""
+var _current_doctrine_id: String = ""
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -50,7 +50,7 @@ func configure(order_entries: Array, unit_entries: Array) -> void:
 func add_elan(amount: float) -> void:
     if amount == 0.0:
         return
-    var new_value := clamp(_current_elan + amount, 0.0, max_elan)
+    var new_value: float = clamp(_current_elan + amount, 0.0, max_elan)
     if !is_equal_approx(new_value, _current_elan):
         _current_elan = new_value
         _emit_state("gain")
@@ -137,7 +137,7 @@ func _calculate_turn_income(unit_entries: Array) -> float:
     var total: float = 0.0
     for entry in unit_entries:
         if entry is Dictionary:
-            var generation_value := entry.get("elan_generation")
+            var generation_value: Variant = entry.get("elan_generation")
             if generation_value is Dictionary:
                 var generation_data: Dictionary = generation_value as Dictionary
                 total += float(generation_data.get("base", 0))
