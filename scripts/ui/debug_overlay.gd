@@ -6,7 +6,7 @@ const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 @onready var toggle_logistics_button: Button = $PanelContainer/MarginContainer/VBoxContainer/ToggleLogisticsButton
 @onready var spawn_unit_button: Button = $PanelContainer/MarginContainer/VBoxContainer/SpawnUnitButton
 
-var event_bus: EventBus
+var event_bus: EventBusAutoload
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()

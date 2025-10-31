@@ -14,8 +14,8 @@ const COUNTER_INTEL_DECAY := 0.15
 const COUNTER_INTEL_GROWTH := 0.05
 const BASE_PROBE_STRENGTH := 0.4
 
-var event_bus: EventBus
-var data_loader: DataLoader
+var event_bus: EventBusAutoload
+var data_loader: DataLoaderAutoload
 
 var _fog_by_tile: Dictionary = {}
 var _weather_by_id: Dictionary = {}
@@ -28,7 +28,7 @@ var _turn_counter := 0
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
+func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
     _rng.randomize()

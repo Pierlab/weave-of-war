@@ -7,7 +7,7 @@ const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]
 @export var base_competence_per_turn: float = 6.0
 
 var current_turn: int = 0
-var event_bus: EventBus
+var event_bus: EventBusAutoload
 
 var _competence_allocations: Dictionary = {}
 var _competence_budget: float = 0.0
@@ -22,7 +22,7 @@ func _ready() -> void:
         bus = EVENT_BUS.get_instance()
     setup(bus)
 
-func setup(event_bus_ref: EventBus) -> void:
+func setup(event_bus_ref: EventBusAutoload) -> void:
     event_bus = event_bus_ref
     if event_bus and not event_bus.logistics_update.is_connected(_on_logistics_update):
         event_bus.logistics_update.connect(_on_logistics_update)
@@ -76,33 +76,33 @@ func _emit_turn_ended() -> void:
 
 func _initialise_competence_state(reason: String) -> void:
     _competence_budget = max(base_competence_per_turn, 0.0)
-    var target_allocations := {}
+    var target_allocations: Dictionary = {}
     if _competence_allocations.is_empty():
-        var default_split := max(_competence_budget / float(COMPETENCE_CATEGORIES.size()), 0.0)
+        var default_split: float = max(_competence_budget / float(COMPETENCE_CATEGORIES.size()), 0.0)
         for category in COMPETENCE_CATEGORIES:
             target_allocations[category] = snapped(default_split, 0.01)
     else:
-        var sum := _sum_allocations()
+        var sum: float = _sum_allocations()
         if sum <= 0.0:
             for category in COMPETENCE_CATEGORIES:
                 target_allocations[category] = 0.0
         else:
-            var scale := _competence_budget / sum if sum > 0.0 else 0.0
+            var scale: float = _competence_budget / sum if sum > 0.0 else 0.0
             for category in COMPETENCE_CATEGORIES:
-                var value := float(_competence_allocations.get(category, 0.0)) * scale
+                var value: float = float(_competence_allocations.get(category, 0.0)) * scale
                 target_allocations[category] = snapped(value, 0.01)
 
-    var validated := _validate_allocations(target_allocations)
+    var validated: Dictionary = _validate_allocations(target_allocations)
     _competence_allocations = validated.get("allocations", {})
     _available_competence = max(_competence_budget - _sum_allocations(), 0.0)
     _processed_break_ids.clear()
     _emit_competence(reason)
 
 func _validate_allocations(raw_allocations: Dictionary) -> Dictionary:
-    var cleaned := {}
-    var total := 0.0
+    var cleaned: Dictionary = {}
+    var total: float = 0.0
     for category in COMPETENCE_CATEGORIES:
-        var value := float(raw_allocations.get(category, 0.0))
+        var value: float = float(raw_allocations.get(category, 0.0))
         value = max(value, 0.0)
         cleaned[category] = snapped(value, 0.01)
         total += cleaned[category]
@@ -122,7 +122,7 @@ func _validate_allocations(raw_allocations: Dictionary) -> Dictionary:
     }
 
 func _sum_allocations() -> float:
-    var total := 0.0
+    var total: float = 0.0
     for category in COMPETENCE_CATEGORIES:
         total += float(_competence_allocations.get(category, 0.0))
     return total
@@ -136,17 +136,18 @@ func _apply_competence_penalty(amount: float, source: Dictionary) -> void:
     if amount <= 0.0:
         return
     _competence_budget = max(_competence_budget - amount, 0.0)
-    var total := _sum_allocations()
+    var total: float = _sum_allocations()
     if total > _competence_budget and total > 0.0:
-        var scale := _competence_budget / total if total > 0.0 else 0.0
+        var scale: float = _competence_budget / total if total > 0.0 else 0.0
         for category in COMPETENCE_CATEGORIES:
-            var value := float(_competence_allocations.get(category, 0.0)) * scale
+            var value: float = float(_competence_allocations.get(category, 0.0)) * scale
             _competence_allocations[category] = snapped(value, 0.01)
     _available_competence = max(_competence_budget - _sum_allocations(), 0.0)
     _emit_competence(source.get("reason", "logistics_break"))
 
 func _on_logistics_update(payload: Dictionary) -> void:
-    var breaks: Array = payload.get("breaks", [])
+    var breaks_variant: Variant = payload.get("breaks", [])
+    var breaks: Array = breaks_variant if breaks_variant is Array else []
     if breaks.is_empty():
         return
 
@@ -161,7 +162,7 @@ func _on_logistics_update(payload: Dictionary) -> void:
         if _processed_break_ids.has(identifier):
             continue
         _processed_break_ids[identifier] = true
-        var penalty := float(entry.get("competence_penalty", 0.0))
+        var penalty: float = float(entry.get("competence_penalty", 0.0))
         if penalty <= 0.0:
             continue
         penalised = true

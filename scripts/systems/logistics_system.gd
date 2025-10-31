@@ -8,8 +8,8 @@ const TERRAIN_DATA := preload("res://scenes/map/terrain_data.gd")
 @export var map_columns := 6
 @export var map_rows := 5
 
-var event_bus: EventBus
-var data_loader: DataLoader
+var event_bus: EventBusAutoload
+var data_loader: DataLoaderAutoload
 
 var _terrain_lookup: Dictionary = {}
 var _terrain_definitions: Dictionary = {}
@@ -32,7 +32,7 @@ var _previous_supply_levels: Dictionary = {}
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
+func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
     _terrain_definitions = TERRAIN_DATA.get_default()

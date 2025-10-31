@@ -4,8 +4,8 @@ extends Node
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
-var event_bus: EventBus
-var data_loader: DataLoader
+var event_bus: EventBusAutoload
+var data_loader: DataLoaderAutoload
 
 var _doctrines_by_id: Dictionary = {}
 var _orders_by_id: Dictionary = {}
@@ -16,7 +16,7 @@ var _allowed_order_ids: Array[String] = []
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
+func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
 

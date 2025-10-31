@@ -71,3 +71,6 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
 - Instrumentation télémétrie consolidée : `logistics_break` complète `elan_spent`, `combat_resolved` et `espionage_ping`, les tests gdUnit valident l'émission dédiée et le plan KPI/Dashboard vit dans `docs/telemetry/dashboard_plan.md`.
 - Éditeur stabilisé : l'ordre `class_name` → `extends` est désormais appliqué partout pour empêcher les erreurs de parsing
   "Unexpected \"class_name\" here" signalées par les versions plus anciennes de l'éditeur.
+- Les autoloads suivent désormais le suffixe `Autoload` (EventBus/DataLoader/Telemetry/AssistantAI) avec des hints typés
+  actualisés, supprimant les avertissements Godot 4.5 traités en erreurs et clarifiant la documentation (README + errors.log)
+  sur la commande PowerShell utilisée pour lancer le projet.

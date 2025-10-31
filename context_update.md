@@ -41,6 +41,7 @@
 - Documenté la stratégie de synchronisation EventBus/Telemetry/DataLoader dans un ADR (`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`) et coché l'action dédiée dans les checklists/mission.
 - Maintenu le glossaire vertical slice en ajoutant [`docs/glossary.md`](docs/glossary.md), en le reliant au README et en cochant la dernière action de la Checklist D.
 - Rétabli le chargement de l'éditeur en neutralisant l'avertissement `class_name_hides_autoload` et en ajoutant des annotations de types explicites dans la HUD et le DataLoader pour éviter les inférences `Variant` bloquantes de Godot 4.5.
+- Renommé les classes des autoloads en `EventBusAutoload`/`DataLoaderAutoload`/`TelemetryAutoload`/`AssistantAIAutoload`, renforcé les hints typés d'Élan et du TurnManager pour qu'aucun avertissement Godot 4.5 ne bloque le chargement, et documenté dans le README la commande PowerShell utilisée pour lancer le projet (répliquée dans `errors.log`).
 
 ## Follow-ups / Open Questions
 - Monitor the first CI run on GitHub to ensure the headless Godot image has the required permissions and paths.

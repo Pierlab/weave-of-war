@@ -210,7 +210,7 @@ func test_formations_json_schema() -> void:
                 _assert_number(competence_weight.get(key), context + ".competence_weight", key)
 
 func test_data_loader_exposes_caches() -> void:
-    var loader: DataLoader = DATA_LOADER.new()
+    var loader: DataLoaderAutoload = DATA_LOADER.new()
     var result := loader.load_all()
     asserts.is_true(result.get("ready", false), "DataLoader should report ready when assets load correctly")
 
