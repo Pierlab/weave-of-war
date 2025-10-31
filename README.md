@@ -10,8 +10,8 @@ This repository now bundles the rituals and automation needed for agent-driven v
 4. Review the current mission briefs in [`docs/agents/missions/`](docs/agents/missions/)—start with
    [`vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md) to align on the vertical slice scope—and the latest
    [`context_snapshot.md`](context_snapshot.md).
-5. Utilise the vertical slice planning checklists in [`CHECKLISTS.md`](CHECKLISTS.md) to coordinate upcoming tasks and the
-   one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) to stay aligned on vision, pillars, loops,
+5. Review the refreshed Vertical Slice P0 execution plan in [`CHECKLISTS.md`](CHECKLISTS.md) (2025 detailed checklist). The previous milestone summary now lives in [`docs/agents/archive/CHECKLISTS_2024-vertical_slice_snapshot.md`](docs/agents/archive/CHECKLISTS_2024-vertical_slice_snapshot.md).
+   Use the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) to stay aligned on vision, pillars, loops,
    and risks. Structural decisions are archived in Architecture Decision Records (ADRs); start with
    [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](docs/ADR_0002_event_bus_and_telemetry_autoloads.md) for the autoload
    signal contract governing Checklist C systems.

@@ -7,11 +7,12 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [`docs/project_spec.md`](../project_spec.md)
 - Latest [`context_snapshot.md`](../../context_snapshot.md)
 - Current notes in [`context_update.md`](../../context_update.md)
-- [`CHECKLISTS.md`](../../CHECKLISTS.md) — track completion state for the vertical slice
+- Expanded execution plan in [`CHECKLISTS.md`](../../CHECKLISTS.md)
+- Previous milestone snapshot archived at [`docs/agents/archive/CHECKLISTS_2024-vertical_slice_snapshot.md`](../archive/CHECKLISTS_2024-vertical_slice_snapshot.md)
 - Existing scenes and scripts under `scenes/` and `scripts/`
 
 ## Acceptance tests
-- Vertical slice checklists (A–D) are fully checked in [`CHECKLISTS.md`](../../CHECKLISTS.md) with validation evidence linked from this mission.
+- Vertical slice checklist items in [`CHECKLISTS.md`](../../CHECKLISTS.md) are completed with evidence linked from this mission file.
 - Automated lint/build/test Godot commands succeed on CI and locally (or blockers documented with mitigation).
 - `README.md`, `CHANGELOG.md`, `context_update.md`, and `context_snapshot.md` reflect the final vertical slice state.
 - SDS deliverables for Command Model and Élan are stored under `docs/design/` with clear owner and review status.
@@ -23,15 +24,16 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Update onboarding and mission documentation alongside any behaviour changes.
 
 ## Implementation checklist
-- [x] Draft SDS outlines for each system (Command Model, Élan, Logistics, Combat 3 Pillars, Espionage, Terrain & Weather, Competence Sliders, Unit Formations) capturing rules, UX, and telemetry needs. See [`docs/design/sds_outlines.md`](../../design/sds_outlines.md).
-- [x] Lock Command Model + Élan SDS with acceptance criteria and share for review in `docs/design/`. (See
-  [`sds_command_model.md`](../../design/sds_command_model.md) and [`sds_elan.md`](../../design/sds_elan.md) — status: Locked for
-  review.)
-- [x] Define a delivery timeline across Semaine 0–6 with milestones mapped to the systems above.
-- [x] Update Godot scenes/scripts incrementally per milestone, ensuring tests and telemetry hooks keep pace. (Doctrine/Élan, Logistique, Combat/Espionnage et Compétence/Formations sont en place avec couverture gdUnit.)
-- [ ] Run headless lint/build/test commands after each milestone and archive logs/screenshots as needed. (Bloqué tant que l'exécutable Godot 4.5.1 n'est pas provisionné localement — voir `context_update.md`.)
-- [x] Refresh `context_update.md`, `CHANGELOG.md`, and `context_snapshot.md` after every significant increment. (Docs synchronisés après les jalons Semaine 0–6.)
-- [x] Capture risks, open questions, and decision records in mission follow-ups or ADRs. (ADR ajouté : [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](../../ADR_0002_event_bus_and_telemetry_autoloads.md).)
+(Use [`CHECKLISTS.md`](../../CHECKLISTS.md) for the detailed sub-tasks and validation artefacts.)
+- [ ] Phase 0 — Alignment, data hygiene, and instrumentation foundations.
+- [ ] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry).
+- [ ] Phase 2 — Logistics backbone with terrain & weather integration.
+- [ ] Phase 3 — Combat (3 Pillars) resolution pipeline.
+- [ ] Phase 4 — Espionage systems and fog of war feedback.
+- [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
+- [ ] Phase 6 — Unit formations/postures influencing combat outcomes.
+- [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
+- [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 
 ## Deliverables
 - Branch name & PR link documenting the latest progress.
@@ -50,35 +52,17 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - **Semaine 6 — Competence sliders & formations**: Ship turn-based competence budget management and unit formation postures (infantry/archers/cavalry). Integrate final telemetry events (Élan spent, pillar results, logistic breaks) and complete documentation updates (`context_update.md`, `CHANGELOG.md`, `context_snapshot.md`).
 
 ## Handoff (fill when pausing or finishing)
-Pinned CI to Godot 4.5.1 and cleaned UI scene parenting so build smoke checks can run headless without crashes. Awaiting a full
-test pass once the new Godot binary is available locally. Updated HUD and GameManager scripts to the Python-style conditional
-syntax required by Godot 4.5.1 so the editor no longer reports parse errors on load. Follow-up pass resolved lingering HUD/Debug
-Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar files for future agents.
-- Semaine 0–1 complétée : boucle commandement/Élan jouable (DoctrineSystem + ElanSystem), HUD avec sélection doctrine/ordres,
-  inertie affichée, feedback audio et tests gdUnit pour sécuriser la logique de verrouillage et de dépense d’Élan.
-- Semaine 2–3 complétée : socle logistique hybride opérationnel (`LogisticsSystem`, météo tournante `sunny/rain/mist`, anneaux
-  d'approvisionnement, routes/convoys, tests gdUnit dédiés) prêt à alimenter HUD et télémétrie.
-- Semaine 4–5 complétée : résolution Combat 3 Piliers alimentée par doctrines/météo/espionnage (`CombatSystem`), brouillard et
-  pings probabilistes opérationnels (`EspionageSystem`), télémétrie `combat_resolved`/`espionage_ping` vérifiée via
-  `tests/gdunit/test_combat_and_espionage_systems.gd`.
-- Semaine 6 complétée : budget de compétences par tour (`TurnManager`), formations actives (`data/formations.json`) et bonus de
-  piliers via `CombatSystem`, avec télémétrie `competence_reallocated`/`formation_changed` et tests `test_competence_and_formations.gd`.
-- Préparation autoload validée : `DataLoader` reporte désormais le signal `data_loader_ready` après initialisation via
-  `call_deferred`, télémétrie et `AssistantAI` s’y connectent automatiquement, et le test `tests/gdunit/test_autoload_preparation.gd`
-  capture la preuve.
-- Vérification locale actuelle : les jeux de données sous `data/` sont parsés via un script Python partagé dans le README,
-  tandis que l'exécutable Godot reste à provisionner dans le conteneur pour relancer les commandes headless.
+Pinned CI to Godot 4.5.1 and cleaned UI scene parenting so build smoke checks can run headless without crashes. Awaiting a full test pass once the new Godot binary is available locally. Updated HUD and GameManager scripts to the Python-style conditional syntax required by Godot 4.5.1 so the editor no longer reports parse errors on load. Follow-up pass resolved lingering HUD/Debug Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar files for future agents.
+- Semaine 0–1 complétée : boucle commandement/Élan jouable (DoctrineSystem + ElanSystem), HUD avec sélection doctrine/ordres, inertie affichée, feedback audio et tests gdUnit pour sécuriser la logique de verrouillage et de dépense d’Élan.
+- Semaine 2–3 complétée : socle logistique hybride opérationnel (`LogisticsSystem`, météo tournante `sunny/rain/mist`, anneaux d'approvisionnement, routes/convoys, tests gdUnit dédiés) prêt à alimenter HUD et télémétrie.
+- Semaine 4–5 complétée : résolution Combat 3 Piliers alimentée par doctrines/météo/espionnage (`CombatSystem`), brouillard et pings probabilistes opérationnels (`EspionageSystem`), télémétrie `combat_resolved`/`espionage_ping` vérifiée via `tests/gdunit/test_combat_and_espionage_systems.gd`.
+- Semaine 6 complétée : budget de compétences par tour (`TurnManager`), formations actives (`data/formations.json`) et bonus de piliers via `CombatSystem`, avec télémétrie `competence_reallocated`/`formation_changed` et tests `test_competence_and_formations.gd`.
+- Préparation autoload validée : `DataLoader` reporte désormais le signal `data_loader_ready` après initialisation via `call_deferred`, télémétrie et `AssistantAI` s’y connectent automatiquement, et le test `tests/gdunit/test_autoload_preparation.gd` capture la preuve.
+- Vérification locale actuelle : les jeux de données sous `data/` sont parsés via un script Python partagé dans le README, tandis que l'exécutable Godot reste à provisionner dans le conteneur pour relancer les commandes headless.
 - Instrumentation télémétrie consolidée : `logistics_break` complète `elan_spent`, `combat_resolved` et `espionage_ping`, les tests gdUnit valident l'émission dédiée et le plan KPI/Dashboard vit dans `docs/telemetry/dashboard_plan.md`.
-- Éditeur stabilisé : l'ordre `class_name` → `extends` est désormais appliqué partout pour empêcher les erreurs de parsing
-  "Unexpected \"class_name\" here" signalées par les versions plus anciennes de l'éditeur.
-- Les autoloads suivent désormais le suffixe `Autoload` (EventBus/DataLoader/Telemetry/AssistantAI) avec des hints typés
-  actualisés, supprimant les avertissements Godot 4.5 traités en erreurs et clarifiant la documentation (README + errors.log)
-  sur la commande PowerShell utilisée pour lancer le projet.
-- Rafraîchi le cache `.godot/global_script_class_cache.cfg` pour refléter ces nouveaux `class_name` et lever les erreurs de
-  parsing "Could not find type ...Autoload" lors du démarrage.
-- Corrigé l'erreur de compilation `Variant` dans `ElanSystem` et amorcé le générateur audio HUD pour éliminer les logs "Player
-  is inactive" lors des interactions doctrines/ordres.
-- Dégagé la boucle audio HUD en stoppant et purgeant le générateur avant relance, supprimant les erreurs `AudioStreamGeneratorPlayback.clear_buffer`
-  répétées et la fuite d'instances `AudioStreamGeneratorPlayback` constatée à la fermeture du jeu.
-- Consolidé cette boucle audio en vérifiant que le `AudioStreamGeneratorPlayback` est inactif avant chaque purge afin d'éliminer
-  l'assertion `Condition "active" is true` apparue lors des changements de doctrine et des avances de tour.
+- Éditeur stabilisé : l'ordre `class_name` → `extends` est désormais appliqué partout pour empêcher les erreurs de parsing "Unexpected \"class_name\" here" signalées par les versions plus anciennes de l'éditeur.
+- Les autoloads suivent désormais le suffixe `Autoload` (EventBus/DataLoader/Telemetry/AssistantAI) avec des hints typés actualisés, supprimant les avertissements Godot 4.5 traités en erreurs et clarifiant la documentation (README + errors.log) sur la commande PowerShell utilisée pour lancer le projet.
+- Rafraîchi le cache `.godot/global_script_class_cache.cfg` pour refléter ces nouveaux `class_name` et lever les erreurs de parsing "Could not find type ...Autoload" lors du démarrage.
+- Corrigé l'erreur de compilation `Variant` dans `ElanSystem` et amorcé le générateur audio HUD pour éliminer les logs "Player is inactive" lors des interactions doctrines/ordres.
+- Dégagé la boucle audio HUD en stoppant et purgeant le générateur avant relance, supprimant les erreurs `AudioStreamGeneratorPlayback.clear_buffer` répétées et la fuite d'instances `AudioStreamGeneratorPlayback` constatée à la fermeture du jeu.
+- Consolidé cette boucle audio en vérifiant que le `AudioStreamGeneratorPlayback` est inactif avant chaque purge afin d'éliminer l'assertion `Condition "active" is true` apparue lors des changements de doctrine et des avances de tour.

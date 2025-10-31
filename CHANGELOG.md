@@ -49,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Updated onboarding docs (`README.md`, `docs/tests/acceptance_tests.md`) to describe the new rituals and automation.
+- Replaced the root vertical slice checklist with a 2025 detailed execution plan and archived the previous milestone summary under `docs/agents/archive/`.
 - Pinned the CI workflow to Godot 4.5.1 using the latest setup action and cache cleanup step for consistent headless runs.
 - Documented the new Godot `.uid` companion files in the README to clarify their purpose in resource referencing.
 - Expanded logistics payloads with break summaries and competence penalty values so downstream systems can react to convoy
