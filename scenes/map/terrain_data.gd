@@ -1,5 +1,5 @@
-extends Resource
 class_name TerrainData
+extends Resource
 
 ## Basic terrain metadata for the procedural map prototype.
 

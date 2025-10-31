@@ -1,5 +1,5 @@
-extends RefCounted
 class_name GdUnitLiteAssertions
+extends RefCounted
 
 var failures: Array[String] = []
 

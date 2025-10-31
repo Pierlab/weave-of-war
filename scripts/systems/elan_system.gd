@@ -1,5 +1,5 @@
-extends Node
 class_name ElanSystem
+extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")

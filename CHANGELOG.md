@@ -56,6 +56,8 @@ All notable changes to this project will be documented in this file.
 - Realigned the `vertical_slice_p0` mission brief checklist with delivered systems and documented the pending headless command blocage.
 
 ### Fixed
+- Reordered `class_name` declarations ahead of `extends` statements across core systems/autoloads to remove editor parse
+  errors when loading the project.
 - CI headless scripts now extend `SceneTree` so `godot --script` runs succeed in local and CI environments.
 - Preloaded map and UI dependencies so the build smoke check no longer fails on missing `HexTile` or `EventBus` types.
 - Corrected UI scene node parenting so headless instantiation no longer drops children or crashes the build smoke check.

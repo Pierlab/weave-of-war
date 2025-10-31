@@ -1,6 +1,8 @@
 # Context Update — Current Branch
 
 ## Summary
+- Reordered every `class_name` declaration ahead of its `extends` clause across autoloads, systems, and tests so older editor
+  builds stop aborting with `Unexpected "class_name" here` parse errors.
 - Established agent onboarding artefacts (`AGENTS.md`, refreshed vibe-coding playbook, mission workspace).
 - Added automated Godot lint/build/test runners plus a GitHub Actions workflow mirroring the headless commands.
 - Introduced a generated context snapshot, changelog, and branch-level reporting routine for sustained continuity.

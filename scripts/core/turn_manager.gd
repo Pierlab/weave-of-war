@@ -1,5 +1,5 @@
-extends Node
 class_name TurnManager
+extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]

@@ -1,5 +1,5 @@
-extends Node2D
 class_name HexTile
+extends Node2D
 
 @export var axial_coords := Vector2.ZERO
 @onready var label: Label = $Label
