@@ -74,3 +74,5 @@ Overlay logistics toggle warnings and documented the new Godot `.uid` sidecar fi
 - Les autoloads suivent désormais le suffixe `Autoload` (EventBus/DataLoader/Telemetry/AssistantAI) avec des hints typés
   actualisés, supprimant les avertissements Godot 4.5 traités en erreurs et clarifiant la documentation (README + errors.log)
   sur la commande PowerShell utilisée pour lancer le projet.
+- Rafraîchi le cache `.godot/global_script_class_cache.cfg` pour refléter ces nouveaux `class_name` et lever les erreurs de
+  parsing "Could not find type ...Autoload" lors du démarrage.

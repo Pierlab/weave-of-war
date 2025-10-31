@@ -112,6 +112,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - If the build smoke check reports missing class names (for example `HexTile` or `EventBus`), preload the corresponding script
   resource before using it for type annotations or `is` checks. See `scenes/map/map.gd` and the UI scripts under
   `scripts/ui/` for reference on the preferred preload pattern.
+- If Godot reports `Could not find type "EventBusAutoload"` (or similar) after renaming an autoload, remove the `.godot/`
+  folder or regenerate the project class cache so `.godot/global_script_class_cache.cfg` picks up the new `class_name`
+  identifiers.
 - Godot 4.5 removed the `condition ? a : b` ternary helper. Replace those expressions with the Python-style
   `a if condition else b` form to avoid parse errors when opening the project or running the headless build script.
 - If you encounter `Unexpected "class_name" here` parse errors, declare the `class_name` **before** the `extends` line. The
