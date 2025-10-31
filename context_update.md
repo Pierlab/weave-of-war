@@ -1,8 +1,8 @@
 # Context Update — Current Branch
 
 ## Summary
-- Reordered every `class_name` declaration ahead of its `extends` clause across autoloads, systems, and tests so older editor
-  builds stop aborting with `Unexpected "class_name" here` parse errors.
+- Reordered every `class_name` declaration ahead of its `extends` clause across autoloads, systems, and tests so older editor builds stop aborting with `Unexpected "class_name" here` parse errors.
+- Replaced the vertical slice planning checklist with a detailed 2025 execution plan, archived the previous milestone summary, and aligned the mission brief/README/CHANGELOG with the new structure.
 - Established agent onboarding artefacts (`AGENTS.md`, refreshed vibe-coding playbook, mission workspace).
 - Added automated Godot lint/build/test runners plus a GitHub Actions workflow mirroring the headless commands.
 - Introduced a generated context snapshot, changelog, and branch-level reporting routine for sustained continuity.

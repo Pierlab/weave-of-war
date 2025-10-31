@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-10-31T23:12:24Z
+- Generated on: 2025-10-31T23:35:49Z
 - Branch: work
-- Commit when generated: 5e6ef2877fe93efc2a35e5c63a07e1c39b72e0eb
-- Subject: Merge pull request #35 from Pierlab/codex/investigate-error-logs-and-update-documentation
+- Commit when generated: 38aa7980d1a1ce15438149e39ef7dfadca0f715e
+- Subject: Merge pull request #36 from Pierlab/codex/fix-audio-stream-condition-error
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
