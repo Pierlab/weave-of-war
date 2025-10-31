@@ -48,6 +48,8 @@ Checklist C should request dependencies from these singletons instead of reading
   emitting `order_issued` telemetry.
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
+- The procedural audio generator now primes its playback stream before emitting tones so doctrine/order interactions no longer
+  raise inactive player warnings in the Godot console.
 
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads

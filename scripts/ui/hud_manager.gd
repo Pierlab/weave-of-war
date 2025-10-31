@@ -266,6 +266,8 @@ func _play_feedback(pitch_hz: float) -> void:
         generator.mix_rate = 44100
         generator.buffer_length = 0.2
         feedback_player.stream = generator
+    if not feedback_player.playing:
+        feedback_player.play()
     var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
         playback.clear_buffer()
