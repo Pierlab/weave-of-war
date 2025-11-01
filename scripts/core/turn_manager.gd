@@ -7,7 +7,7 @@ const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]
 @export var base_competence_per_turn: float = 6.0
 
 var current_turn: int = 0
-var event_bus: EventBusAutoload
+var event_bus: EventBus
 
 var _competence_allocations: Dictionary = {}
 var _competence_budget: float = 0.0
@@ -22,7 +22,7 @@ func _ready() -> void:
         bus = EVENT_BUS.get_instance()
     setup(bus)
 
-func setup(event_bus_ref: EventBusAutoload) -> void:
+func setup(event_bus_ref: EventBus) -> void:
     event_bus = event_bus_ref
     if event_bus and not event_bus.logistics_update.is_connected(_on_logistics_update):
         event_bus.logistics_update.connect(_on_logistics_update)

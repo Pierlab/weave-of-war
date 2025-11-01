@@ -8,7 +8,7 @@ const UTILS := preload("res://scripts/core/utils.gd")
 @export var convoy_lerp_duration := 0.75
 @export var hex_outline_width := 2.0
 
-var event_bus: EventBusAutoload
+var event_bus: EventBus
 var _hex_points: PackedVector2Array = PackedVector2Array()
 var _supply_tiles: Dictionary = {}
 var _route_tracks: Dictionary = {}

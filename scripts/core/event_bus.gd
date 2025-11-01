@@ -1,5 +1,4 @@
-@warning_ignore("class_name_hides_autoload")
-class_name EventBusAutoload
+class_name EventBus
 extends Node
 
 signal turn_started(turn_number: int)
@@ -27,7 +26,7 @@ signal doctrine_change_requested(doctrine_id: String)
 signal order_execution_requested(order_id: String)
 signal order_execution_failed(payload: Dictionary)
 
-static var _instance: EventBusAutoload
+static var _instance: EventBus
 var _logistics_visible: bool = false
 
 func _ready() -> void:
@@ -35,11 +34,11 @@ func _ready() -> void:
     add_to_group("event_bus")
     var signal_count := 0
     for info in get_signal_list():
-        if info is Dictionary and info.get("class_name", "") == "EventBusAutoload":
+        if info is Dictionary and info.get("class_name", "") == "EventBus":
             signal_count += 1
-    print("[Autoload] EventBusAutoload ready (signals registered: %d)" % signal_count)
+    print("[Autoload] EventBus ready (autoload=EventBusAutoload, signals registered: %d)" % signal_count)
 
-static func get_instance() -> EventBusAutoload:
+static func get_instance() -> EventBus:
     return _instance
 
 func emit_data_loader_ready(payload: Dictionary) -> void:

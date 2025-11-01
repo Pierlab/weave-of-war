@@ -320,7 +320,7 @@ func test_assistant_ai_acknowledges_order_packets() -> void:
         "intel_profile": {"signal_strength": 0.75},
     })
 
-    var assistant: AssistantAIAutoload = ASSISTANT_AI.new()
+    var assistant: AssistantAI = ASSISTANT_AI.new()
     assistant._event_bus = event_bus
     assistant._data_loader = data_loader
 

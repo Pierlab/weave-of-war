@@ -11,8 +11,8 @@ const HexTileScript := preload("res://scenes/map/hex_tile.gd")
 @export var rows := 10
 @export var hex_scene: PackedScene = HexTileScene
 
-var event_bus: EventBusAutoload
-var data_loader: DataLoaderAutoload
+var event_bus: EventBus
+var data_loader: DataLoader
 var _terrain_definitions: Dictionary = TERRAIN_DATA.get_default()
 var _tiles: Dictionary = {}
 

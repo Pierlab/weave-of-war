@@ -7,8 +7,8 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 @export var max_elan: float = 6.0
 @export var decay_amount: float = 1.0
 
-var event_bus: EventBusAutoload
-var data_loader: DataLoaderAutoload
+var event_bus: EventBus
+var data_loader: DataLoader
 
 var _orders_by_id: Dictionary = {}
 var _allowed_order_ids: Array[String] = []
@@ -23,7 +23,7 @@ var _rounds_at_cap: int = 0
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
+func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
 

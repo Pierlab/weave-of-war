@@ -14,8 +14,8 @@ func after_each() -> void:
                 node.queue_free()
         _nodes_to_cleanup.clear()
         await tree.process_frame
-    EventBusAutoload._instance = null
-    TelemetryAutoload._instance = null
+    EventBus._instance = null
+    Telemetry._instance = null
 
 class MockEventBus:
     var events: Array = []
@@ -133,8 +133,8 @@ func test_weather_events_recorded_by_telemetry() -> void:
         return
 
     var root := tree.get_root()
-    var event_bus: EventBusAutoload = EVENT_BUS.new()
-    var telemetry: TelemetryAutoload = TELEMETRY.new()
+    var event_bus: EventBus = EVENT_BUS.new()
+    var telemetry: Telemetry = TELEMETRY.new()
     var system: WeatherSystem = WEATHER_SYSTEM.new()
 
     root.add_child(event_bus)

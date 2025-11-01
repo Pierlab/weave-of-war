@@ -7,9 +7,9 @@ const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
 const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 const WEATHER_SYSTEM := preload("res://scripts/systems/weather_system.gd")
 
-var event_bus: EventBusAutoload
+var event_bus: EventBus
 var turn_manager: TurnManager
-var data_loader: DataLoaderAutoload
+var data_loader: DataLoader
 var doctrine_system: DoctrineSystem
 var elan_system: ElanSystem
 var logistics_system: LogisticsSystem

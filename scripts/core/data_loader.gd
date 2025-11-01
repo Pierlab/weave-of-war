@@ -1,5 +1,4 @@
-@warning_ignore("class_name_hides_autoload")
-class_name DataLoaderAutoload
+class_name DataLoader
 extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
@@ -24,7 +23,7 @@ const CONVOY_USAGE := ["optional", "required", "forbidden"]
 const FORMATION_POSTURES := ["defensive", "aggressive", "balanced", "fluid", "recon", "ranged", "support"]
 const TERRAIN_ENTRY_TYPES := ["definition", "tile"]
 
-static var _instance: DataLoaderAutoload
+static var _instance: DataLoader
 
 var _collections: Dictionary = {}
 var _indexed: Dictionary = {}
@@ -35,7 +34,7 @@ func _ready() -> void:
     var result: Dictionary = load_all()
     call_deferred("_notify_event_bus", result)
 
-static func get_instance() -> DataLoaderAutoload:
+static func get_instance() -> DataLoader:
     return _instance
 
 func is_ready() -> bool:
@@ -149,7 +148,7 @@ func get_summary() -> Dictionary:
     }
 
 func _notify_event_bus(result: Dictionary) -> void:
-    var event_bus: EventBusAutoload = EVENT_BUS.get_instance()
+    var event_bus: EventBus = EVENT_BUS.get_instance()
     if event_bus == null:
         return
 
@@ -213,7 +212,7 @@ func _load_json_array(path: String, label: String) -> Dictionary:
             }
         }
 
-    var schema_errors := DataLoaderAutoload.validate_collection(label, parsed)
+    var schema_errors := DataLoader.validate_collection(label, parsed)
     if not schema_errors.is_empty():
         return {
             "success": false,
@@ -245,8 +244,8 @@ static func validate_collection(label: String, entries: Array) -> Array:
 
     var errors: Array = []
     for index in entries.size():
-        var entry := entries[index]
-        var context := _entry_context(label, entry, index)
+        var entry: Variant = entries[index]
+        var context: String = _entry_context(label, entry, index)
         if typeof(entry) != TYPE_DICTIONARY:
             errors.append(_error(label, context, "invalid_type", "Entry must be a dictionary"))
             continue
@@ -778,7 +777,7 @@ static func _validate_formation(entry: Dictionary, context: String) -> Array:
     ], context)
     errors += _ensure_strings("formations", entry, ["id", "name", "posture"], context)
     if entry.has("posture"):
-        var posture := entry.get("posture")
+        var posture: Variant = entry.get("posture")
         if typeof(posture) == TYPE_STRING and not FORMATION_POSTURES.has(posture):
             errors.append(_error("formations", context + ".posture", "invalid_enum", posture))
     errors += _ensure_dictionaries("formations", entry, ["pillar_modifiers", "competence_weight"], context)
@@ -825,7 +824,7 @@ func _validate_cross_references() -> Array:
     for index in range(units.size()):
         var unit_entry: Variant = units[index]
         if unit_entry is Dictionary and unit_entry.has("default_formations"):
-            var unit_context := _entry_context("units", unit_entry, index)
+            var unit_context: String = _entry_context("units", unit_entry, index)
             for formation_id in unit_entry.get("default_formations"):
                 if typeof(formation_id) == TYPE_STRING and not formation_ids.has(formation_id):
                     errors.append(_error("units", unit_context + ".default_formations", "unknown_reference", formation_id))
@@ -834,7 +833,7 @@ func _validate_cross_references() -> Array:
     for index in range(logistics.size()):
         var logistics_entry: Variant = logistics[index]
         if logistics_entry is Dictionary and logistics_entry.has("links"):
-            var log_context := _entry_context("logistics", logistics_entry, index)
+            var log_context: String = _entry_context("logistics", logistics_entry, index)
             var links: Variant = logistics_entry.get("links")
             if typeof(links) == TYPE_DICTIONARY:
                 if links.has("weather_modifiers") and links.get("weather_modifiers") is Dictionary:
@@ -909,7 +908,7 @@ static func _ensure_integerish(label: String, entry: Dictionary, keys: Array, co
     for key in keys:
         if not entry.has(key):
             continue
-        var value := entry.get(key)
+        var value: Variant = entry.get(key)
         if typeof(value) == TYPE_INT:
             continue
         if typeof(value) == TYPE_FLOAT and is_equal_approx(value, round(value)):
@@ -920,7 +919,7 @@ static func _ensure_integerish(label: String, entry: Dictionary, keys: Array, co
 static func _ensure_boolean(label: String, entry: Dictionary, key: String, context: String) -> Array:
     if not entry.has(key):
         return []
-    var value := entry.get(key)
+    var value: Variant = entry.get(key)
     if typeof(value) != TYPE_BOOL:
         return [_error(label, context + "." + key, "invalid_type", "boolean")]
     return []

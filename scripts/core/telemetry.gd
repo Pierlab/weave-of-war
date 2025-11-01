@@ -1,13 +1,12 @@
-@warning_ignore("class_name_hides_autoload")
-class_name TelemetryAutoload
+class_name Telemetry
 extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 
-static var _instance: TelemetryAutoload
+static var _instance: Telemetry
 
 var _buffer: Array = []
-var _event_bus: EventBusAutoload
+var _event_bus: EventBus
 
 func _ready() -> void:
     _instance = self
@@ -16,7 +15,7 @@ func _ready() -> void:
     var connected := _event_bus != null
     print("[Autoload] TelemetryAutoload ready (event_bus_connected: %s)" % ("true" if connected else "false"))
 
-static func get_instance() -> TelemetryAutoload:
+static func get_instance() -> Telemetry:
     return _instance
 
 func log_event(name: StringName, payload: Dictionary = {}) -> void:

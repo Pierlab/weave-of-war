@@ -43,6 +43,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Phase 0 findings
+- 2025-11-27 — Détaché les `class_name` (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) des singletons `*Autoload`, ajouté les hints typés manquants dans `DataLoader` et `LogisticsSystem`, et mis à jour README/CHANGELOG/tests pour refléter le nouveau contrat (type hints via les classes, accès runtime via les autoloads).
 - 2025-11-26 — Neutralisé l'avertissement `class_name_hides_autoload` en ajoutant `@warning_ignore` sur les autoloads et en renforçant les hints typés (`DataLoader`, systèmes logistique/terrain/météo, HUD) avec conversions `str()`/`fmod()` pour empêcher Godot 4.5 de promouvoir les inférences `Variant` et l'opérateur `%` float en erreurs bloquantes.
 - 2025-11-01 — Re-read project spec, mission brief, and latest context snapshot; scope remains aligned with no new risks beyond the known local Godot binary provisioning blocker (tracked in `context_update.md`).
 - 2025-11-02 — Audited `data/*.json` catalogues against the locked SDS packages; remaining gaps:
