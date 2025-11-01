@@ -28,7 +28,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [ ] Phase 0 — Alignment, data hygiene, and instrumentation foundations.
 - [x] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry). *(2025-11-15 — Acceptation manuelle documentée dans `docs/tests/acceptance_tests.md` pour valider doctrines, ordres et télémétrie.)*
 - [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-22 — Les pénalités météo alimentent désormais le flux logistique et le risque d'interception; restent à brancher la télémétrie météo et la couverture de tests additionnelle.)*
-- [ ] Phase 3 — Combat (3 Pillars) resolution pipeline.
+- [~] Phase 3 — Combat (3 Pillars) resolution pipeline. *(2025-11-30 — CombatSystem instancié côté GameManager et connecté aux flux `order_*`/`logistics_update`.)*
 - [ ] Phase 4 — Espionage systems and fog of war feedback.
 - [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
 - [ ] Phase 6 — Unit formations/postures influencing combat outcomes.
@@ -99,6 +99,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-24 — Étendu `tests/gdunit/test_logistics_system.gd` avec des cas ciblant la réduction de portées sous météo "storm", l'émission unique des événements `logistics_break` lors d'interceptions successives et la cadence de rotation météo pilotée par la logistique; checklist item 24 clôturé avec notes dans `CHECKLISTS.md` et README/CHANGELOG mis à jour.
 - 2025-11-25 — Rafraîchi `docs/tests/acceptance_tests.md` (AT-08 à AT-10) pour couvrir la bascule HUD/debug du overlay logistique, la mise à jour des tooltips terrain et les impacts météo sur la portée/logistique; checklist item 25 validé.
 - 2025-11-28 — Corrigé les erreurs Godot 4.6 liées aux inférences `Variant` en typant `LogisticsSystem` (`route_id`) et la mise à jour de cap d'Élan, et dupliqué les définitions `TerrainData` avant merge pour que la carte puisse injecter `data/terrain.json` sans heurter les dictionnaires read-only.
+
+### Phase 3 progress
+- 2025-11-30 — `GameManager` instancie désormais `CombatSystem`, branche les signaux `order_execution_requested`/`order_issued`/`logistics_update`, et chaque payload `combat_resolved` inclut un bloc `logistics` (flow, niveau, sévérité, tour) pour contextualiser les victoires de piliers côté HUD et télémétrie.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

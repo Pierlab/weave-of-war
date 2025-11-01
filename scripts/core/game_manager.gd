@@ -6,6 +6,7 @@ const DOCTRINE_SYSTEM := preload("res://scripts/systems/doctrine_system.gd")
 const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
 const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 const WEATHER_SYSTEM := preload("res://scripts/systems/weather_system.gd")
+const COMBAT_SYSTEM := preload("res://scripts/systems/combat_system.gd")
 
 var event_bus: EventBus
 var turn_manager: TurnManager
@@ -14,6 +15,7 @@ var doctrine_system: DoctrineSystem
 var elan_system: ElanSystem
 var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
+var combat_system: CombatSystem
 
 var _core_systems_initialised := false
 
@@ -36,6 +38,9 @@ func _ready() -> void:
 
     weather_system = WEATHER_SYSTEM.new()
     add_child(weather_system)
+
+    combat_system = COMBAT_SYSTEM.new()
+    add_child(combat_system)
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)
@@ -72,6 +77,8 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
 
     doctrine_system.setup(event_bus, data_loader)
     elan_system.setup(event_bus, data_loader)
+    if combat_system:
+        combat_system.setup(event_bus, data_loader)
     if weather_system:
         weather_system.setup(event_bus, data_loader)
     if logistics_system:

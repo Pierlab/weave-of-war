@@ -42,7 +42,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 25. [x] **Refresh manual tests.** Update `docs/tests/acceptance_tests.md` with logistics overlay toggles, terrain tooltip checks, and weather-driven changes. *(2025-11-25 — AT-08 à AT-10 détaillent désormais la double bascule HUD/debug, les tooltips terrain dynamiques et les impacts météo/logistiques.)*
 
 ## Phase 3 — Combat (3 Pillars)
-26. [ ] **Instantiate CombatSystem.** Wire combat to order execution events plus logistics/weather/espionage signals via `EventBusAutoload`.
+26. [x] **Instantiate CombatSystem.** Wire combat to order execution events plus logistics/weather/espionage signals via `EventBusAutoload`. *(2025-11-30 — `GameManager` ajoute désormais `CombatSystem`, relie `order_execution_requested`/`order_issued`/`logistics_update`, et les résolutions de combat incluent un bloc télémétrie `logistics` pour exposer flow/supply/severity.)*
 27. [ ] **Implement pillar maths.** Encode Position/Impulse/Information calculations using doctrine, formation, terrain, weather, and intel modifiers exactly as SDS specifies. Annotate formulas in mission notes.
 28. [ ] **Build combat UI.** Deliver HUD panels/modals showing gauges, textual summaries, and Élan adjustments; capture UI screenshots.
 29. [ ] **Record telemetry.** Emit `combat_resolved` payloads with per-pillar breakdowns and resulting unit states.
