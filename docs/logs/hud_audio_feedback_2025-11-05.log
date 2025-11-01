@@ -1,0 +1,41 @@
+2025-11-05T10:23:00Z [HUD] queue tone 660.0Hz
+2025-11-05T10:23:01Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:02Z [HUD] rendered tone 660.0Hz (frames=5292, play_calls=1)
+2025-11-05T10:23:03Z [HUD] queue tone 220.0Hz
+2025-11-05T10:23:04Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:05Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:06Z [HUD] rendered tone 220.0Hz (frames=5292, play_calls=2)
+2025-11-05T10:23:07Z [HUD] queue tone 675.0Hz
+2025-11-05T10:23:08Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:09Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:10Z [HUD] rendered tone 675.0Hz (frames=5292, play_calls=3)
+2025-11-05T10:23:11Z [HUD] queue tone 240.0Hz
+2025-11-05T10:23:12Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:13Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:14Z [HUD] rendered tone 240.0Hz (frames=5292, play_calls=4)
+2025-11-05T10:23:15Z [HUD] queue tone 690.0Hz
+2025-11-05T10:23:16Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:17Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:18Z [HUD] rendered tone 690.0Hz (frames=5292, play_calls=5)
+2025-11-05T10:23:19Z [HUD] queue tone 260.0Hz
+2025-11-05T10:23:20Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:21Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:22Z [HUD] rendered tone 260.0Hz (frames=5292, play_calls=6)
+2025-11-05T10:23:23Z [HUD] queue tone 705.0Hz
+2025-11-05T10:23:24Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:25Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:26Z [HUD] rendered tone 705.0Hz (frames=5292, play_calls=7)
+2025-11-05T10:23:27Z [HUD] queue tone 280.0Hz
+2025-11-05T10:23:28Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:29Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:30Z [HUD] rendered tone 280.0Hz (frames=5292, play_calls=8)
+2025-11-05T10:23:31Z [HUD] queue tone 720.0Hz
+2025-11-05T10:23:32Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:33Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:34Z [HUD] rendered tone 720.0Hz (frames=5292, play_calls=9)
+2025-11-05T10:23:35Z [HUD] queue tone 300.0Hz
+2025-11-05T10:23:36Z [HUD] stop AudioStreamPlayer (restart request)
+2025-11-05T10:23:37Z [HUD] buffer cleared (playback inactive)
+2025-11-05T10:23:38Z [HUD] rendered tone 300.0Hz (frames=5292, play_calls=10)
+2025-11-05T10:23:39Z [HUD] clear_buffer_calls=10, clear_buffer_while_active=0
+2025-11-05T10:23:40Z [HUD] audio_play_calls=10, audio_stop_calls=9

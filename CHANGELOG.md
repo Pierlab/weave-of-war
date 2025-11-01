@@ -61,6 +61,9 @@ All notable changes to this project will be documented in this file.
 - Realigned the `vertical_slice_p0` mission brief checklist with delivered systems and documented the pending headless command blocage.
 
 ### Fixed
+- Stabilised the HUD's procedural audio feedback by queueing tone requests and clearing the generator buffer only after the
+  playback instance reports inactive, eliminating `AudioStreamGeneratorPlayback.clear_buffer` warnings during doctrine/order
+  swaps and shutdown.
 - Regenerated the Godot class cache metadata to reflect the `*Autoload` class names so typed autoload references no longer
   trigger `Could not find type` parse errors when the project boots.
 - Reordered `class_name` declarations ahead of `extends` statements across core systems/autoloads to remove editor parse
