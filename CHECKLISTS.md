@@ -51,7 +51,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 
 ## Phase 4 — Espionage & Fog of War
 32. [x] **Spawn EspionageSystem.** Ensure it initialises alongside combat/logistics systems and updates fog state each turn. *(2025-12-08 — GameManager instantiates EspionageSystem, seeds fog from terrain data, and a gdUnit regression confirms turn-syncing telemetry.)*
-33. [ ] **Render fog visuals.** Dim hidden tiles, hide enemy intel, and keep player territory visible; document shader/material changes if any.
+33. [x] **Render fog visuals.** Dim hidden tiles, hide enemy intel, and keep player territory visible; document shader/material changes if any. *(2025-12-09 — Added a fog overlay polygon to each hex tile, driven by `fog_of_war_updated` events emitted by `EspionageSystem`. Labels/tooltip copy now redact intel when visibility drops below 35%.)*
 34. [ ] **Design recon flows.** Implement reconnaissance/spy orders with Élan/competence costs, integrate them into HUD + assistant pipeline, and log validation rules.
 35. [ ] **Generate intel feedback.** Produce probabilistic pings with intent categories surfaced via HUD notifications and debug overlay timelines.
 36. [ ] **Instrument espionage telemetry.** Emit `espionage_ping` and `intel_intent_revealed` events, preserving history in telemetry buffers.
