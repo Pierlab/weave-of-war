@@ -1,6 +1,8 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-06 — Corrigé les erreurs de parsing Godot en annotant explicitement les variables `CombatSystem`/`HUDManager`,
+  rétablissant l'initialisation du GameManager; README et CHANGELOG documentent le pattern de typage renforcé.
 - 2025-12-05 — Documenté le flux HUD → CombatSystem → Telemetry pour déclencher les engagements et lire le panneau "Dernier engagement"; README, mission brief et checklist Phase 3 item 31 mis à jour.
 - 2025-12-04 — Ajouté `tests/gdunit/test_combat_resolution.gd` pour couvrir la reproductibilité contrôlée par seed, les tie-breakers
   contestés et les pénalités logistiques critiques sur les pertes, clôturant l'item 30 de la checklist Phase 3. README, CHANGELOG,

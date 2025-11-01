@@ -418,15 +418,15 @@ func _on_combat_resolved(payload: Dictionary) -> void:
     _update_combat_panel()
 
 func _on_elan_spent(payload: Dictionary) -> void:
-    var amount := -abs(float(payload.get("amount", 0.0)))
-    var entry := {
+    var amount: float = -abs(float(payload.get("amount", 0.0)))
+    var entry: Dictionary = {
         "amount": amount,
         "remaining": float(payload.get("remaining", payload.get("current", 0.0))),
         "reason": str(payload.get("reason", "order_cost")),
         "order_id": str(payload.get("order_id", "")),
     }
     _last_elan_event = entry.duplicate(true)
-    var order_id := str(entry.get("order_id", ""))
+    var order_id: String = str(entry.get("order_id", ""))
     if not order_id.is_empty():
         _elan_adjustments[order_id] = entry.duplicate(true)
     _update_combat_panel()
@@ -615,7 +615,7 @@ func _update_combat_panel() -> void:
     var context_bits: Array[String] = []
     var doctrine_id := str(_last_combat_payload.get("doctrine_id", ""))
     if not doctrine_id.is_empty():
-        var doctrine_name := _doctrine_names.get(doctrine_id, doctrine_id.capitalize())
+        var doctrine_name: String = str(_doctrine_names.get(doctrine_id, doctrine_id.capitalize()))
         context_bits.append("Doctrine %s" % doctrine_name)
     var weather_id := str(_last_combat_payload.get("weather_id", ""))
     if not weather_id.is_empty():
@@ -668,12 +668,13 @@ func _update_pillar_row(pillar_id: String, result: Dictionary, victor: String) -
     var label: Label = row.get("label", null)
     if meter == null or label == null:
         return
-    var attacker := max(float(result.get("attacker", 0.0)), 0.0)
-    var defender := max(float(result.get("defender", 0.0)), 0.0)
-    var total := max(attacker + defender, 0.001)
-    meter.value = clamp((attacker / total) * meter.max_value, meter.min_value, meter.max_value)
-    var winner := str(result.get("winner", "stalemate"))
-    var winner_label := _localize_victor(winner)
+    var attacker: float = max(float(result.get("attacker", 0.0)), 0.0)
+    var defender: float = max(float(result.get("defender", 0.0)), 0.0)
+    var total: float = max(attacker + defender, 0.001)
+    var ratio: float = attacker / total
+    meter.value = clamp(ratio * meter.max_value, meter.min_value, meter.max_value)
+    var winner: String = str(result.get("winner", "stalemate"))
+    var winner_label: String = _localize_victor(winner)
     label.text = "Att %.2f / Def %.2f — %s" % [attacker, defender, winner_label]
     label.tooltip_text = "Marge : %.2f" % float(result.get("margin", 0.0))
     meter.add_theme_color_override("fg_color", _pillar_color_for_winner(winner))
@@ -690,7 +691,7 @@ func _decisive_pillars(pillars: Dictionary, victor: String) -> Array[String]:
         var entry: Dictionary = pillars.get(pillar_id, {})
         if not (entry is Dictionary):
             continue
-        var winner := str(entry.get("winner", "stalemate"))
+        var winner: String = str(entry.get("winner", "stalemate"))
         if victor == "attacker" or victor == "defender":
             if winner == victor:
                 decisive.append(PILLAR_DISPLAY_NAMES.get(pillar_id, pillar_id.capitalize()))
@@ -707,9 +708,9 @@ func _localize_victor(value: String) -> String:
 func _format_intel_line(intel: Dictionary) -> String:
     if intel.is_empty():
         return ""
-    var confidence := clamp(float(intel.get("confidence", 0.0)), 0.0, 1.0)
-    var source := str(intel.get("source", "baseline"))
-    var pretty_source := source.replace("_", " ").capitalize()
+    var confidence: float = clamp(float(intel.get("confidence", 0.0)), 0.0, 1.0)
+    var source: String = str(intel.get("source", "baseline"))
+    var pretty_source: String = source.replace("_", " ").capitalize()
     return "Intel : %.0f%% (%s)" % [confidence * 100.0, pretty_source]
 
 func _format_logistics_line(logistics: Dictionary) -> Dictionary:
@@ -718,15 +719,15 @@ func _format_logistics_line(logistics: Dictionary) -> Dictionary:
             "text": "Logistique : données indisponibles.",
             "tooltip": "Aucune information supply transmise par `combat_resolved`.",
         }
-    var flow := float(logistics.get("logistics_flow", 0.0))
-    var severity_id := str(logistics.get("severity", ""))
-    var severity := _localize_severity(severity_id)
-    var movement := float(logistics.get("movement_cost", 1.0))
-    var attacker_factor := float(logistics.get("attacker_factor", 1.0))
-    var defender_factor := float(logistics.get("defender_factor", 1.0))
-    var supply_level := str(logistics.get("supply_level", ""))
-    var target_hex := str(logistics.get("target_hex", ""))
-    var text := "Logistique : flow %.2f · sévérité %s · att %.2f / def %.2f" % [
+    var flow: float = float(logistics.get("logistics_flow", 0.0))
+    var severity_id: String = str(logistics.get("severity", ""))
+    var severity: String = _localize_severity(severity_id)
+    var movement: float = float(logistics.get("movement_cost", 1.0))
+    var attacker_factor: float = float(logistics.get("attacker_factor", 1.0))
+    var defender_factor: float = float(logistics.get("defender_factor", 1.0))
+    var supply_level: String = str(logistics.get("supply_level", ""))
+    var target_hex: String = str(logistics.get("target_hex", ""))
+    var text: String = "Logistique : flow %.2f · sévérité %s · att %.2f / def %.2f" % [
         flow,
         severity,
         attacker_factor,
@@ -740,10 +741,10 @@ func _format_logistics_line(logistics: Dictionary) -> Dictionary:
         tooltip_lines.append("Sévérité brute : %s" % severity_id)
     if not target_hex.is_empty():
         tooltip_lines.append("Hex cible : %s" % target_hex)
-    var turn := int(logistics.get("turn", -1))
+    var turn: int = int(logistics.get("turn", -1))
     if turn >= 0:
         tooltip_lines.append("Tour logistique : %d" % turn)
-    var logistics_id := str(logistics.get("logistics_id", ""))
+    var logistics_id: String = str(logistics.get("logistics_id", ""))
     if not logistics_id.is_empty():
         tooltip_lines.append("Scenario supply : %s" % logistics_id)
     return {
@@ -757,24 +758,24 @@ func _elan_summary_for_order(order_id: String) -> Dictionary:
     if not order_id.is_empty():
         var adjustment: Dictionary = _elan_adjustments.get(order_id, {})
         if adjustment is Dictionary and not adjustment.is_empty():
-            var amount := float(adjustment.get("amount", 0.0))
-            var remaining := float(adjustment.get("remaining", 0.0))
-            var direction := "-" if amount <= 0.0 else "+"
+            var amount: float = float(adjustment.get("amount", 0.0))
+            var remaining: float = float(adjustment.get("remaining", 0.0))
+            var direction: String = "-" if amount <= 0.0 else "+"
             var order_entry: Dictionary = _order_lookup.get(order_id, {})
             var order_payload: Dictionary = _last_order_payloads.get(order_id, {})
-            var order_name := str(order_payload.get("order_name", order_entry.get("name", order_id)))
+            var order_name: String = str(order_payload.get("order_name", order_entry.get("name", order_id)))
             text_lines.append("Élan dépensé : %s%.1f (%s). Reste %.1f." % [direction, abs(amount), order_name, remaining])
             tooltip_lines.append("Raison : %s" % _localize_reason(str(adjustment.get("reason", "order_cost"))))
         elif _last_elan_event is Dictionary and not _last_elan_event.is_empty():
-            var event_amount := float(_last_elan_event.get("amount", 0.0))
+            var event_amount: float = float(_last_elan_event.get("amount", 0.0))
             if not is_equal_approx(event_amount, 0.0):
                 text_lines.append("Élan récent : %.1f (raison %s)." % [event_amount, _localize_reason(str(_last_elan_event.get("reason", "")))])
     if text_lines.is_empty():
         text_lines.append("Élan : aucune variation enregistrée pour cet engagement.")
     if _last_elan_gain is Dictionary and not _last_elan_gain.is_empty():
-        var gain_amount := float(_last_elan_gain.get("amount", 0.0))
+        var gain_amount: float = float(_last_elan_gain.get("amount", 0.0))
         if gain_amount > 0.0:
-            var gain_reason := _localize_reason(str(_last_elan_gain.get("reason", "")))
+            var gain_reason: String = _localize_reason(str(_last_elan_gain.get("reason", "")))
             text_lines.append("Dernier gain : +%.1f (%s)." % [gain_amount, gain_reason])
             tooltip_lines.append("Gain courant : %.1f" % float(_last_elan_gain.get("current", 0.0)))
     return {

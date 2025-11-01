@@ -17,7 +17,7 @@ var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
 var combat_system: CombatSystem
 
-var _core_systems_initialised := false
+var _core_systems_initialised: bool = false
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()

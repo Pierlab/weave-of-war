@@ -101,6 +101,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-28 — Corrigé les erreurs Godot 4.6 liées aux inférences `Variant` en typant `LogisticsSystem` (`route_id`) et la mise à jour de cap d'Élan, et dupliqué les définitions `TerrainData` avant merge pour que la carte puisse injecter `data/terrain.json` sans heurter les dictionnaires read-only.
 
 ### Phase 3 progress
+- 2025-12-06 — Neutralisé les erreurs `Variant` promues en erreurs bloquantes par Godot 4.6 en typant les variables
+  locales du `CombatSystem` et du `HUDManager`, ce qui permet à `GameManager` d'instancier à nouveau le pipeline combat/logistique
+  sans échec de compilation.
 - 2025-11-30 — `GameManager` instancie désormais `CombatSystem`, branche les signaux `order_execution_requested`/`order_issued`/`logistics_update`, et chaque payload `combat_resolved` inclut un bloc `logistics` (flow, niveau, sévérité, tour) pour contextualiser les victoires de piliers côté HUD et télémétrie.
 - 2025-12-01 — Les formules des piliers Position/Impulsion/Information appliquent désormais le focus doctrinal, la sévérité logistique (flow + movement cost), les bonus de formation/compétence, ainsi que les multiplicateurs météo/terrain et renseignement (`intel_confidence`, `signal_strength`, `counter_intel`). Ce fichier conserve l'annotation de référence :
   - **Position** = (profil unités + doctrine + formation + ordre + bonus attaque) × terrain × météo × focus doctrinal × facteur logistique × pénalité mouvement (selon `movement_cost`) × ajustement sévérité (warning=×0,9, critical=×0,75) + 5% de bonus espionnage.
