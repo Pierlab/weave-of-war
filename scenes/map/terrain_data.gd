@@ -6,15 +6,18 @@ extends Resource
 const TERRAIN_TYPES := {
     "plains": {
         "name": "Plains",
-        "movement_cost": 1
+        "movement_cost": 1.0,
+        "description": "Open ground that keeps convoys quick and logistics stable."
     },
     "forest": {
         "name": "Forest",
-        "movement_cost": 2
+        "movement_cost": 2.0,
+        "description": "Dense woodland that slows supply chains but offers concealment."
     },
     "hill": {
         "name": "Hill",
-        "movement_cost": 3
+        "movement_cost": 3.0,
+        "description": "Elevated ridges that tax convoys while improving lines of sight."
     }
 }
 

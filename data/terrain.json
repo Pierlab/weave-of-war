@@ -1,0 +1,233 @@
+[
+  {
+    "id": "plains",
+    "type": "definition",
+    "name": "Plains",
+    "movement_cost": 1.0,
+    "description": "Open ground that keeps convoys quick and logistics stable."
+  },
+  {
+    "id": "forest",
+    "type": "definition",
+    "name": "Forest",
+    "movement_cost": 2.0,
+    "description": "Dense woodland that slows supply chains but offers concealment."
+  },
+  {
+    "id": "hill",
+    "type": "definition",
+    "name": "Hill",
+    "movement_cost": 3.0,
+    "description": "Elevated ridges that tax convoys while improving lines of sight."
+  },
+  {
+    "id": "0,0",
+    "type": "tile",
+    "q": 0,
+    "r": 0,
+    "terrain": "plains"
+  },
+  {
+    "id": "1,0",
+    "type": "tile",
+    "q": 1,
+    "r": 0,
+    "terrain": "forest"
+  },
+  {
+    "id": "2,0",
+    "type": "tile",
+    "q": 2,
+    "r": 0,
+    "terrain": "hill"
+  },
+  {
+    "id": "3,0",
+    "type": "tile",
+    "q": 3,
+    "r": 0,
+    "terrain": "plains"
+  },
+  {
+    "id": "4,0",
+    "type": "tile",
+    "q": 4,
+    "r": 0,
+    "terrain": "forest"
+  },
+  {
+    "id": "5,0",
+    "type": "tile",
+    "q": 5,
+    "r": 0,
+    "terrain": "hill"
+  },
+  {
+    "id": "0,1",
+    "type": "tile",
+    "q": 0,
+    "r": 1,
+    "terrain": "forest"
+  },
+  {
+    "id": "1,1",
+    "type": "tile",
+    "q": 1,
+    "r": 1,
+    "terrain": "hill"
+  },
+  {
+    "id": "2,1",
+    "type": "tile",
+    "q": 2,
+    "r": 1,
+    "terrain": "plains"
+  },
+  {
+    "id": "3,1",
+    "type": "tile",
+    "q": 3,
+    "r": 1,
+    "terrain": "forest"
+  },
+  {
+    "id": "4,1",
+    "type": "tile",
+    "q": 4,
+    "r": 1,
+    "terrain": "hill"
+  },
+  {
+    "id": "5,1",
+    "type": "tile",
+    "q": 5,
+    "r": 1,
+    "terrain": "plains"
+  },
+  {
+    "id": "0,2",
+    "type": "tile",
+    "q": 0,
+    "r": 2,
+    "terrain": "hill"
+  },
+  {
+    "id": "1,2",
+    "type": "tile",
+    "q": 1,
+    "r": 2,
+    "terrain": "plains"
+  },
+  {
+    "id": "2,2",
+    "type": "tile",
+    "q": 2,
+    "r": 2,
+    "terrain": "forest"
+  },
+  {
+    "id": "3,2",
+    "type": "tile",
+    "q": 3,
+    "r": 2,
+    "terrain": "hill"
+  },
+  {
+    "id": "4,2",
+    "type": "tile",
+    "q": 4,
+    "r": 2,
+    "terrain": "plains"
+  },
+  {
+    "id": "5,2",
+    "type": "tile",
+    "q": 5,
+    "r": 2,
+    "terrain": "forest"
+  },
+  {
+    "id": "0,3",
+    "type": "tile",
+    "q": 0,
+    "r": 3,
+    "terrain": "plains"
+  },
+  {
+    "id": "1,3",
+    "type": "tile",
+    "q": 1,
+    "r": 3,
+    "terrain": "forest"
+  },
+  {
+    "id": "2,3",
+    "type": "tile",
+    "q": 2,
+    "r": 3,
+    "terrain": "hill"
+  },
+  {
+    "id": "3,3",
+    "type": "tile",
+    "q": 3,
+    "r": 3,
+    "terrain": "plains"
+  },
+  {
+    "id": "4,3",
+    "type": "tile",
+    "q": 4,
+    "r": 3,
+    "terrain": "forest"
+  },
+  {
+    "id": "5,3",
+    "type": "tile",
+    "q": 5,
+    "r": 3,
+    "terrain": "hill"
+  },
+  {
+    "id": "0,4",
+    "type": "tile",
+    "q": 0,
+    "r": 4,
+    "terrain": "forest"
+  },
+  {
+    "id": "1,4",
+    "type": "tile",
+    "q": 1,
+    "r": 4,
+    "terrain": "hill"
+  },
+  {
+    "id": "2,4",
+    "type": "tile",
+    "q": 2,
+    "r": 4,
+    "terrain": "plains"
+  },
+  {
+    "id": "3,4",
+    "type": "tile",
+    "q": 3,
+    "r": 4,
+    "terrain": "forest"
+  },
+  {
+    "id": "4,4",
+    "type": "tile",
+    "q": 4,
+    "r": 4,
+    "terrain": "hill"
+  },
+  {
+    "id": "5,4",
+    "type": "tile",
+    "q": 5,
+    "r": 4,
+    "terrain": "plains"
+  }
+]

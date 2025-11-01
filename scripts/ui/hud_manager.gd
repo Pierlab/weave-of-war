@@ -2,9 +2,12 @@ extends Control
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
+const UTILS := preload("res://scripts/core/utils.gd")
 
 @onready var next_turn_button: Button = $MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $MarginContainer/VBoxContainer/ToggleLogisticsButton
+@onready var weather_icon: ColorRect = $MarginContainer/VBoxContainer/WeatherPanel/WeatherIcon
+@onready var weather_label: Label = $MarginContainer/VBoxContainer/WeatherPanel/WeatherLabel
 @onready var doctrine_selector: OptionButton = $MarginContainer/VBoxContainer/DoctrineSelector
 @onready var doctrine_status_label: Label = $MarginContainer/VBoxContainer/DoctrineStatusLabel
 @onready var inertia_label: Label = $MarginContainer/VBoxContainer/InertiaLabel
@@ -17,6 +20,12 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 const FEEDBACK_SAMPLE_RATE := 44100.0
 const FEEDBACK_DURATION := 0.12
 const FEEDBACK_VOLUME := 0.2
+const WEATHER_COLORS := {
+    "sunny": Color(1.0, 0.84, 0.25, 1.0),
+    "rain": Color(0.35, 0.55, 0.9, 1.0),
+    "mist": Color(0.7, 0.75, 0.85, 1.0),
+    "default": Color(0.8, 0.8, 0.8, 1.0),
+}
 
 var event_bus: EventBusAutoload
 var data_loader: DataLoaderAutoload
@@ -36,6 +45,7 @@ var _feedback_generator: AudioStreamGenerator
 var _pending_feedback_pitches: Array = []
 var _feedback_flush_scheduled := false
 var _suppress_doctrine_selector_signal := false
+var _current_weather: Dictionary = {}
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -58,6 +68,7 @@ func _wire_ui() -> void:
         next_turn_button.pressed.connect(_on_next_turn_pressed)
     if toggle_logistics_button:
         toggle_logistics_button.pressed.connect(_on_toggle_logistics_pressed)
+        _refresh_terrain_tooltip([], [])
     if doctrine_selector:
         doctrine_selector.item_selected.connect(_on_doctrine_selector_item_selected)
     if order_selector:
@@ -80,12 +91,16 @@ func _connect_event_bus() -> void:
         event_bus.order_issued.connect(_on_order_issued)
     if not event_bus.order_execution_failed.is_connected(_on_order_execution_failed):
         event_bus.order_execution_failed.connect(_on_order_execution_failed)
+    if not event_bus.weather_changed.is_connected(_on_weather_changed):
+        event_bus.weather_changed.connect(_on_weather_changed)
 
 func _populate_from_data_loader() -> void:
     if data_loader == null or not data_loader.is_ready():
         return
     _populate_doctrines(data_loader.list_doctrines())
     _populate_orders(data_loader.list_orders())
+    _refresh_terrain_tooltip(data_loader.list_terrain_definitions(), data_loader.list_terrain_tiles())
+    _update_weather_panel()
 
 func _populate_doctrines(entries: Array) -> void:
     if doctrine_selector == null:
@@ -118,6 +133,11 @@ func _populate_orders(entries: Array) -> void:
             _order_lookup[id] = entry
             _order_costs[id] = float(entry.get("base_elan_cost", 0))
     _refresh_order_selector([])
+
+func _refresh_terrain_tooltip(definitions: Array, tiles: Array) -> void:
+    if toggle_logistics_button == null:
+        return
+    toggle_logistics_button.tooltip_text = UTILS.build_terrain_tooltip(definitions, tiles)
 
 func _refresh_order_selector(allowed_entries: Array) -> void:
     if order_selector == null:
@@ -154,6 +174,10 @@ func _on_logistics_toggled(should_show: bool) -> void:
     if toggle_logistics_button:
         toggle_logistics_button.text = "Hide Logistics" if should_show else "Show Logistics"
 
+func _on_weather_changed(payload: Dictionary) -> void:
+    _current_weather = payload.duplicate(true)
+    _update_weather_panel()
+
 func _on_doctrine_selector_item_selected(index: int) -> void:
     if _suppress_doctrine_selector_signal:
         return
@@ -179,6 +203,48 @@ func _on_doctrine_selector_item_selected(index: int) -> void:
 
 func _on_order_selector_item_selected(_index: int) -> void:
     _refresh_order_button_state()
+
+func _update_weather_panel() -> void:
+    if weather_label == null or weather_icon == null:
+        return
+    var weather_id := str(_current_weather.get("weather_id", ""))
+    if weather_id.is_empty():
+        weather_label.text = "Weather : —"
+        weather_icon.color = WEATHER_COLORS.get("default", Color(0.8, 0.8, 0.8, 1.0))
+        weather_label.tooltip_text = "Aucune météo active."
+        return
+    var name := str(_current_weather.get("name", weather_id.capitalize()))
+    var remaining := int(_current_weather.get("duration_remaining", 0))
+    var range_variant: Variant = _current_weather.get("duration_range", [])
+    var range_text := ""
+    if range_variant is Array and remaining > 0:
+        var minimum := int(range_variant[0]) if range_variant.size() > 0 else remaining
+        var maximum := int(range_variant[1]) if range_variant.size() > 1 else minimum
+        if minimum == maximum:
+            range_text = " (%d tour%s restant%s)" % [remaining, "s" if remaining > 1 else "", "s" if remaining > 1 else ""]
+        else:
+            range_text = " (%d/%d restants)" % [remaining, maximum]
+    elif remaining > 0:
+        range_text = " (%d tour%s restant%s)" % [remaining, "s" if remaining > 1 else "", "s" if remaining > 1 else ""]
+    weather_label.text = "Weather : %s%s" % [name, range_text]
+
+    var icon_color: Color = WEATHER_COLORS.get(weather_id, WEATHER_COLORS.get("default"))
+    weather_icon.color = icon_color
+
+    var effects := str(_current_weather.get("effects", ""))
+    var movement := float(_current_weather.get("movement_modifier", 1.0))
+    var flow := float(_current_weather.get("logistics_flow_modifier", 1.0))
+    var intel := float(_current_weather.get("intel_noise", 0.0))
+    var elan_bonus := float(_current_weather.get("elan_regeneration_bonus", 0.0))
+    var tooltip_lines: Array = []
+    tooltip_lines.append("%s" % name)
+    if not effects.is_empty():
+        tooltip_lines.append(effects)
+    tooltip_lines.append("Déplacement ×%.2f | Flux ×%.2f" % [movement, flow])
+    tooltip_lines.append("Brouillard intel +%.2f | Bonus Élan %.2f" % [intel, elan_bonus])
+    if remaining > 0:
+        tooltip_lines.append("Encore %d tour%s" % [remaining, "s" if remaining > 1 else ""])
+    weather_label.tooltip_text = "\n".join(tooltip_lines)
 
 func _refresh_order_button_state() -> void:
     if execute_order_button == null:
@@ -212,6 +278,8 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
     var collections: Dictionary = payload.get("collections", {})
     _populate_doctrines(collections.get("doctrines", []))
     _populate_orders(collections.get("orders", []))
+    if data_loader:
+        _refresh_terrain_tooltip(data_loader.list_terrain_definitions(), data_loader.list_terrain_tiles())
 
 func _on_doctrine_selected(payload: Dictionary) -> void:
     var doctrine_id: String = payload.get("id", "")

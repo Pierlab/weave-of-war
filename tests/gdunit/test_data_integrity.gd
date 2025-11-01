@@ -307,6 +307,11 @@ func test_data_loader_exposes_caches() -> void:
     var formation := loader.get_formation("shield_wall")
     asserts.is_true(formation.size() > 0, "Formation 'shield_wall' should be cached for quick lookups")
 
+    var terrain_tiles := loader.list_terrain_tiles()
+    asserts.is_true(terrain_tiles.size() > 0, "Terrain tiles collection should load into DataLoader")
+    var terrain_definitions := loader.list_terrain_definitions()
+    asserts.is_true(terrain_definitions.size() >= 3, "Terrain definitions should expose the baseline biomes")
+
 func test_data_loader_validation_reports_missing_keys() -> void:
     var errors := DataLoaderAutoload.validate_collection("orders", [{"id": "invalid_order"}])
     asserts.is_true(errors.size() > 0, "Validation should report missing required keys")

@@ -28,6 +28,7 @@ var _last_payload: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _pending_breaks: Array = []
 var _previous_supply_levels: Dictionary = {}
+var _weather_controlled_externally := false
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -51,6 +52,8 @@ func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload)
             event_bus.turn_started.connect(_on_turn_started)
         if not event_bus.logistics_toggled.is_connected(_on_logistics_toggled):
             event_bus.logistics_toggled.connect(_on_logistics_toggled)
+        if not event_bus.weather_changed.is_connected(_on_weather_changed):
+            event_bus.weather_changed.connect(_on_weather_changed)
 
     _recalculate_state("ready")
 
@@ -58,6 +61,7 @@ func configure(logistics_entries: Array, weather_entries: Array) -> void:
     _logistics_by_id.clear()
     _weather_by_id.clear()
     _weather_sequence.clear()
+    _weather_controlled_externally = false
 
     for entry in logistics_entries:
         if entry is Dictionary and entry.has("id"):
@@ -75,6 +79,7 @@ func configure(logistics_entries: Array, weather_entries: Array) -> void:
         _current_logistics_id = str(_logistics_by_id.keys()[0])
 
     _apply_logistics_map(_logistics_by_id.get(_current_logistics_id, {}))
+    _ingest_terrain_from_data_loader()
     if _current_weather_id.is_empty() and _weather_sequence.size() > 0:
         _current_weather_id = str(_weather_sequence[0])
     elif not _weather_by_id.has(_current_weather_id) and _weather_sequence.size() > 0:
@@ -96,7 +101,7 @@ func set_logistics_state(logistics_id: String) -> void:
     _ensure_convoy_states()
     _recalculate_state("state_change")
 
-func set_weather_state(weather_id: String) -> void:
+func set_weather_state(weather_id: String, reason := "manual") -> void:
     if weather_id.is_empty() or not _weather_by_id.has(weather_id):
         return
     _current_weather_id = weather_id
@@ -107,6 +112,8 @@ func set_weather_state(weather_id: String) -> void:
             "name": _weather_by_id.get(weather_id, {}).get("name", weather_id),
             "effects": _weather_by_id.get(weather_id, {}).get("effects", ""),
             "turn": _turn_counter,
+            "reason": reason,
+            "source": "logistics_system",
         })
 
 func configure_map(terrain_tiles: Dictionary, supply_centers: Array, routes: Array) -> void:
@@ -136,9 +143,23 @@ func _on_logistics_toggled(is_visible: bool) -> void:
     _visible = is_visible
     _recalculate_state("visibility")
 
+func _on_weather_changed(payload: Dictionary) -> void:
+    if payload.get("source", "") == "logistics_system":
+        return
+    var weather_id := str(payload.get("weather_id", ""))
+    if weather_id.is_empty():
+        return
+    _weather_controlled_externally = true
+    if weather_id == _current_weather_id and str(payload.get("reason", "")) == "tick":
+        return
+    _current_weather_id = weather_id
+    var reason := str(payload.get("reason", "weather_event"))
+    _recalculate_state(reason)
+
 func _generate_default_map() -> void:
     _terrain_lookup.clear()
     var terrain_keys := _terrain_definitions.keys()
+    terrain_keys.sort()
     var terrain_count := terrain_keys.size()
     for q in range(map_columns):
         for r in range(map_rows):
@@ -151,7 +172,11 @@ func _generate_default_map() -> void:
                 "r": r,
                 "terrain": terrain_id,
                 "base_movement_cost": movement,
+                "name": str(terrain.get("name", terrain_id.capitalize())),
+                "description": str(terrain.get("description", "")),
+                "id": tile_id,
             }
+    _ensure_tile_metadata()
 
 func _configure_default_network() -> void:
     _supply_centers = [
@@ -195,6 +220,79 @@ func _configure_default_network() -> void:
     ]
     _reset_convoy_states_for_routes()
     _ensure_convoy_states()
+
+func _ingest_terrain_from_data_loader() -> void:
+    if data_loader == null:
+        _ensure_tile_metadata()
+        return
+    var definitions := data_loader.list_terrain_definitions()
+    if definitions.size() > 0:
+        _merge_terrain_definitions(definitions)
+    var tiles := data_loader.list_terrain_tiles()
+    if tiles.size() > 0:
+        _apply_terrain_tiles(tiles)
+    _ensure_tile_metadata()
+
+func _merge_terrain_definitions(definitions: Array) -> void:
+    for entry in definitions:
+        if not (entry is Dictionary):
+            continue
+        var id := str(entry.get("id", ""))
+        if id.is_empty():
+            continue
+        var current := _terrain_definitions.get(id, {})
+        var definition := {
+            "name": str(entry.get("name", current.get("name", id.capitalize()))),
+            "movement_cost": float(entry.get("movement_cost", current.get("movement_cost", 1.0))),
+            "description": str(entry.get("description", current.get("description", ""))),
+        }
+        _terrain_definitions[id] = definition
+
+func _apply_terrain_tiles(tiles: Array) -> void:
+    for entry in tiles:
+        if not (entry is Dictionary):
+            continue
+        var q := int(entry.get("q", 0))
+        var r := int(entry.get("r", 0))
+        var tile_id := _tile_id(q, r)
+        var terrain_id := str(entry.get("terrain", "plains"))
+        var definition := _terrain_definitions.get(terrain_id, {})
+        var tile := _terrain_lookup.get(tile_id, {
+            "q": q,
+            "r": r,
+        })
+        tile["q"] = q
+        tile["r"] = r
+        tile["id"] = tile_id
+        tile["terrain"] = terrain_id
+        tile["name"] = str(entry.get("name", definition.get("name", terrain_id.capitalize())))
+        tile["description"] = str(entry.get("description", definition.get("description", "")))
+        var base_cost := definition.get("movement_cost", tile.get("base_movement_cost", 1.0))
+        if entry.has("movement_cost"):
+            base_cost = entry.get("movement_cost")
+        tile["base_movement_cost"] = float(base_cost)
+        _terrain_lookup[tile_id] = tile
+
+func _ensure_tile_metadata() -> void:
+    for tile_id in _terrain_lookup.keys():
+        var tile := _terrain_lookup.get(tile_id, {})
+        var q := int(tile.get("q", 0))
+        var r := int(tile.get("r", 0))
+        tile["q"] = q
+        tile["r"] = r
+        tile["id"] = tile_id
+        var terrain_id := str(tile.get("terrain", "plains"))
+        if terrain_id.is_empty():
+            terrain_id = "plains"
+            tile["terrain"] = terrain_id
+        var definition := _terrain_definitions.get(terrain_id, {})
+        if not tile.has("name") or String(tile.get("name", "")).is_empty():
+            tile["name"] = str(definition.get("name", terrain_id.capitalize()))
+        if not tile.has("description"):
+            tile["description"] = str(definition.get("description", ""))
+        var movement_variant := tile.get("base_movement_cost", definition.get("movement_cost", 1.0))
+        tile["base_movement_cost"] = float(movement_variant)
+        _terrain_lookup[tile_id] = tile
 
 func _apply_logistics_map(logistics_config: Dictionary) -> void:
     if not logistics_config.has("map"):
@@ -265,6 +363,7 @@ func _apply_logistics_map(logistics_config: Dictionary) -> void:
         _reset_convoy_states_for_routes()
         _ensure_convoy_states()
         _previous_supply_levels.clear()
+    _ensure_tile_metadata()
 
 func _ensure_convoy_states() -> void:
     for route in _routes:
@@ -370,11 +469,15 @@ func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_c
         var distance := _distance_to_nearest_center(axial)
         var base_movement := float(tile.get("base_movement_cost", 1.0))
         var terrain_id := str(tile.get("terrain", "plains"))
+        var terrain_name := str(tile.get("name", terrain_id.capitalize()))
+        var terrain_description := str(tile.get("description", ""))
         var supply_level := _supply_level(distance, supply_radius)
         var logistics_flow := _compute_tile_flow(flow_multiplier, terrain_id, distance, supply_radius)
         zones.append({
             "tile_id": tile_id,
             "terrain": terrain_id,
+            "terrain_name": terrain_name,
+            "terrain_description": terrain_description,
             "distance": distance,
             "supply_level": supply_level,
             "movement_cost": snapped(base_movement * movement_modifier, 0.01),
@@ -436,6 +539,9 @@ func _derive_reachable_tiles(zones: Array) -> Array:
             "tile_id": tile_id,
             "supply_level": supply_level,
             "logistics_flow": snapped(flow, 0.01),
+            "terrain": zone.get("terrain", "plains"),
+            "terrain_name": zone.get("terrain_name", ""),
+            "movement_cost": zone.get("movement_cost", 0.0),
         })
     reachable.sort_custom(func(a, b): return String(a.get("tile_id", "")) < String(b.get("tile_id", "")))
     return reachable
@@ -463,6 +569,9 @@ func _collect_supply_deficits(zones: Array, logistics_config: Dictionary) -> Arr
             "supply_level": supply_level,
             "logistics_flow": snapped(flow, 0.01),
             "severity": severity,
+            "terrain": zone.get("terrain", "plains"),
+            "terrain_name": zone.get("terrain_name", ""),
+            "movement_cost": zone.get("movement_cost", 0.0),
         })
     deficits.sort_custom(func(a, b): return String(a.get("tile_id", "")) < String(b.get("tile_id", "")))
     return deficits
@@ -530,6 +639,8 @@ func _advance_convoys() -> void:
         _convoys_by_route[route_id] = state
 
 func _maybe_rotate_weather() -> void:
+    if _weather_controlled_externally:
+        return
     if _weather_rotation_turns <= 0:
         return
     if _weather_sequence.size() <= 1:
@@ -545,8 +656,10 @@ func _maybe_rotate_weather() -> void:
         event_bus.emit_weather_changed({
             "weather_id": _current_weather_id,
             "name": _weather_by_id.get(_current_weather_id, {}).get("name", _current_weather_id),
+            "effects": _weather_by_id.get(_current_weather_id, {}).get("effects", ""),
             "turn": _turn_counter,
             "reason": "rotation",
+            "source": "logistics_system",
         })
 
 func _route_speed(route_type: String, flow_multiplier: float) -> float:

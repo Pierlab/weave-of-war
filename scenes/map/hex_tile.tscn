@@ -10,10 +10,11 @@ color = Color(0.305882, 0.52549, 0.403922, 1)
 polygon = PackedVector2Array(0, -32, 27, -16, 27, 16, 0, 32, -27, 16, -27, -16)
 
 [node name="Label" type="Label" parent="."]
-offset_left = -24.0
-offset_top = -10.0
-offset_right = 24.0
-offset_bottom = 10.0
+offset_left = -28.0
+offset_top = -18.0
+offset_right = 28.0
+offset_bottom = 18.0
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
 text = "0,0"

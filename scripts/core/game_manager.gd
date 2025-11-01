@@ -5,6 +5,7 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 const DOCTRINE_SYSTEM := preload("res://scripts/systems/doctrine_system.gd")
 const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
 const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
+const WEATHER_SYSTEM := preload("res://scripts/systems/weather_system.gd")
 
 var event_bus: EventBusAutoload
 var turn_manager: TurnManager
@@ -12,6 +13,7 @@ var data_loader: DataLoaderAutoload
 var doctrine_system: DoctrineSystem
 var elan_system: ElanSystem
 var logistics_system: LogisticsSystem
+var weather_system: WeatherSystem
 
 var _core_systems_initialised := false
 
@@ -31,6 +33,9 @@ func _ready() -> void:
 
     logistics_system = LOGISTICS_SYSTEM.new()
     add_child(logistics_system)
+
+    weather_system = WEATHER_SYSTEM.new()
+    add_child(weather_system)
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)
@@ -67,6 +72,8 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
 
     doctrine_system.setup(event_bus, data_loader)
     elan_system.setup(event_bus, data_loader)
+    if weather_system:
+        weather_system.setup(event_bus, data_loader)
     if logistics_system:
         logistics_system.setup(event_bus, data_loader)
 
@@ -74,10 +81,11 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
 
     var counts: Dictionary = payload.get("counts", {})
     assert(not counts.is_empty(), "GameManager expected data_loader_ready counts payload.")
-    print("[GameManager] DataLoader ready → doctrines=%d, orders=%d, units=%d" % [
+    print("[GameManager] DataLoader ready → doctrines=%d, orders=%d, units=%d, terrain_tiles=%d" % [
         counts.get("doctrines", 0),
         counts.get("orders", 0),
         counts.get("units", 0),
+        counts.get("terrain", 0),
     ])
 
     turn_manager.start_game()
@@ -100,5 +108,6 @@ func _build_data_loader_payload() -> Dictionary:
             "weather": data_loader.list_weather_states() if data_loader else [],
             "logistics": data_loader.list_logistics_states() if data_loader else [],
             "formations": data_loader.list_formations() if data_loader else [],
+            "terrain": data_loader.list_terrain_tiles() if data_loader else [],
         }
     }

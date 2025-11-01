@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T15:23:49Z
+- Generated on: 2025-11-01T15:53:54Z
 - Branch: work
-- Commit when generated: 82429e44d58ea4fca8c713616243704bb05d7476
-- Subject: Merge pull request #56 from Pierlab/codex/add-item-to-checklist.md-rv1mi6
+- Commit when generated: 02dcc5f6add81db88a9e70c3bbb57043d2de94a1
+- Subject: Add terrain metadata and tooltips for logistics UI
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -36,6 +36,7 @@
 - scripts/systems/elan_system.gd
 - scripts/systems/espionage_system.gd
 - scripts/systems/logistics_system.gd
+- scripts/systems/weather_system.gd
 - scripts/tools/simulate_hud_audio_feedback.py
 - scripts/ui/debug_overlay.gd
 - scripts/ui/hud_manager.gd
@@ -57,6 +58,7 @@
 - tests/gdunit/test_logistics_data_connectivity.gd
 - tests/gdunit/test_logistics_system.gd
 - tests/gdunit/test_smoke.gd
+- tests/gdunit/test_weather_system.gd
 
 ## Key documentation
 - README.md
