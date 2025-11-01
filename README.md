@@ -89,6 +89,20 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   logistics flow, intel noise, and Élan regeneration modifiers for fast reference.
 - **Accessibility notes** — Élan totals show both absolute (`Élan : X.X / Y.Y`) and trend indicators (`↗` income, `↘` upkeep). A context-rich tooltip on the Élan label lists base cap, active doctrine bonus, turns spent at cap, and the decay scheduled for the next round so keyboard and screen-reader users receive the same warnings surfaced by colour shifts. All feedback strings avoid colour-only messaging by embedding the validation reason in text, while the paired positive/negative hues exceed WCAG contrast guidelines against the HUD's neutral background.
 
+### Competence slider usage guide
+Follow this loop whenever you redistribute competence so the downstream systems react exactly as designed:
+
+1. **Prepare the reallocations.** Select a slider with `[1]`, `[2]`, `[3]` (or the matching controller buttons) until the row highlight moves to the desired category. The status line directly beneath the sliders shows the current allocation, remaining budget, and the per-turn delta cap that still applies.
+2. **Adjust within limits.** Use `←/→`, `A/D`, or the d-pad to change values. When you hit a locked cell, the HUD restores the previous value and flashes a tooltip that specifies whether inertia (`Restant : N tour(s)`) or the delta cap caused the rejection. Successful moves update the budget label immediately and emit a `competence_allocation_requested` signal that TurnManager evaluates.
+3. **Verify telemetry feedback.** Open **Debug > Remote > TelemetryAutoload** and inspect the latest `competence_reallocated` entry. The payload lists `before`/`after` allocations, `remaining_budget`, `inertia`, and any `modifiers.logistics_penalty` so you can trace why the HUD budget label changed colour.
+4. **Check system reactions.**
+   - Trigger a combat resolution (issue an order that leads to an engagement) and confirm the `combat_resolved.pillars.impulse.attacker` field rises when Tactics exceeds its baseline.
+   - Inspect the assistant log in the debug overlay; the next `assistant_order_packet` should report `competence_alignment` matching the new Strategy ratio.
+   - Let the next logistics tick run and watch the overlay or telemetry payload: `logistics_update.competence_multiplier` and `flow_multiplier` shift in tandem with your Logistics slider.
+5. **Restore balance.** If a logistics penalty was active, reallocating points back into Logistics removes the `modifiers.logistics_penalty` entry in telemetry within one turn, which also clears the red budget warning on the HUD.
+
+This routine doubles as the manual acceptance flow for the competence panel: following the steps above ensures the HUD, telemetry buffers, and downstream systems stay synchronised whenever allocations change.
+
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads
   that describe supply levels, terrain-driven flow modifiers, convoy progress/interruptions, the list of reachable tiles, and
