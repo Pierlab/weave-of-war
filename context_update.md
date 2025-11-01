@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-03 — Hardened `DataLoaderAutoload` with schema + enum validation (`validate_collection()`), surfaced load-time issues through `load_all()`, and extended `tests/gdunit/test_data_integrity.gd` with regression coverage for valid/invalid payloads while checking off Checklist Phase 0 item 3.
 - 2025-11-01 — Re-aligned Vertical Slice P0 scope after reviewing `docs/project_spec.md`, mission brief, and `context_snapshot.md`; confirmed no new scope deltas beyond the existing local Godot binary provisioning blocker.
 - 2025-11-02 — Catalogued Phase 0 data gaps across `data/*.json`, highlighting missing doctrines, CP metadata, logistics graphs, weather telemetry fields, and the absent competence slider dataset in the mission brief.
 - Re-sequenced `CHECKLISTS.md` into a numbered, evidence-driven execution script and updated the mission brief/README to call out the strict sequential flow.
