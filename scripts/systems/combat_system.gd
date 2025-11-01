@@ -38,6 +38,11 @@ var _competence_allocations := {
     "strategy": 0.0,
     "logistics": 0.0,
 }
+var _logistics_lookup: Dictionary = {}
+var _logistics_deficits: Dictionary = {}
+var _last_logistics_payload: Dictionary = {}
+var _pending_order_id := ""
+var _last_order_payload: Dictionary = {}
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -69,6 +74,12 @@ func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
             event_bus.assistant_order_packet.connect(_on_assistant_packet)
         if not event_bus.competence_reallocated.is_connected(_on_competence_reallocated):
             event_bus.competence_reallocated.connect(_on_competence_reallocated)
+        if not event_bus.logistics_update.is_connected(_on_logistics_update):
+            event_bus.logistics_update.connect(_on_logistics_update)
+        if not event_bus.order_execution_requested.is_connected(_on_order_execution_requested):
+            event_bus.order_execution_requested.connect(_on_order_execution_requested)
+        if not event_bus.order_issued.is_connected(_on_order_issued):
+            event_bus.order_issued.connect(_on_order_issued)
 
 func configure(unit_entries: Array, order_entries: Array, doctrine_entries: Array, weather_entries: Array, formation_entries: Array) -> void:
     _units_by_id = _index_entries(unit_entries)
@@ -166,6 +177,11 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
     var doctrine_effects := _doctrines_by_id.get(_current_doctrine_id, {}).get("effects", {})
     var doctrine_bonus: Dictionary = doctrine_effects.get("combat_bonus", {})
 
+    var target_hex := str(engagement.get("target", engagement.get("target_hex", "")))
+    var logistics_context := _logistics_context_for_target(target_hex)
+    var attacker_logistics_factor := float(logistics_context.get("attacker_factor", 1.0))
+    var defender_logistics_factor := float(logistics_context.get("defender_factor", 1.0))
+
     var attacker_base := _aggregate_unit_profile(attacker_unit_ids, "combat_profile", "attacker")
     var defender_base := _aggregate_unit_profile(defender_unit_ids, "combat_profile", "defender")
     var attacker_detection := _aggregate_unit_value(attacker_unit_ids, "recon_profile", "detection")
@@ -206,6 +222,8 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
 
         attacker_strength *= terrain_factor * weather_factor
         defender_strength *= terrain_factor * weather_factor
+        attacker_strength *= attacker_logistics_factor
+        defender_strength *= defender_logistics_factor
 
         var jitter := _rng.randf_range(-0.05, 0.05)
         attacker_strength = max(attacker_strength + jitter, 0.0)
@@ -235,7 +253,6 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
     elif attacker_wins == defender_wins and attacker_wins == 1:
         victor = "contested"
 
-    var target_hex := str(engagement.get("target", engagement.get("target_hex", "")))
     var intel_source := _recent_intel.get(target_hex, {}).get("source", "baseline") if _recent_intel.has(target_hex) else "baseline"
     var payload := {
         "engagement_id": engagement.get("engagement_id", order_id if order_id != "" else "skirmish"),
@@ -250,6 +267,7 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
             "source": intel_source,
         },
         "reason": engagement.get("reason", "resolution"),
+        "logistics": logistics_context,
     }
 
     _last_resolution = payload.duplicate(true)
@@ -430,9 +448,101 @@ func _on_assistant_order_packet(packet: Dictionary) -> void:
     var engagements: Array = packet.get("expected_engagements", [])
     for engagement in engagements:
         if engagement is Dictionary:
-            resolve_engagement(engagement)
+            _resolve_assistant_engagement(engagement)
 
 func _on_competence_reallocated(payload: Dictionary) -> void:
     var allocations: Dictionary = payload.get("allocations", {})
     for category in COMPETENCE_CATEGORIES:
         _competence_allocations[category] = float(allocations.get(category, 0.0))
+
+func _on_logistics_update(payload: Dictionary) -> void:
+    _last_logistics_payload = payload.duplicate(true)
+    _logistics_lookup.clear()
+    var zones_variant: Variant = payload.get("supply_zones", [])
+    var zones: Array = zones_variant if zones_variant is Array else []
+    for zone in zones:
+        if not (zone is Dictionary):
+            continue
+        var tile_id := str(zone.get("tile_id", ""))
+        if tile_id == "":
+            continue
+        _logistics_lookup[tile_id] = zone.duplicate(true)
+
+    _logistics_deficits.clear()
+    var deficits_variant: Variant = payload.get("supply_deficits", [])
+    var deficits: Array = deficits_variant if deficits_variant is Array else []
+    for entry in deficits:
+        if not (entry is Dictionary):
+            continue
+        var deficit_tile := str(entry.get("tile_id", ""))
+        if deficit_tile == "":
+            continue
+        _logistics_deficits[deficit_tile] = entry.duplicate(true)
+
+func _on_order_execution_requested(order_id: String) -> void:
+    _pending_order_id = order_id
+
+func _on_order_issued(payload: Dictionary) -> void:
+    _last_order_payload = payload.duplicate(true)
+    var issued_id := str(payload.get("order_id", ""))
+    if issued_id == _pending_order_id:
+        _pending_order_id = ""
+
+func _resolve_assistant_engagement(engagement: Dictionary) -> void:
+    var enriched := _enrich_engagement(engagement)
+    resolve_engagement(enriched)
+
+func _enrich_engagement(engagement: Dictionary) -> Dictionary:
+    var enriched := engagement.duplicate(true)
+    var target_hex := str(enriched.get("target", enriched.get("target_hex", "")))
+    if target_hex != "":
+        enriched["target_hex"] = target_hex
+        if not enriched.has("terrain") or str(enriched.get("terrain", "")).is_empty():
+            var zone: Dictionary = _logistics_lookup.get(target_hex, {})
+            if not zone.is_empty():
+                enriched["terrain"] = zone.get("terrain", enriched.get("terrain", "plains"))
+    if not enriched.has("weather_id") or str(enriched.get("weather_id", "")).is_empty():
+        enriched["weather_id"] = _current_weather_id
+    return enriched
+
+func _logistics_context_for_target(target_hex: String) -> Dictionary:
+    if target_hex.is_empty():
+        return {
+            "attacker_factor": 1.0,
+            "defender_factor": 1.0,
+            "logistics_flow": 1.0,
+            "supply_level": "",
+            "severity": "",
+            "turn": int(_last_logistics_payload.get("turn", -1)),
+            "logistics_id": str(_last_logistics_payload.get("logistics_id", "")),
+            "target_hex": target_hex,
+            "movement_cost": 1.0,
+        }
+
+    var zone: Dictionary = _logistics_lookup.get(target_hex, {})
+    var flow := float(zone.get("logistics_flow", 1.0))
+    var supply_level := str(zone.get("supply_level", ""))
+    var movement_cost := float(zone.get("movement_cost", 1.0))
+    var deficit: Dictionary = _logistics_deficits.get(target_hex, {}) if _logistics_deficits.has(target_hex) else {}
+    var severity := str(deficit.get("severity", "")) if deficit is Dictionary else ""
+
+    var attacker_factor := clamp(flow, 0.2, 1.5)
+    match severity:
+        "warning":
+            attacker_factor *= 0.85
+        "critical":
+            attacker_factor *= 0.65
+        _:
+            pass
+
+    return {
+        "attacker_factor": snapped(attacker_factor, 0.01),
+        "defender_factor": 1.0,
+        "logistics_flow": snapped(flow, 0.01),
+        "supply_level": supply_level,
+        "severity": severity,
+        "movement_cost": snapped(movement_cost, 0.01),
+        "turn": int(_last_logistics_payload.get("turn", -1)),
+        "logistics_id": str(_last_logistics_payload.get("logistics_id", "")),
+        "target_hex": target_hex,
+    }

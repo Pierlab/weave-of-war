@@ -119,6 +119,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `CombatSystem` now resolves Manoeuvre/Feu/Moral contests by combining unit combat profiles, doctrine bonuses, terrain and
   weather multipliers, and the latest espionage confidence. Each resolution emits a `combat_resolved` payload for telemetry and
   upcoming HUD combat panels.
+- `GameManager` now instantiates `CombatSystem` with the other core loops and routes live `logistics_update` data into combat
+  resolutions. Engagement telemetry embeds a `logistics` block (flow, supply level, deficit severity) so HUD panels and
+  dashboards can explain how supply health shifted pillar results.
 - `EspionageSystem` maintains fog of war at the tile level, ingests logistics payloads to boost visibility, and fires
   probabilistic pings that can reveal enemy intentions via `espionage_ping`. The dedicated gdUnit coverage in
   `tests/gdunit/test_combat_and_espionage_systems.gd` locks behaviour under sunny vs. misty weather noise.

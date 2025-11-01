@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-30 — `GameManager` instancie désormais `CombatSystem`, relie les signaux `logistics_update`/`order_*` et enrichit les
+  payloads `combat_resolved` avec le contexte de supply (flow, niveau, sévérité) afin que la télémétrie et les futurs panneaux
+  HUD expliquent comment la logistique influence les piliers.
 - 2025-11-29 — Documenté dans le README les avertissements Godot au démarrage sous Windows (mappings SDL `misc2`, couches Vulkan
   Microsoft incomplètes, extensions optionnelles absentes) afin que les agents sachent qu'ils sont bénins et comment les
   neutraliser localement si nécessaire.

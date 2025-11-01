@@ -84,6 +84,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Given** la boucle de commandement déclenche un ordre offensif
 - **When** `CombatSystem` reçoit un engagement avec doctrine active et météo en cours
 - **Then** un payload `combat_resolved` est émis avec les trois piliers (`position`, `impulse`, `information`) et une victoire déterminée par majorité
+- **And** le payload expose un bloc `logistics` (niveau d'approvisionnement, flow, sévérité, tour) pour expliquer l'impact de la supply sur la résolution
 
 ### AT-12: Pings d'espionnage et intentions révélées
 - **Given** la carte dispose d'un brouillard initial et de niveaux de logistique hétérogènes
