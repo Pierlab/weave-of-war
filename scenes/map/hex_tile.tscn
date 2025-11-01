@@ -9,6 +9,12 @@ script = ExtResource("1")
 color = Color(0.305882, 0.52549, 0.403922, 1)
 polygon = PackedVector2Array(0, -32, 27, -16, 27, 16, 0, 32, -27, 16, -27, -16)
 
+[node name="FogOverlay" type="Polygon2D" parent="."]
+z_index = 2
+visible = false
+color = Color(0, 0, 0, 0.85)
+polygon = PackedVector2Array(0, -32, 27, -16, 27, 16, 0, 32, -27, 16, -27, -16)
+
 [node name="Label" type="Label" parent="."]
 offset_left = -28.0
 offset_top = -18.0

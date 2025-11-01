@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added a fog-of-war rendering pipeline: `EspionageSystem` now emits `fog_of_war_updated` snapshots and the hex map applies a
+  dark overlay/tooltip redaction when visibility falls below scout confidence, keeping player-controlled supply rings readable
+  while concealing enemy intel.
 - Added a HUD "Dernier engagement" panel driven by `combat_resolved` that renders pillar gauges, logistics flow/severity, and
   Élan adjustments so players can review battle context without relying on the debug overlay.
 - Extended `combat_resolved` payloads with pillar summaries and per-unit outcomes (formation, casualties, logistics notes) and

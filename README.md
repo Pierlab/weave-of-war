@@ -145,6 +145,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   probabilistic pings that can reveal enemy intentions via `espionage_ping`. `GameManager` now spawns the system beside
   logistics/combat controllers, hydrates the fog map from `data/terrain.json`, and gdUnit coverage
   (`tests/gdunit/test_game_manager_logistics_bootstrap.gd`) locks the turn-synchronised telemetry.
+- The hex map renders this fog state live: `fog_of_war_updated` events darken tiles with low intel, hide terrain labels/tooltips
+  when confidence drops below 35%, and keep player-held territory fully readable when logistics visibility boosts apply.
 - `tests/gdunit/test_combat_resolution.gd` verrouille la reproductibilité contrôlée par seed, les cas contestés (une victoire
   chacun + stalemate) et l'impact des déficits logistiques critiques sur les pertes pour clore la checklist Phase 3 item 30.
 

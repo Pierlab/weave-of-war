@@ -15,6 +15,7 @@ var event_bus: EventBus
 var data_loader: DataLoader
 var _terrain_definitions: Dictionary = TERRAIN_DATA.get_default()
 var _tiles: Dictionary = {}
+var _default_visibility := 0.2
 
 func _ready() -> void:
     _generate_map()
@@ -32,6 +33,8 @@ func _acquire_sources() -> void:
             data_loader = DATA_LOADER.get_instance()
     if event_bus and not event_bus.data_loader_ready.is_connected(_on_data_loader_ready):
         event_bus.data_loader_ready.connect(_on_data_loader_ready)
+    if event_bus and not event_bus.fog_of_war_updated.is_connected(_on_fog_of_war_updated):
+        event_bus.fog_of_war_updated.connect(_on_fog_of_war_updated)
     if data_loader and data_loader.is_ready():
         _apply_terrain_from_data_loader()
 
@@ -53,6 +56,8 @@ func _generate_map() -> void:
             hex.position = UTILS.axial_to_pixel(q, r)
             var tile_id := _tile_id(q, r)
             _tiles[tile_id] = hex
+            if hex.has_method("apply_visibility"):
+                hex.apply_visibility(_default_visibility)
 
 func _apply_terrain_from_data_loader() -> void:
     if data_loader == null:
@@ -129,6 +134,29 @@ func _set_tile_terrain(tile_id: String, terrain_id: String, name: String, descri
             "description": description,
             "movement_cost": movement_cost,
         })
+
+func _set_tile_visibility(tile_id: String, visibility: float) -> void:
+    if not _tiles.has(tile_id):
+        return
+    var tile: Node = _tiles.get(tile_id)
+    if tile and tile.has_method("apply_visibility"):
+        tile.apply_visibility(visibility)
+
+func _on_fog_of_war_updated(payload: Dictionary) -> void:
+    var entries: Array = payload.get("visibility", payload.get("visibility_map", []))
+    var applied: Dictionary = {}
+    for entry in entries:
+        if not (entry is Dictionary):
+            continue
+        var tile_id := str(entry.get("tile_id", ""))
+        if tile_id == "":
+            continue
+        var visibility := clamp(float(entry.get("visibility", _default_visibility)), 0.0, 1.0)
+        _set_tile_visibility(tile_id, visibility)
+        applied[tile_id] = true
+    for tile_id in _tiles.keys():
+        if not applied.has(tile_id):
+            _set_tile_visibility(tile_id, _default_visibility)
 
 func _tile_id(q: int, r: int) -> String:
     return "%d,%d" % [q, r]

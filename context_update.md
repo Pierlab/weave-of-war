@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-09 — La carte rend désormais le brouillard de guerre : `EspionageSystem` émet des événements `fog_of_war_updated`
+  consommés par `Map`, chaque `HexTile` affiche un overlay assombri proportionnel à la visibilité et masque les infos terrain
+  quand l'intel est faible, ce qui clôt l'item 33 de la checklist Phase 4.
 - 2025-12-08 — `GameManager` instancie désormais `EspionageSystem`, hydrate le brouillard via `data/terrain.json`, et le test
   gdUnit `test_game_manager_logistics_bootstrap.gd` vérifie que les tours `EventBus` synchronisent les pings `espionage_ping`
   avec les mises à jour logistiques.

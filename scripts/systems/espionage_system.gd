@@ -62,6 +62,7 @@ func configure_map(terrain_tiles: Dictionary) -> void:
     _fog_by_tile.clear()
     for tile_id in terrain_tiles.keys():
         _fog_by_tile[str(tile_id)] = _new_tile_state()
+    _emit_fog_update()
 
 func set_rng_seed(seed: int) -> void:
     _rng.seed = seed
@@ -81,6 +82,7 @@ func ingest_logistics_payload(payload: Dictionary) -> void:
         tile_state["counter_intel"] = max(float(tile_state.get("counter_intel", 0.0)) - COUNTER_INTEL_DECAY, 0.0)
         _fog_by_tile[tile_id] = tile_state
     _turn_counter = int(payload.get("turn", _turn_counter))
+    _emit_fog_update()
 
 func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadata: Dictionary = {}) -> Dictionary:
     if target.is_empty():
@@ -122,6 +124,7 @@ func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadat
     _last_ping = payload.duplicate(true)
     if event_bus:
         event_bus.emit_espionage_ping(_last_ping)
+        _emit_fog_update()
     return _last_ping
 
 func get_fog_snapshot() -> Array:
@@ -197,6 +200,15 @@ func _on_turn_started(turn_number: int) -> void:
         tile_state["visibility"] = clamp(float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY)) - 0.05, DEFAULT_TILE_VISIBILITY, 1.0)
         tile_state["counter_intel"] = clamp(float(tile_state.get("counter_intel", 0.0)) + COUNTER_INTEL_GROWTH, 0.0, 1.0)
         _fog_by_tile[tile_id] = tile_state
+    _emit_fog_update()
+
+func _emit_fog_update() -> void:
+    if event_bus == null:
+        return
+    event_bus.emit_fog_of_war_updated({
+        "turn": _turn_counter,
+        "visibility": _build_visibility_snapshot(),
+    })
 
 func _on_data_loader_ready(payload: Dictionary) -> void:
     var collections: Dictionary = payload.get("collections", {})

@@ -129,6 +129,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-12-08 — `GameManager` instancie désormais `EspionageSystem`, hydrate le brouillard depuis `data/terrain.json`, et un test
   gdUnit (`test_game_manager_logistics_bootstrap.gd`) vérifie que les tours diffusés par `EventBus` synchronisent les pings
   `espionage_ping` avec l'état logistique.
+- 2025-12-09 — Les tuiles de la carte appliquent maintenant un overlay de brouillard animé par les événements `fog_of_war_updated`
+  : visibilité faible assombrit l'hex, masque les infos terrain/tooltip et ne laisse apparaître que les coordonnées, tandis que
+  les tuiles ravitaillées conservent leur lisibilité complète.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
