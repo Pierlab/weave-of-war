@@ -109,6 +109,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - Terrain layout and biome definitions now live in [`data/terrain.json`](data/terrain.json); the hex map consumes those entries to
   display Plains/Forest/Hill names directly on tiles while HUD and debug overlay tooltips summarise movement costs and tile
   counts for quick reference.
+- Terrain defaults cloned from `TerrainData` are now merged into the runtime dictionary before applying DataLoader overrides, so
+  designers can safely tweak biome names, descriptions, and movement costs without tripping Godot's read-only dictionary guard.
 - Terrain defaults derived from `TerrainData` are combined with supply-center distance calculations to label tiles as `core`,
   `fringe`, or `isolated`, ensuring movement costs and convoy interception odds reflect both geography and climate, even before
   bespoke terrain layouts are provided.
