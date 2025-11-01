@@ -35,6 +35,7 @@ var _doctrine_state: Dictionary = {}
 var _feedback_generator: AudioStreamGenerator
 var _pending_feedback_pitches: Array = []
 var _feedback_flush_scheduled := false
+var _suppress_doctrine_selector_signal := false
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -154,11 +155,27 @@ func _on_logistics_toggled(should_show: bool) -> void:
         toggle_logistics_button.text = "Hide Logistics" if should_show else "Show Logistics"
 
 func _on_doctrine_selector_item_selected(index: int) -> void:
-    if doctrine_selector == null or event_bus == null:
+    if _suppress_doctrine_selector_signal:
+        return
+    if doctrine_selector == null:
         return
     var metadata: Variant = doctrine_selector.get_item_metadata(index)
-    if typeof(metadata) == TYPE_STRING:
-        event_bus.request_doctrine_change(metadata)
+    if typeof(metadata) != TYPE_STRING:
+        return
+    var doctrine_id := String(metadata)
+    if doctrine_id.is_empty():
+        return
+    var current_id: String = str(_doctrine_state.get("id", ""))
+    if doctrine_id == current_id:
+        return
+    var inertia_remaining: int = int(_doctrine_state.get("inertia_remaining", 0))
+    if inertia_remaining > 0:
+        _set_feedback("Doctrine verrouillée par l'inertie (%d tour(s))." % inertia_remaining, false)
+        _play_feedback(200.0)
+        _update_doctrine_selector_state(current_id)
+        return
+    if event_bus:
+        event_bus.request_doctrine_change(doctrine_id)
 
 func _on_order_selector_item_selected(_index: int) -> void:
     _refresh_order_button_state()
@@ -174,6 +191,12 @@ func _refresh_order_button_state() -> void:
     if cost > 0.0:
         label_text = "Exécuter (%.1f Élan)" % cost
     execute_order_button.text = label_text
+    var tooltip_text := "Exécuter l'ordre sélectionné."
+    if order_id.is_empty():
+        tooltip_text = "Sélectionnez un ordre à exécuter."
+    elif cost > _elan_state.get("current", 0.0):
+        tooltip_text = "Élan insuffisant : %.1f requis, %.1f disponible." % [cost, _elan_state.get("current", 0.0)]
+    execute_order_button.tooltip_text = tooltip_text
 
 func _on_execute_order_pressed() -> void:
     if event_bus == null:
@@ -267,6 +290,7 @@ func _on_order_execution_failed(payload: Dictionary) -> void:
     match reason:
         "doctrine_locked":
             _set_feedback("Doctrine verrouillée par l'inertie (%d tour(s))." % int(payload.get("inertia_remaining", 0)), false)
+            _update_doctrine_selector_state(str(_doctrine_state.get("id", "")))
         "insufficient_elan":
             var needed: float = float(payload.get("required", 0.0))
             var available: float = float(payload.get("available", 0.0))
@@ -278,12 +302,13 @@ func _on_order_execution_failed(payload: Dictionary) -> void:
 func _update_doctrine_selector_state(selected_id := "") -> void:
     if doctrine_selector == null:
         return
+    _suppress_doctrine_selector_signal = true
     if selected_id.is_empty():
         if doctrine_selector.get_item_count() > 0:
             doctrine_selector.select(0)
-        return
-    if _doctrine_lookup.has(selected_id):
+    elif _doctrine_lookup.has(selected_id):
         doctrine_selector.select(int(_doctrine_lookup.get(selected_id)))
+    _suppress_doctrine_selector_signal = false
 
 func _get_selected_order_id() -> String:
     if order_selector == null or order_selector.get_item_count() == 0:

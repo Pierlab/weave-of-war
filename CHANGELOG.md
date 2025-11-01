@@ -66,6 +66,7 @@ All notable changes to this project will be documented in this file.
 - Expanded logistics payloads with break summaries and competence penalty values so downstream systems can react to convoy
   interceptions without bespoke polling.
 - Realigned the `vertical_slice_p0` mission brief checklist with delivered systems and documented the pending headless command blocage.
+- HUD doctrine and order controls now raise EventBus requests directly, restore the previous doctrine when inertia blocks a swap, and surface Élan shortfall tooltips so validation feedback stays visible without leaving the HUD.
 
 ### Fixed
 - Stabilised the HUD's procedural audio feedback by queueing tone requests and clearing the generator buffer only after the
