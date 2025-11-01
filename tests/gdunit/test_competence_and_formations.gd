@@ -143,6 +143,130 @@ func test_turn_manager_enforces_competence_inertia() -> void:
     var inertia_state: Dictionary = manager.get_competence_payload().get("inertia", {})
     asserts.is_true(inertia_state.has("tactics"), "Inertia payload should report remaining lock state for each category")
 
+func test_turn_manager_emits_failure_signal_when_request_exceeds_delta() -> void:
+    var event_bus: EventBus = EVENT_BUS.new()
+    event_bus._ready()
+
+    var manager: TurnManager = TURN_MANAGER.new()
+    manager.configure_sliders([
+        {
+            "id": "tactics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 2,
+            "logistics_penalty_multiplier": 1.0,
+        },
+        {
+            "id": "strategy",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 0.75,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 0.8,
+        },
+        {
+            "id": "logistics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 1.2,
+        }
+    ])
+    manager.setup(event_bus)
+
+    var reallocation_events: Array = []
+    event_bus.competence_reallocated.connect(func(payload: Dictionary) -> void:
+        reallocation_events.append(payload)
+    )
+    var failure_payloads: Array = []
+    event_bus.competence_allocation_failed.connect(func(payload: Dictionary) -> void:
+        failure_payloads.append(payload)
+    )
+
+    manager.start_game()
+    var initial_events := reallocation_events.size()
+
+    event_bus.request_competence_allocation({
+        "tactics": 5.0,
+        "strategy": 2.0,
+        "logistics": 2.0,
+    })
+
+    asserts.is_equal(initial_events, reallocation_events.size(), "Invalid requests should not emit new competence events")
+    asserts.is_equal(1, failure_payloads.size(), "Invalid delta should emit a single failure payload")
+    var payload: Dictionary = failure_payloads[0]
+    asserts.is_equal("delta_exceeds_cap", payload.get("reason", ""), "Failure payload should report the delta overflow reason")
+    asserts.is_equal("tactics", payload.get("category", ""), "Failure payload should identify the offending category")
+    asserts.is_true(payload.get("requested", {}) is Dictionary, "Failure payload should preserve requested allocations")
+
+func test_turn_manager_processes_event_bus_competence_request() -> void:
+    var event_bus: EventBus = EVENT_BUS.new()
+    event_bus._ready()
+
+    var manager: TurnManager = TURN_MANAGER.new()
+    manager.configure_sliders([
+        {
+            "id": "tactics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 2,
+            "logistics_penalty_multiplier": 1.0,
+        },
+        {
+            "id": "strategy",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 0.75,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 0.8,
+        },
+        {
+            "id": "logistics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 1.2,
+        }
+    ])
+    manager.setup(event_bus)
+
+    var reallocation_events: Array = []
+    event_bus.competence_reallocated.connect(func(payload: Dictionary) -> void:
+        reallocation_events.append(payload)
+    )
+    var failure_payloads: Array = []
+    event_bus.competence_allocation_failed.connect(func(payload: Dictionary) -> void:
+        failure_payloads.append(payload)
+    )
+
+    manager.start_game()
+    reallocation_events.clear()
+
+    event_bus.request_competence_allocation({
+        "tactics": 2.5,
+        "strategy": 1.75,
+        "logistics": 1.75,
+    })
+
+    asserts.is_equal(0, failure_payloads.size(), "Valid allocation requests should not trigger failure payloads")
+    asserts.is_equal(1, reallocation_events.size(), "Valid requests should emit a single competence event via the bus")
+    var payload: Dictionary = reallocation_events[0]
+    asserts.is_equal("manual", payload.get("reason", ""), "Manual requests should tag the competence payload with the manual reason")
+    var allocations: Dictionary = payload.get("allocations", {})
+    asserts.is_equal(2.5, float(allocations.get("tactics", 0.0)), "Payload should expose updated tactics allocation")
+    asserts.is_equal(1.75, float(allocations.get("strategy", 0.0)), "Payload should expose updated strategy allocation")
+    asserts.is_equal(1.75, float(allocations.get("logistics", 0.0)), "Payload should expose updated logistics allocation")
+
 func test_combat_system_applies_competence_bonus() -> void:
     var system: CombatSystem = COMBAT_SYSTEM.new()
     system.set_rng_seed(5)

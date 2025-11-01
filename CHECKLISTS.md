@@ -62,7 +62,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 39. [x] **Ship HUD sliders.** Build slider controls with visual feedback and keyboard/controller shortcuts; capture interaction clips. *(2025-12-15 — HUD Compétence panel delivers dynamic sliders, event bus allocation requests/failures, keyboard/D-pad shortcuts, and refreshed docs/checklist evidence.)*
 40. [x] **Propagate slider effects.** Apply slider values to combat impulse, assistant AI planning, and logistics efficiency. *(2025-12-16 — Tactics ratios boost the combat impulse multiplier, Assistant AI packets now expose competence-aligned confidence, and `LogisticsSystem` scales its flow multiplier via `competence_multiplier` with gdUnit coverage.)*
 41. [x] **Emit competence telemetry.** Publish `competence_reallocated` events with before/after values and turn IDs. *(2025-12-17 — `TurnManager` émet désormais un `turn_id` unique et des instantanés `before`/`after` (allocations, budget, inertie, modificateurs) que `TelemetryAutoload` sérialise pour les HUD/tests/dashboards.)*
-42. [ ] **Automate slider behaviour.** Cover inertia constraints and downstream effects via gdUnit tests; store logs.
+42. [x] **Automate slider behaviour.** Cover inertia constraints and downstream effects via gdUnit tests; store logs. *(2025-12-18 — Added gdUnit coverage for EventBus allocation requests, asserting delta/inertia failures emit `competence_allocation_failed` and successful reallocations propagate updated payloads without regressions.)*
 43. [ ] **Update documentation.** Expand `README.md` and acceptance tests with slider usage guidance and expected outcomes.
 
 ## Phase 6 — Unit Formations & Postures

@@ -145,6 +145,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   de compétence restant pour suivre la qualité des pings.
 
 ### Phase 5 progress
+- 2025-12-18 — Automated competence slider behaviour via gdUnit tests covering EventBus allocation requests: valid reallocations emit `competence_reallocated` payloads while delta/inertia violations surface `competence_allocation_failed` with detailed reasons.
 - 2025-12-17 — `TurnManager` enrichit `competence_reallocated` avec un `turn_id` unique et des instantanés `before`/`after` (allocations, budget restant, inertie, modificateurs). `TelemetryAutoload` sérialise ces champs pour que HUD, tests et dashboards comparent les deltas sans reconstruire l'historique, clôturant la checklist item 41.
 - 2025-12-16 — Les allocations de compétence alimentent désormais tout le pipeline : le multiplicateur d'Impulsion du `CombatSystem` applique le ratio Tactique, `AssistantAIAutoload` ajuste ses prévisions (`competence_alignment`, snapshot allocations/ratios) et `LogisticsSystem` diffuse un `competence_multiplier` qui module le flux. Docs, changelog et tests gdUnit (logistique, assistant, combat) verrouillent cette propagation.
 - 2025-12-15 — HUD « Compétence » disponible : sliders dynamiques pour Tactique/Stratégie/Logistique, requêtes `EventBus` (`competence_allocation_requested`) et retours d'échec (`competence_allocation_failed`), feedback inline (budget, inertie, delta max) et raccourcis `[1]/[2]/[3]` + d-pad/`A`/`D` pour piloter les allocations sans souris.
