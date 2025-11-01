@@ -298,6 +298,7 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
 
     if event_bus:
         event_bus.emit_combat_resolved(_last_resolution)
+        _emit_combat_formation_events(_last_resolution)
 
     return _last_resolution
 
@@ -456,10 +457,55 @@ func _formation_payload(unit_id: String, reason: String) -> Dictionary:
         "reason": reason,
     }
 
-func _emit_formation_update(unit_id: String, reason: String) -> void:
+func _emit_formation_update(unit_id: String, reason: String, context: Dictionary = {}) -> void:
     if event_bus == null:
         return
-    event_bus.emit_formation_changed(_formation_payload(unit_id, reason))
+    var payload := _formation_payload(unit_id, reason)
+    if not context.is_empty():
+        for key in context.keys():
+            payload[key] = context.get(key)
+    event_bus.emit_formation_changed(payload)
+
+func _emit_combat_formation_events(resolution: Dictionary) -> void:
+    if event_bus == null or resolution.is_empty():
+        return
+    var engagement_id := str(resolution.get("engagement_id", ""))
+    var order_id := str(resolution.get("order_id", ""))
+    var victor := str(resolution.get("victor", "stalemate"))
+    var terrain_id := str(resolution.get("terrain", ""))
+    var weather_id := str(resolution.get("weather_id", ""))
+    var summary_variant: Variant = resolution.get("pillar_summary", {})
+    var pillar_summary: Dictionary = {}
+    if summary_variant is Dictionary:
+        pillar_summary = (summary_variant as Dictionary).duplicate(true)
+    var units_variant: Variant = resolution.get("units", {})
+    if not (units_variant is Dictionary):
+        return
+    var units: Dictionary = units_variant as Dictionary
+    for side_variant in units.keys():
+        var side_id := str(side_variant)
+        var entries_variant: Variant = units.get(side_variant, [])
+        if not (entries_variant is Array):
+            continue
+        var entries: Array = entries_variant as Array
+        for entry_variant in entries:
+            if not (entry_variant is Dictionary):
+                continue
+            var unit_state: Dictionary = (entry_variant as Dictionary).duplicate(true)
+            var unit_id := str(unit_state.get("unit_id", ""))
+            if unit_id.is_empty():
+                continue
+            var context := {
+                "side": side_id,
+                "engagement_id": engagement_id,
+                "order_id": order_id,
+                "victor": victor,
+                "terrain": terrain_id,
+                "weather_id": weather_id,
+                "pillar_summary": pillar_summary.duplicate(true),
+                "unit_result": unit_state,
+            }
+            _emit_formation_update(unit_id, "combat", context)
 
 func _resolve_intel_confidence(engagement: Dictionary) -> float:
     var confidence: float = float(engagement.get("intel_confidence", _default_intel_confidence))
