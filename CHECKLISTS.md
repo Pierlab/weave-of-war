@@ -11,7 +11,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 > `[ ]` = pending · `[~]` = in progress (replace the space with `~`) · `[x]` = complete with validation evidence linked in mission notes.
 
 ## Phase 0 — Alignment, Data Hygiene, and Instrumentation Foundations
-1. [ ] **Re-align scope and mission context.** Re-read `docs/project_spec.md`, `docs/agents/missions/vertical_slice_p0.md`, and the latest `context_snapshot.md`. Log any scope delta or open risk in `context_update.md` under a new dated bullet.
+1. [x] **Re-align scope and mission context.** Re-read `docs/project_spec.md`, `docs/agents/missions/vertical_slice_p0.md`, and the latest `context_snapshot.md`. Log any scope delta or open risk in `context_update.md` under a new dated bullet. *(2025-11-01 — Scope aligned; no new risks beyond existing Godot binary provisioning blocker.)*
 2. [ ] **Catalogue data gaps.** Audit every `data/*.json` file against SDS expectations (doctrines, orders, units, weather, logistics, formations, competence sliders). Record missing fields/inconsistencies in the mission brief under a "Phase 0 findings" heading.
 3. [ ] **Harden DataLoader validation.** Update `DataLoader` schemas and gdUnit tests so that all JSON documents used in P0 validate required enums/keys before consumption. Link passing test output in the mission brief.
 4. [ ] **Verify autoload readiness.** Confirm `EventBusAutoload`, `DataLoaderAutoload`, `TelemetryAutoload`, and `AssistantAIAutoload` are registered in `project.godot`, emit baseline signals during startup, and surface no warnings. Capture an editor/headless log excerpt proving success.
