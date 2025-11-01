@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Locked the doctrine catalogue to the five SDS-defined stances with command profile metadata (CP caps, swap tokens, inertia multipliers) for downstream systems.
 - Added gdUnit data integrity tests to load and validate the JSON data assets before gameplay systems consume them.
 - Bootstraped the agent-driven workflow: root `AGENTS.md`, refreshed vibe-coding playbook, and mission workspace.
 - Introduced lightweight gdUnit-style tests plus CI runners for lint, build, and test checks.

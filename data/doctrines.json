@@ -3,12 +3,14 @@
     "id": "force",
     "name": "Force",
     "description": "Direct, overwhelming pressure on the enemy front.",
-    "tags": ["offense", "momentum"],
+    "tags": ["offense", "momentum", "attrition"],
     "inertia_lock_turns": 2,
     "elan_upkeep": 1,
     "elan_spend_modifiers": {
       "assault": -1,
-      "forced_march": 0
+      "forced_march": 0,
+      "strategic_reroll": 1,
+      "inspiration": 0
     },
     "logistics_requirements": {
       "minimum_supply_state": "stable",
@@ -22,18 +24,26 @@
         "information": -0.05
       },
       "intel_visibility_modifier": -0.1
+    },
+    "command_profile": {
+      "cp_cap_delta": 2,
+      "swap_token_budget": 1,
+      "inertia_multiplier": 1.25,
+      "allowed_order_tags": ["assault", "press", "breakthrough"]
     }
   },
   {
     "id": "ruse",
     "name": "Ruse",
     "description": "Mask movements, manipulate intel, and punish over-extension.",
-    "tags": ["deception", "information"],
+    "tags": ["deception", "information", "tempo"],
     "inertia_lock_turns": 1,
     "elan_upkeep": 0,
     "elan_spend_modifiers": {
       "assault": 0,
-      "forced_march": -1
+      "forced_march": -1,
+      "strategic_reroll": 0,
+      "inspiration": -1
     },
     "logistics_requirements": {
       "minimum_supply_state": "flexible",
@@ -47,6 +57,111 @@
         "information": 0.4
       },
       "intel_visibility_modifier": 0.25
+    },
+    "command_profile": {
+      "cp_cap_delta": -1,
+      "swap_token_budget": 2,
+      "inertia_multiplier": 0.85,
+      "allowed_order_tags": ["feint", "probe", "intercept"]
+    }
+  },
+  {
+    "id": "patience",
+    "name": "Patience",
+    "description": "Stabilise the line, absorb pressure, and counter when conditions peak.",
+    "tags": ["defense", "resilience", "timing"],
+    "inertia_lock_turns": 3,
+    "elan_upkeep": 0,
+    "elan_spend_modifiers": {
+      "assault": 1,
+      "forced_march": 1,
+      "strategic_reroll": -1,
+      "inspiration": -2
+    },
+    "logistics_requirements": {
+      "minimum_supply_state": "stable",
+      "supply_ring_bonus": 2
+    },
+    "effects": {
+      "combat_pillar_focus": "position",
+      "combat_bonus": {
+        "impulse": -0.1,
+        "position": 0.45,
+        "information": 0.1
+      },
+      "intel_visibility_modifier": 0.05
+    },
+    "command_profile": {
+      "cp_cap_delta": 3,
+      "swap_token_budget": 1,
+      "inertia_multiplier": 1.4,
+      "allowed_order_tags": ["fortify", "hold", "reserve"]
+    }
+  },
+  {
+    "id": "vitesse",
+    "name": "Vitesse",
+    "description": "Exploit tempo, reposition rapidly, and strike before the enemy stabilises.",
+    "tags": ["mobility", "momentum", "initiative"],
+    "inertia_lock_turns": 1,
+    "elan_upkeep": 1,
+    "elan_spend_modifiers": {
+      "assault": -2,
+      "forced_march": -2,
+      "strategic_reroll": 1,
+      "inspiration": 0
+    },
+    "logistics_requirements": {
+      "minimum_supply_state": "flexible",
+      "supply_ring_bonus": 0
+    },
+    "effects": {
+      "combat_pillar_focus": "impulse",
+      "combat_bonus": {
+        "impulse": 0.3,
+        "position": -0.05,
+        "information": 0.05
+      },
+      "intel_visibility_modifier": -0.15
+    },
+    "command_profile": {
+      "cp_cap_delta": -2,
+      "swap_token_budget": 2,
+      "inertia_multiplier": 0.7,
+      "allowed_order_tags": ["advance", "feint", "raid"]
+    }
+  },
+  {
+    "id": "equilibre",
+    "name": "Équilibre",
+    "description": "Balance aggression and caution to pivot between fronts without collapse.",
+    "tags": ["flexibility", "support", "control"],
+    "inertia_lock_turns": 2,
+    "elan_upkeep": 1,
+    "elan_spend_modifiers": {
+      "assault": 0,
+      "forced_march": 0,
+      "strategic_reroll": 0,
+      "inspiration": 0
+    },
+    "logistics_requirements": {
+      "minimum_supply_state": "surged",
+      "supply_ring_bonus": 1
+    },
+    "effects": {
+      "combat_pillar_focus": "position",
+      "combat_bonus": {
+        "impulse": 0.1,
+        "position": 0.2,
+        "information": 0.2
+      },
+      "intel_visibility_modifier": 0.1
+    },
+    "command_profile": {
+      "cp_cap_delta": 1,
+      "swap_token_budget": 2,
+      "inertia_multiplier": 1.0,
+      "allowed_order_tags": ["advance", "fortify", "coordinate"]
     }
   }
 ]

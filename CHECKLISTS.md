@@ -18,7 +18,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 5. [x] **Stabilise HUD audio feedback.** Rework `_play_feedback()` and related helpers to start streams, guard playback, and stop/clear safely. Attach a short validation log or clip demonstrating clean console output after repeated doctrine/order swaps. *(2025-11-05 — Deferred queue drains the generator only when inactive, guarded by `docs/logs/hud_audio_feedback_2025-11-05.log`.)*
 
 ## Phase 1 — Command Model & Élan Core Loop
-6. [ ] **Lock doctrine catalogue.** Ensure doctrine names (Force/Ruse/Patience/Vitesse/Équilibre) and metadata in `data/doctrines.json` match SDS rules. Update localisation strings or HUD labels as needed.
+6. [x] **Lock doctrine catalogue.** Ensure doctrine names (Force/Ruse/Patience/Vitesse/Équilibre) and metadata in `data/doctrines.json` match SDS rules. Update localisation strings or HUD labels as needed. *(2025-11-06 — Added full doctrine entries with command profiles and aligned logistics synergies in `data/doctrines.json`/`data/logistics.json`.)*
 7. [ ] **Enrich orders dataset.** Expand `data/orders.json` with Élan costs, doctrine requirements, and AI intent metadata aligned with the SDS. Document any new fields in the mission brief.
 8. [ ] **Document HUD UX copy.** Capture doctrine/order text, audio cues, and accessibility notes in the HUD section of `README.md`.
 9. [ ] **Wire core systems.** Instantiate `DoctrineSystem` and `ElanSystem` within `GameManager` using typed references. Ensure both wait for `data_loader_ready` before setup logic runs (add assertions/logs as proof).

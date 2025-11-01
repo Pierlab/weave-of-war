@@ -27,7 +27,7 @@
     "elan_penalty_on_break": 3,
     "recovery_per_turn": 2,
     "links": {
-      "doctrine_synergy": ["audace", "force"],
+      "doctrine_synergy": ["vitesse", "force"],
       "weather_modifiers": {
         "rain": -0.3,
         "mist": -0.05
