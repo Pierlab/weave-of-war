@@ -34,7 +34,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   `data/competence_sliders.json`, applique des caps de réallocation/inertie par catégorie, expose l'état des modificateurs et la
   télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
   livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
-- [~] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-20 — Cartographie formations↔archétypes en place, reste à livrer les contrôles HUD/combats.)*
+- [~] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-21 — Panneau HUD « Formations » opérationnel avec validations Élan/inertie; restent à propager les sélections dans les résolutions combat et à enrichir la télémétrie/tests.)*
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 
@@ -157,6 +157,15 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   que la documentation (README, CHANGELOG, checklist) reflète les nouveaux contrats.
 
 ### Phase 6 progress
+- 2025-12-22 — `CombatSystem` applique désormais les bonus/malus de posture directement dans la résolution des piliers : les
+  formations ajoutent leurs modificateurs aux forces de base et appliquent un multiplicateur moyen par pilier avant les effets
+  terrain/météo/logistique. Un nouveau test gdUnit confirme que passer de « Advance Column » à « Shield Wall » augmente la
+  Position tout en réduisant l'Impulsion/Information, clôturant l'item 46.
+- 2025-12-21 — `FormationSystem` introduit une couche de contrôle dédiée : la HUD affiche désormais un panneau "Formations"
+  listant les postures autorisées, les coûts d'Élan et l'inertie associée. Les requêtes `formation_change_requested` débloquent
+  les Élan nécessaires, bloquent les sélecteurs pendant la durée d'inertie et publient `formation_status_updated` pour que la
+  HUD/tests disposent d'un état consolidé. Un nouveau test gdUnit vérifie le parcours succès/échec (coût/inertie) et documente
+  le comportement.
 - 2025-12-20 — `DataLoader` dérive automatiquement les archétypes compatibles pour chaque entrée [`data/formations.json`](../../data/formations.json) (`line`, `mobile`, `ranged`, `support`) et expose des helpers (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `CombatSystem` s'appuie sur ce mapping pour tolérer des fallbacks de formation par archétype, `tests/gdunit/test_data_integrity.gd` vérifie la cartographie, et README/CHECKLISTS/mission brief documentent la répartition.
 
 ### Delivery timeline (Semaine 0–6)

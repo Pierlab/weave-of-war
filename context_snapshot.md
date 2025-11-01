@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T23:00:19Z
+- Generated on: 2025-11-01T23:21:43Z
 - Branch: work
-- Commit when generated: 7b971b87b8579fea92df480edbf3bf41f32a74d5
-- Subject: Merge pull request #85 from Pierlab/codex/add-checklist-item-to-checklist.md-lp4ntl
+- Commit when generated: ccb39dfc6719d2f41221d8ba2ad976da78a4d162
+- Subject: Implement formation controls and FormationSystem
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -35,6 +35,7 @@
 - scripts/systems/doctrine_system.gd
 - scripts/systems/elan_system.gd
 - scripts/systems/espionage_system.gd
+- scripts/systems/formation_system.gd
 - scripts/systems/logistics_system.gd
 - scripts/systems/weather_system.gd
 - scripts/tools/simulate_hud_audio_feedback.py

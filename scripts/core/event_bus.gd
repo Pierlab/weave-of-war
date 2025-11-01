@@ -26,6 +26,9 @@ signal competence_reallocated(payload: Dictionary)
 signal competence_allocation_requested(allocations: Dictionary)
 signal competence_allocation_failed(payload: Dictionary)
 signal formation_changed(payload: Dictionary)
+signal formation_change_requested(payload: Dictionary)
+signal formation_change_failed(payload: Dictionary)
+signal formation_status_updated(payload: Dictionary)
 signal competence_spent(payload: Dictionary)
 signal doctrine_change_requested(doctrine_id: String)
 signal order_execution_requested(order_id: String)
@@ -108,6 +111,15 @@ func emit_competence_spent(payload: Dictionary) -> void:
 
 func emit_formation_changed(payload: Dictionary) -> void:
     formation_changed.emit(payload)
+
+func request_formation_change(payload: Dictionary) -> void:
+    formation_change_requested.emit(payload)
+
+func emit_formation_change_failed(payload: Dictionary) -> void:
+    formation_change_failed.emit(payload)
+
+func emit_formation_status(payload: Dictionary) -> void:
+    formation_status_updated.emit(payload)
 
 func request_next_turn() -> void:
     next_turn_requested.emit()

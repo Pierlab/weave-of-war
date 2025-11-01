@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Formation control panel in the HUD with per-unit dropdowns that surface Élan costs, inertia locks, and formation descriptions.
+  The new `FormationSystem` listens to `formation_change_requested`, spends Élan, enforces lock timers, and broadcasts
+  `formation_status_updated` so the UI and telemetry stay in sync while preventing illegal or unaffordable posture swaps.
+- Combat pillar resolution now consumes active formation postures: `CombatSystem` adds the formation bonuses to pillar strengths,
+  applies an average multiplier per unit, and a new gdUnit test confirms that swapping from "Advance Column" to "Shield Wall"
+  boosts Position while trimming Impulse/Information, closing checklist item 46.
 - Derived formation archetype mapping: `DataLoader` now links each [`data/formations.json`](data/formations.json) entry to the unit classes that can field it, exposes helper lookups, and `CombatSystem` consumes the mapping for formation fallbacks. README, mission brief, checklist, and gdUnit data integrity tests document and verify the coverage while unlocking checklist item 44.
 - Automated competence slider regression tests capturing EventBus allocation requests: successful reallocations now assert the emitted `competence_reallocated` payloads while delta/inertie violations trigger `competence_allocation_failed` with contextual reasons, closing checklist item 42.
 - Enriched `competence_reallocated` telemetry with a `turn_id` and explicit `before`/`after` snapshots (allocations, budget, inertia, modifiers). `TelemetryAutoload` now normalises these fields and documentation/checklists/acceptance tests reflect the new auditing flow.

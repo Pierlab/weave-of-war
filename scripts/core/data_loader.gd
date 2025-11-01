@@ -919,6 +919,8 @@ static func _validate_formation(entry: Dictionary, context: String) -> Array:
         "id",
         "name",
         "posture",
+        "elan_cost",
+        "inertia_lock_turns",
         "pillar_modifiers",
         "competence_weight",
     ], context)
@@ -933,6 +935,20 @@ static func _validate_formation(entry: Dictionary, context: String) -> Array:
         errors += _validate_pillar_distribution("formations", entry.get("pillar_modifiers"), context + ".pillar_modifiers")
     if entry.has("competence_weight") and entry.get("competence_weight") is Dictionary:
         errors += _ensure_numeric_dictionary("formations", entry.get("competence_weight"), context + ".competence_weight")
+    if entry.has("elan_cost"):
+        var elan_cost: Variant = entry.get("elan_cost")
+        if typeof(elan_cost) not in [TYPE_FLOAT, TYPE_INT]:
+            errors.append(_error("formations", context + ".elan_cost", "invalid_number", elan_cost))
+        elif float(elan_cost) < 0.0:
+            errors.append(_error("formations", context + ".elan_cost", "negative_value", elan_cost))
+    if entry.has("inertia_lock_turns"):
+        var lock_turns: Variant = entry.get("inertia_lock_turns")
+        if typeof(lock_turns) not in [TYPE_INT, TYPE_FLOAT]:
+            errors.append(_error("formations", context + ".inertia_lock_turns", "invalid_integer", lock_turns))
+        elif int(lock_turns) < 0:
+            errors.append(_error("formations", context + ".inertia_lock_turns", "negative_value", lock_turns))
+    if entry.has("description") and not (entry.get("description") is String):
+        errors.append(_error("formations", context + ".description", "invalid_string", entry.get("description")))
 
     return errors
 

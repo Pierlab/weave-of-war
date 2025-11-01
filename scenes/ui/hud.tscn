@@ -150,6 +150,35 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
+[node name="FormationPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 160)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/FormationPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="FormationTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/FormationPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Formations"
+theme_override_font_sizes/font_size = 16
+
+[node name="FormationHintLabel" type="Label" parent="MarginContainer/VBoxContainer/FormationPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Choisissez une posture pour chaque unité. Les coûts d'Élan et l'inertie sont indiqués pour chaque option."
+
+[node name="FormationRows" type="VBoxContainer" parent="MarginContainer/VBoxContainer/FormationPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
 [node name="CombatPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
