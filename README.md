@@ -145,6 +145,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   probabilistic pings that can reveal enemy intentions via `espionage_ping`. `GameManager` now spawns the system beside
   logistics/combat controllers, hydrates the fog map from `data/terrain.json`, and gdUnit coverage
   (`tests/gdunit/test_game_manager_logistics_bootstrap.gd`) locks the turn-synchronised telemetry.
+- Telemetry captures both the raw `espionage_ping` payloads and a dedicated `intel_intent_revealed` event whenever a probe
+  exposes an intention. Use `TelemetryAutoload.get_history("espionage_ping")` or `get_history("intel_intent_revealed")` to
+  compare confidence, RNG rolls, and revealed intents across the full session timeline.
 - The hex map renders this fog state live: `fog_of_war_updated` events darken tiles with low intel, hide terrain labels/tooltips
   when confidence drops below 35%, and keep player-held territory fully readable when logistics visibility boosts apply.
 - `tests/gdunit/test_combat_resolution.gd` verrouille la reproductibilité contrôlée par seed, les cas contestés (une victoire
@@ -173,10 +176,11 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 Les ordres *Recon Probe* et *Deep Cover* consomment à la fois de l'Élan et des points de compétence (`tactics`/`strategy`/`logistics`).
 Si le budget restant est insuffisant, la HUD désactive le bouton `Exécuter` et affiche une infobulle détaillant les catégories manquantes.
 Lorsqu'ils aboutissent, `EspionageSystem` déclenche automatiquement un ping ciblant la tuile la moins renseignée et publie un événement
-`espionage_ping` enrichi pour suivre le gain de visibilité. La HUD affiche désormais un panneau **Renseignements** listant les derniers pings
+`espionage_ping` enrichi pour suivre le gain de visibilité puis, en cas de révélation, un `intel_intent_revealed` séparé pour journaliser
+les intentions confirmées. La HUD affiche désormais un panneau **Renseignements** listant les derniers pings
 avec le statut (succès/échec), l'intention révélée, la probabilité calculée vs le jet RNG et les bonus de détection apportés par la
 compétence. L'overlay debug complète cette vue avec une timeline détaillée (tour, ordre source, cible, roll, bruit/détection, visibilité
-avant/après) pour valider rapidement les tirages pendant les sessions QA.
+avant/après) pour valider rapidement les tirages pendant les sessions QA, tandis que la télémétrie conserve l'historique complet accessible via `TelemetryAutoload.get_history`.
 
 ## Competence sliders & formations (Semaine 6)
 - `TurnManager` now maintains a per-turn competence budget across the `tactics`, `strategy`, and `logistics` sliders. Manual

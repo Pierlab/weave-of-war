@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T21:34:52Z
+- Generated on: 2025-11-01T21:50:13Z
 - Branch: work
-- Commit when generated: fc342e69d986f8e5f8bfc867dbb860c583d1891a
-- Subject: Add recon orders with competence costs and auto pings
+- Commit when generated: 782c0fca0af7e2d6aa57ff97e8054bd5dd8a7eb9
+- Subject: Merge pull request #77 from Pierlab/codex/update-checklist.md-kl7qxb
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 

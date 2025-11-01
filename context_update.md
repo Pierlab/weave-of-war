@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-12 — Instrumenté `EspionageSystem` et `TelemetryAutoload` : les pings publient désormais un événement `intel_intent_revealed` dédié, la HUD/debug overlay consigne ces révélations, et `TelemetryAutoload.get_history` préserve l'historique complet des `espionage_ping`/intentions pour les dashboards.
 - 2025-12-11 — Le panneau HUD "Renseignements" affiche maintenant chaque ping `espionage_ping` (succès/échec, intention, probabilité vs jet),
   la timeline debug consigne les tirages détaillés, et `EspionageSystem` enrichit ses payloads avec roll, bonus de détection,
   deltas de visibilité et budget de compétence restant.
