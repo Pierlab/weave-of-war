@@ -52,6 +52,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   - `data/formations.json` is missing eligible unit class lists, Élan/posture switch costs, and recovery timings required to align with the formations + competence interplay described in the SDS outlines.
   - `data/weather.json` does not yet expose visibility modifiers, forecast sequencing metadata, or telemetry IDs needed for `weather_changed` payloads in the Logistics/Terrain SDS outline.
   - No competence slider dataset exists under `data/`; create `competence_sliders.json` (or equivalent) capturing slider caps, inertia limits, unlock effects, and telemetry keys demanded by the competence slider SDS outline.
+- 2025-11-03 — Consolidated DataLoader hardening: `DataLoaderAutoload.validate_collection()` now rejects missing keys, enum drift, and numeric/type mismatches while `load_all()` surfaces schema issues. Added gdUnit coverage (`test_data_loader_validation_reports_missing_keys`, `test_data_loader_validation_accepts_valid_payload`) to capture regression evidence for Checklist Phase 0 / item 3.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

@@ -34,7 +34,7 @@ The logs above are mirrored in `errors.log` at the repository root to help futur
 | Autoload | Script | Responsibilities |
 | --- | --- | --- |
 | `EventBus` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
-| `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, caches them by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
+| `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
 | `Telemetry` | `scripts/core/telemetry.gd` | Records emitted gameplay events for debugging and gdUnit assertions. Provides `log_event`, `get_buffer`, and `clear` helpers so tests can verify new Checklist C flows. |
 | `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
 
@@ -102,7 +102,7 @@ for root, _, files in os.walk("data"):
 print("All JSON data files parsed successfully")
 PY
 ```
-The gdUnit suite now includes data integrity coverage that loads each JSON data file under `data/` and validates required keys and types before gameplay logic consumes them.
+The gdUnit suite now includes data integrity coverage that loads each JSON data file under `data/` and validates required keys and types before gameplay logic consumes them. `tests/gdunit/test_data_integrity.gd` now asserts both positive (`test_data_loader_validation_accepts_valid_payload`) and negative (`test_data_loader_validation_reports_missing_keys`) paths for the hardened `DataLoaderAutoload.validate_collection()` helper.
 These scripts now extend `SceneTree` directly so they can be executed with `--script` in both local shells and CI runners.
 They power local validation and the GitHub Actions workflow defined in `.github/workflows/ci.yml`.
 

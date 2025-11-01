@@ -213,6 +213,7 @@ func test_data_loader_exposes_caches() -> void:
     var loader: DataLoaderAutoload = DATA_LOADER.new()
     var result := loader.load_all()
     asserts.is_true(result.get("ready", false), "DataLoader should report ready when assets load correctly")
+    asserts.is_true(result.get("errors", []).is_empty(), "DataLoader should not surface schema errors with valid assets")
 
     var doctrine := loader.get_doctrine("force")
     asserts.is_true(doctrine.size() > 0, "Doctrine 'force' should be accessible via DataLoader cache")
@@ -234,6 +235,18 @@ func test_data_loader_exposes_caches() -> void:
 
     var formation := loader.get_formation("shield_wall")
     asserts.is_true(formation.size() > 0, "Formation 'shield_wall' should be cached for quick lookups")
+
+func test_data_loader_validation_reports_missing_keys() -> void:
+    var errors := DataLoaderAutoload.validate_collection("orders", [{"id": "invalid_order"}])
+    asserts.is_true(errors.size() > 0, "Validation should report missing required keys")
+    var first_error := errors[0]
+    asserts.is_equal("orders", first_error.get("label"), "Validation error should report the correct label")
+    asserts.is_equal("missing_key", first_error.get("reason"), "Validation should identify missing keys")
+
+func test_data_loader_validation_accepts_valid_payload() -> void:
+    var orders := _load_json_array("res://data/orders.json", "orders")
+    var errors := DataLoaderAutoload.validate_collection("orders", orders)
+    asserts.is_true(errors.is_empty(), "Orders dataset should satisfy the hardened schema validation")
 
 func _load_json_array(path: String, label: String) -> Array:
     var file := FileAccess.open(path, FileAccess.READ)
