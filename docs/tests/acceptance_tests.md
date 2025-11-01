@@ -40,10 +40,25 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Then** the console prints a `DataLoader ready` summary and telemetry buffers contain an entry named `data_loader_ready`
   with doctrine/order/unit counts greater than zero
 
-### AT-07: Boucle commandement/Élan interactif
-- **Given** la scène principale est en cours d'exécution
-- **When** je sélectionne une doctrine différente puis exécute un ordre autorisé via la HUD
-- **Then** la HUD met à jour l'inertie, joue un signal sonore court, ajuste la jauge d'Élan et le journal console confirme l'émission de l'ordre
+### AT-07: Boucle commandement/Élan interactive
+- **Given** la scène principale est en cours d'exécution et les autoloads `EventBus`, `Telemetry`, `AssistantAI` et `DataLoader` ont émis leurs logs de démarrage
+- **When** je suis les étapes ci-dessous
+- **Then** la HUD met à jour l'inertie et l'Élan, les validations d'ordre s'affichent in-line, et la télémétrie enregistre les événements correspondants
+
+**Étapes détaillées**
+1. Ouvrir la scène principale dans l'éditeur Godot et lancer le jeu (`F5`). Attendre que la console affiche `DataLoader ready` et que la HUD affiche les doctrines disponibles.
+2. Dans le panneau doctrine de la HUD, choisir une doctrine différente de celle active (ex. passer de **Force** à **Ruse**). Vérifier :
+   - La ligne "Inertie" met à jour les tours restants.
+   - Le tooltip du sélecteur rappelle le multiplicateur d'inertie de la doctrine sélectionnée.
+   - Un court bip de feedback audio est joué.
+3. Tenter immédiatement un nouveau changement de doctrine alors que l'inertie est verrouillée. Constater que :
+   - La HUD restaure la doctrine précédente.
+   - Un tooltip ou message d'erreur précise la raison du refus (ex. "Inertie restante: 1 tour").
+4. Sélectionner un ordre autorisé dans la liste (ex. **Advance**) et survoler le bouton d'exécution pour vérifier l'infobulle indiquant le coût d'Élan actuel ainsi que l'Élan manquant le cas échéant.
+5. Cliquer sur le bouton d'exécution de l'ordre lorsque l'Élan disponible est suffisant. Confirmer :
+   - La jauge d'Élan diminue du montant attendu et affiche le total restant.
+   - La console et la debug overlay consigne un paquet `assistant_order_packet` (nom de l'ordre, cible, intention, confiance).
+6. Ouvrir le **Debug > Remote** dans l'éditeur Godot, sélectionner `TelemetryAutoload` puis inspecter la propriété `buffer`. Vérifier qu'une séquence d'événements `doctrine_selected`, `order_issued`, `elan_spent` (et `order_rejected` si l'étape 3 a été déclenchée) est présente avec des payloads renseignant l'identifiant, le coût et le reste d'Élan.
 
 ### AT-08: Overlay logistique hybride
 - **Given** la scène principale est en cours d'exécution et `LogisticsSystem` a chargé les données JSON enrichies
