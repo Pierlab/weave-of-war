@@ -46,7 +46,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-01 — Re-read project spec, mission brief, and latest context snapshot; scope remains aligned with no new risks beyond the known local Godot binary provisioning blocker (tracked in `context_update.md`).
 - 2025-11-02 — Audited `data/*.json` catalogues against the locked SDS packages; remaining gaps:
   - `data/doctrines.json` only lists `force` and `ruse`. The Command Model SDS requires the full set (Force/Ruse/Patience/Vitesse/Équilibre) plus CP cap deltas, inertia multipliers, and swap token budgets for doctrine gating.
-  - `data/orders.json` lacks explicit `cp_cost` values, `base_delay`/inertia multipliers, targeting scopes, and posture requirements referenced in the Command Model SDS. Assistant AI intent metadata also needs interpreter hints for queue telemetry.
+  - `data/orders.json` lacks explicit `cp_cost` values, `base_delay`/inertia multipliers, targeting scopes, and posture requirements referenced in the Command Model SDS. Assistant AI intent metadata also needs interpreter hints for queue telemetry. *(2025-11-07 — Résolu via l'enrichissement complet du dataset et la mise à jour de la validation.)*
   - `data/logistics.json` still summarises logistics tiers without depot nodes, graph connectivity, convoy capacity, or hazard profiles expected by the Logistics SDS outline for map-driven validation.
   - `data/units.json` omits readiness penalties, surge/edge token hooks, and morale thresholds that combat and Élan systems depend on for pillar/decay calculations in the SDS specs.
   - `data/formations.json` is missing eligible unit class lists, Élan/posture switch costs, and recovery timings required to align with the formations + competence interplay described in the SDS outlines.
@@ -58,6 +58,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 
 ### Phase 1 progress
 - 2025-11-06 — Locked the doctrine dataset to the SDS stances with command profile metadata and aligned logistics synergies (`data/doctrines.json`, `data/logistics.json`).
+- 2025-11-07 — Élargi `data/orders.json` avec les coûts CP, délais de base, exigences doctrinales, ciblage/postures et métadonnées Assistant AI, puis renforcé `DataLoaderAutoload` + `tests/gdunit/test_data_integrity.gd` et documenté le nouveau contrat dans README/CHANGELOG.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

@@ -14,6 +14,8 @@ const DATA_FILES := {
 
 const COMBAT_PILLARS := ["position", "impulse", "information"]
 const ORDER_INTENTIONS := ["offense", "defense", "deception", "support"]
+const ORDER_TARGET_SCOPES := ["frontline", "flank", "rear", "logistics", "global", "support"]
+const ORDER_RISK_LEVELS := ["low", "moderate", "high", "critical"]
 const LOGISTICS_ROUTE_TYPES := ["ring", "road", "convoy", "river", "airlift"]
 const SUPPLY_STATES := ["stable", "flexible", "surged", "strained"]
 const CONVOY_USAGE := ["optional", "required", "forbidden"]
@@ -311,35 +313,78 @@ static func _validate_order(entry: Dictionary, context: String) -> Array:
     errors += _require_keys("orders", entry, [
         "id",
         "name",
+        "tags",
         "description",
+        "cp_cost",
         "base_elan_cost",
         "inertia_impact",
+        "base_delay_turns",
         "allowed_doctrines",
+        "doctrine_requirements",
         "logistics_demand",
+        "inertia_profile",
+        "targeting",
+        "posture_requirements",
         "resolution_effects",
         "intention",
         "pillar_weights",
         "intel_profile",
+        "assistant_metadata",
     ], context)
     errors += _ensure_strings("orders", entry, ["id", "name", "description", "intention"], context)
-    errors += _ensure_integerish("orders", entry, ["base_elan_cost", "inertia_impact"], context)
+    errors += _ensure_integerish("orders", entry, ["cp_cost", "base_elan_cost", "inertia_impact", "base_delay_turns"], context)
+    errors += _ensure_array_of_strings("orders", entry, "tags", context)
     errors += _ensure_array_of_strings("orders", entry, "allowed_doctrines", context)
-    errors += _ensure_dictionaries("orders", entry, ["logistics_demand", "resolution_effects", "pillar_weights", "intel_profile"], context)
+    errors += _ensure_dictionaries("orders", entry, [
+        "doctrine_requirements",
+        "logistics_demand",
+        "inertia_profile",
+        "targeting",
+        "posture_requirements",
+        "resolution_effects",
+        "pillar_weights",
+        "intel_profile",
+        "assistant_metadata",
+    ], context)
 
     if entry.has("intention"):
         var intention := entry.get("intention")
         if typeof(intention) == TYPE_STRING and not ORDER_INTENTIONS.has(intention):
             errors.append(_error("orders", context + ".intention", "invalid_enum", intention))
 
+    if entry.has("doctrine_requirements") and entry.get("doctrine_requirements") is Dictionary:
+        errors += _validate_order_doctrine_requirements(entry.get("doctrine_requirements"), context + ".doctrine_requirements")
     if entry.has("logistics_demand") and entry.get("logistics_demand") is Dictionary:
         errors += _validate_order_logistics(entry.get("logistics_demand"), context + ".logistics_demand")
+    if entry.has("inertia_profile") and entry.get("inertia_profile") is Dictionary:
+        errors += _validate_order_inertia_profile(entry.get("inertia_profile"), context + ".inertia_profile")
+    if entry.has("targeting") and entry.get("targeting") is Dictionary:
+        errors += _validate_order_targeting(entry.get("targeting"), context + ".targeting")
+    if entry.has("posture_requirements") and entry.get("posture_requirements") is Dictionary:
+        errors += _validate_order_posture_requirements(entry.get("posture_requirements"), context + ".posture_requirements")
     if entry.has("resolution_effects") and entry.get("resolution_effects") is Dictionary:
         errors += _validate_order_resolution(entry.get("resolution_effects"), context + ".resolution_effects")
     if entry.has("pillar_weights") and entry.get("pillar_weights") is Dictionary:
         errors += _validate_pillar_distribution("orders", entry.get("pillar_weights"), context + ".pillar_weights")
     if entry.has("intel_profile") and entry.get("intel_profile") is Dictionary:
         errors += _validate_intel_profile(entry.get("intel_profile"), context + ".intel_profile")
+    if entry.has("assistant_metadata") and entry.get("assistant_metadata") is Dictionary:
+        errors += _validate_assistant_metadata(entry.get("assistant_metadata"), context + ".assistant_metadata")
 
+    return errors
+
+static func _validate_order_doctrine_requirements(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("orders", data, ["required_tags", "minimum_swap_tokens", "command_profile"], context)
+    errors += _ensure_array_of_strings("orders", data, "required_tags", context)
+    errors += _ensure_integerish("orders", data, ["minimum_swap_tokens"], context)
+    if data.has("minimum_swap_tokens"):
+        var tokens := data.get("minimum_swap_tokens")
+        if typeof(tokens) in [TYPE_INT, TYPE_FLOAT]:
+            if float(tokens) < 0.0:
+                errors.append(_error("orders", context + ".minimum_swap_tokens", "invalid_range", "value_must_be_non_negative"))
+    if data.has("command_profile") and typeof(data.get("command_profile")) != TYPE_STRING:
+        errors.append(_error("orders", context + ".command_profile", "invalid_type", "string"))
     return errors
 
 static func _validate_order_logistics(data: Dictionary, context: String) -> Array:
@@ -357,6 +402,74 @@ static func _validate_order_logistics(data: Dictionary, context: String) -> Arra
             errors.append(_error("orders", context + ".convoy_usage", "invalid_type", "string"))
         elif not CONVOY_USAGE.has(usage):
             errors.append(_error("orders", context + ".convoy_usage", "invalid_enum", usage))
+    return errors
+
+static func _validate_order_inertia_profile(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("orders", data, ["doctrine_multipliers", "logistics_state_multipliers", "competence_offsets"], context)
+    errors += _ensure_dictionaries("orders", data, ["doctrine_multipliers", "logistics_state_multipliers", "competence_offsets"], context)
+    if data.has("doctrine_multipliers") and data.get("doctrine_multipliers") is Dictionary:
+        errors += _ensure_numeric_dictionary("orders", data.get("doctrine_multipliers"), context + ".doctrine_multipliers")
+    if data.has("logistics_state_multipliers") and data.get("logistics_state_multipliers") is Dictionary:
+        var multipliers: Dictionary = data.get("logistics_state_multipliers")
+        errors += _ensure_numeric_dictionary("orders", multipliers, context + ".logistics_state_multipliers")
+        for state in multipliers.keys():
+            if typeof(state) == TYPE_STRING and not SUPPLY_STATES.has(state):
+                errors.append(_error("orders", context + ".logistics_state_multipliers", "invalid_enum", String(state)))
+    if data.has("competence_offsets") and data.get("competence_offsets") is Dictionary:
+        errors += _ensure_numeric_dictionary("orders", data.get("competence_offsets"), context + ".competence_offsets")
+    return errors
+
+static func _validate_order_targeting(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("orders", data, ["scope", "requires_line_of_sight", "preferred_unit_classes", "allowed_postures", "max_concurrent"], context)
+    if data.has("scope"):
+        var scope := data.get("scope")
+        if typeof(scope) != TYPE_STRING:
+            errors.append(_error("orders", context + ".scope", "invalid_type", "string"))
+        elif not ORDER_TARGET_SCOPES.has(scope):
+            errors.append(_error("orders", context + ".scope", "invalid_enum", scope))
+    if data.has("requires_line_of_sight"):
+        errors += _ensure_boolean("orders", data, "requires_line_of_sight", context)
+    errors += _ensure_array_of_strings("orders", data, "preferred_unit_classes", context)
+    errors += _ensure_array_of_strings("orders", data, "allowed_postures", context)
+    if data.has("allowed_postures") and data.get("allowed_postures") is Array:
+        for posture in data.get("allowed_postures"):
+            if typeof(posture) == TYPE_STRING and not FORMATION_POSTURES.has(posture):
+                errors.append(_error("orders", context + ".allowed_postures", "invalid_enum", posture))
+    errors += _ensure_integerish("orders", data, ["max_concurrent"], context)
+    if data.has("max_concurrent"):
+        var concurrent := data.get("max_concurrent")
+        if typeof(concurrent) in [TYPE_INT, TYPE_FLOAT] and int(concurrent) < 1:
+            errors.append(_error("orders", context + ".max_concurrent", "invalid_range", "value_must_be_positive"))
+    return errors
+
+static func _validate_order_posture_requirements(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("orders", data, ["required_postures", "incompatible_postures"], context)
+    errors += _ensure_array_of_strings("orders", data, "required_postures", context)
+    errors += _ensure_array_of_strings("orders", data, "incompatible_postures", context)
+    for key in ["required_postures", "incompatible_postures"]:
+        if data.has(key) and data.get(key) is Array:
+            for posture in data.get(key):
+                if typeof(posture) == TYPE_STRING and not FORMATION_POSTURES.has(posture):
+                    errors.append(_error("orders", context + "." + key, "invalid_enum", posture))
+    return errors
+
+static func _validate_assistant_metadata(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("orders", data, ["intent_profile", "risk_level", "recommended_followups", "telemetry_tags"], context)
+    errors += _ensure_dictionaries("orders", data, ["intent_profile"], context)
+    if data.has("intent_profile") and data.get("intent_profile") is Dictionary:
+        errors += _ensure_numeric_dictionary("orders", data.get("intent_profile"), context + ".intent_profile")
+    if data.has("risk_level"):
+        var risk := data.get("risk_level")
+        if typeof(risk) != TYPE_STRING:
+            errors.append(_error("orders", context + ".risk_level", "invalid_type", "string"))
+        elif not ORDER_RISK_LEVELS.has(risk):
+            errors.append(_error("orders", context + ".risk_level", "invalid_enum", risk))
+    errors += _ensure_array_of_strings("orders", data, "recommended_followups", context)
+    errors += _ensure_array_of_strings("orders", data, "telemetry_tags", context)
     return errors
 
 static func _validate_order_resolution(data: Dictionary, context: String) -> Array:
@@ -623,6 +736,14 @@ static func _ensure_integerish(label: String, entry: Dictionary, keys: Array, co
             continue
         errors.append(_error(label, context + "." + key, "invalid_type", "integer"))
     return errors
+
+static func _ensure_boolean(label: String, entry: Dictionary, key: String, context: String) -> Array:
+    if not entry.has(key):
+        return []
+    var value := entry.get(key)
+    if typeof(value) != TYPE_BOOL:
+        return [_error(label, context + "." + key, "invalid_type", "boolean")]
+    return []
 
 static func _ensure_numeric(label: String, entry: Dictionary, keys: Array, context: String) -> Array:
     var errors: Array = []
