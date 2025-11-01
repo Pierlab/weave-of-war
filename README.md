@@ -144,6 +144,25 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `tests/gdunit/test_combat_resolution.gd` verrouille la reproductibilité contrôlée par seed, les cas contestés (une victoire
   chacun + stalemate) et l'impact des déficits logistiques critiques sur les pertes pour clore la checklist Phase 3 item 30.
 
+### Déclencher et lire une résolution de combat
+1. **Préparez le tour côté HUD Commandement.** Choisissez la doctrine active depuis le sélecteur principal puis sélectionnez un
+   ordre offensif (par exemple *Advance* ou *Harass*) dans la liste déroulante. Lorsque l'ordre exige une cible, utilisez la
+   liste déroulante de cibles générée par l'Assistant AI pour pointer l'hex souhaité.
+2. **Validez l'engagement.** Appuyez sur le bouton `Exécuter (X.X Élan)` : l'ordre traverse l'Élan System, déclenche
+   `order_execution_requested` puis `order_issued`, et `CombatSystem` récupère automatiquement les modificateurs actifs
+   (doctrine, météo, logistique, espionnage, formation/compétence).
+3. **Consultez le panneau "Dernier engagement".** Dès que `combat_resolved` est émis, le panneau affiche :
+   - Trois jauges (Position, Impulsion, Information) avec un indicateur de pilier vainqueur.
+   - Un résumé texte `Décisif : {Nom du pilier}` et une marge normalisée (`±X.X`).
+   - Un encadré logistique rappelant `flow`, `severity`, `movement_cost` et l'hex cible, plus un récapitulatif des dépenses/
+     gains d'Élan sur l'engagement.
+4. **Inspectez les détails unitaires si nécessaire.** Pendant qu'un run est actif, ouvrez le panneau **Debugger** en bas de
+   l'éditeur Godot, basculez sur l'onglet **Remote** puis sélectionnez `TelemetryAutoload`. Utilisez le menu contextuel
+   *Inspect* sur la propriété `buffer` pour afficher `get_buffer()["combat_resolved"][-1]`. Chaque entrée contient :
+   - `pillar_summary` avec les totaux bruts, la marge normalisée et le(s) pilier(s) décisif(s).
+   - `units.attacker[]` / `units.defender[]` détaillant formation active, pertes estimées, moral/logistique et remarques.
+   - `logistics` pour suivre l'état de supply transmis depuis `LogisticsSystem`.
+
 ## Competence sliders & formations (Semaine 6)
 - `TurnManager` now maintains a per-turn competence budget across the `tactics`, `strategy`, and `logistics` sliders. Manual
   reallocations emit `competence_reallocated` telemetry and logistics breaks consume available points automatically, keeping the

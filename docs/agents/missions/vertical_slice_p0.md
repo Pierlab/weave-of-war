@@ -114,6 +114,8 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-12-04 — Batterie gdUnit `tests/gdunit/test_combat_resolution.gd` couvrant la reproductibilité contrôlée par seed, les cas
   contestés (1 pilier chacun + statu quo) et l'impact des déficits logistiques critiques sur les pertes/cas. Capture des sorties
   à consigner lors du prochain run Godot headless.
+- 2025-12-05 — Documenté le déclenchement d'engagements et la lecture du panneau "Dernier engagement" : README détaille le flux
+  HUD → CombatSystem → Telemetry, cette note rappelle l'inspection via Remote Debugger et référence l'item 31 de la checklist.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
