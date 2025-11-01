@@ -105,8 +105,12 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 
 ### AT-14: Compétences et formations actives
 - **Given** la scène principale est en cours d'exécution avec les curseurs de compétences visibles et les unités dotées de formations par défaut
+- **And** le panneau HUD « Formations » liste chaque unité avec ses options (nom, coût d'Élan, inertie) et un sélecteur actif
 - **When** je redistribue les points (`competence_reallocated`) puis déclenche une rupture logistique qui intercepte un convoi
-- **Then** la télémétrie enregistre la baisse de budget compétence, un événement `formation_changed` apparaît lorsque je sélectionne une nouvelle posture, et la résolution de combat suivante reflète les bonus/malus de la formation choisie
+- **And** je sélectionne une nouvelle posture via le menu déroulant d'une unité disposant de l'Élan nécessaire
+- **Then** la télémétrie enregistre la baisse de budget compétence, un événement `formation_changed` apparaît avec `reason: manual`, et la résolution de combat suivante reflète les bonus/malus de la formation choisie
+- **And** je compare `combat_resolved.pillars` avant/après : adopter « Shield Wall » augmente `position.attacker` tout en réduisant `impulse.attacker` et `information.attacker` par rapport au tir précédent
+- **And** le sélecteur reste verrouillé pendant la durée d'inertie restante, tandis qu'une tentative sans Élan suffisant affiche un message HUD explicite et publie `formation_change_failed`
 
 ### AT-15: HUD Compétence — sliders & raccourcis
 - **Given** le panneau HUD « Compétence » affiche les allocations Tactique/Stratégie/Logistique et la HUD indique le budget restant

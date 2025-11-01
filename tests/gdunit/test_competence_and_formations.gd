@@ -3,6 +3,9 @@ extends GdUnitLiteTestCase
 const TURN_MANAGER := preload("res://scripts/core/turn_manager.gd")
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const COMBAT_SYSTEM := preload("res://scripts/systems/combat_system.gd")
+const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
+const FORMATION_SYSTEM := preload("res://scripts/systems/formation_system.gd")
+const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
 func test_turn_manager_competence_budget_and_penalties() -> void:
     var event_bus: EventBus = EVENT_BUS.new()
@@ -340,3 +343,179 @@ func test_combat_system_applies_competence_bonus() -> void:
     var boosted_impulse := boosted.get("pillars", {}).get("impulse", {}).get("attacker", 0.0)
 
     asserts.is_true(boosted_impulse > baseline_impulse, "Competence allocation should increase impulse pillar strength")
+
+func test_combat_system_applies_formation_modifiers_to_pillars() -> void:
+    var system: CombatSystem = COMBAT_SYSTEM.new()
+    system.set_rng_seed(11)
+    system.configure(
+        [
+            {
+                "id": "infantry",
+                "combat_profile": {"position": 1.0, "impulse": 0.8, "information": 0.5},
+                "recon_profile": {"detection": 0.2, "counter_intel": 0.1},
+                "competence_synergy": {"tactics": 2, "strategy": 1, "logistics": 1},
+                "default_formations": ["shield_wall", "advance_column"],
+            }
+        ],
+        [
+            {
+                "id": "advance",
+                "pillar_weights": {"position": 0.35, "impulse": 0.6, "information": 0.25},
+                "intel_profile": {"signal_strength": 0.65, "counter_intel": 0.1},
+            }
+        ],
+        [
+            {
+                "id": "force",
+                "effects": {"combat_bonus": {"position": 0.05, "impulse": 0.1, "information": 0.05}},
+            }
+        ],
+        [
+            {
+                "id": "sunny",
+                "combat_modifiers": {"position": 1.0, "impulse": 1.0, "information": 1.0},
+            }
+        ],
+        [
+            {
+                "id": "shield_wall",
+                "pillar_modifiers": {"position": 0.4, "impulse": -0.2, "information": -0.1},
+                "posture": "defensive",
+                "competence_weight": {"logistics": 0.2},
+            },
+            {
+                "id": "advance_column",
+                "pillar_modifiers": {"position": -0.1, "impulse": 0.3, "information": 0.0},
+                "posture": "aggressive",
+                "competence_weight": {"tactics": 0.1},
+            }
+        ]
+    )
+
+    var engagement := {
+        "engagement_id": "formation_test",
+        "order_id": "advance",
+        "attacker_unit_ids": ["infantry"],
+        "defender_unit_ids": [],
+        "terrain": "plains",
+    }
+
+    system.set_unit_formation("infantry", "advance_column")
+    system.set_rng_seed(42)
+    var column_result := system.resolve_engagement(engagement)
+    var column_pillars: Dictionary = column_result.get("pillars", {})
+    var column_position: float = float(column_pillars.get("position", {}).get("attacker", 0.0))
+    var column_impulse: float = float(column_pillars.get("impulse", {}).get("attacker", 0.0))
+    var column_information: float = float(column_pillars.get("information", {}).get("attacker", 0.0))
+
+    system.set_unit_formation("infantry", "shield_wall")
+    system.set_rng_seed(42)
+    var shield_result := system.resolve_engagement(engagement)
+    var shield_pillars: Dictionary = shield_result.get("pillars", {})
+    var shield_position: float = float(shield_pillars.get("position", {}).get("attacker", 0.0))
+    var shield_impulse: float = float(shield_pillars.get("impulse", {}).get("attacker", 0.0))
+    var shield_information: float = float(shield_pillars.get("information", {}).get("attacker", 0.0))
+
+    asserts.is_true(shield_position > column_position, "Shield wall should improve the attacker's position pillar")
+    asserts.is_true(shield_impulse < column_impulse, "Shield wall should reduce impulse in exchange for resilience")
+    asserts.is_true(shield_information < column_information, "Shield wall should trade information gains for protection")
+
+func test_formation_system_enforces_cost_and_inertia() -> void:
+    var event_bus: EventBus = EVENT_BUS.new()
+    event_bus._ready()
+
+    var loader: DataLoader = DATA_LOADER.new()
+    loader.load_all()
+
+    var turn_manager: TurnManager = TURN_MANAGER.new()
+    turn_manager.setup(event_bus)
+
+    var elan_system: ElanSystem = ELAN_SYSTEM.new()
+    elan_system.setup(event_bus, loader)
+    elan_system.set_turn_manager(turn_manager)
+    elan_system.add_elan(3.0)
+
+    var combat_system: CombatSystem = COMBAT_SYSTEM.new()
+    combat_system.setup(event_bus, loader)
+
+    var formation_system: FormationSystem = FORMATION_SYSTEM.new()
+    formation_system.setup(event_bus, loader, combat_system, elan_system, turn_manager)
+
+    turn_manager.start_game()
+
+    var status_payloads: Array = []
+    event_bus.formation_status_updated.connect(func(payload: Dictionary) -> void:
+        status_payloads.append(payload)
+    )
+    var changes: Array = []
+    event_bus.formation_changed.connect(func(payload: Dictionary) -> void:
+        changes.append(payload)
+    )
+    var failures: Array = []
+    event_bus.formation_change_failed.connect(func(payload: Dictionary) -> void:
+        failures.append(payload)
+    )
+
+    status_payloads.clear()
+    changes.clear()
+    failures.clear()
+
+    event_bus.request_formation_change({
+        "unit_id": "infantry",
+        "formation_id": "advance_column",
+        "source": "test",
+    })
+
+    asserts.is_true(changes.size() > 0, "Formation change should emit a change payload")
+    var change_payload: Dictionary = changes[0]
+    asserts.is_equal("manual", change_payload.get("reason", ""), "Formation change should be tagged as manual")
+    asserts.is_equal("advance_column", change_payload.get("formation_id", ""), "Infantry should adopt advance column")
+
+    asserts.is_true(status_payloads.size() > 0, "Formation status should update after a change")
+    var last_status: Dictionary = status_payloads.back()
+    var units: Dictionary = last_status.get("units", {})
+    var infantry_status: Dictionary = {}
+    if units.has("infantry"):
+        infantry_status = units.get("infantry", {})
+    asserts.is_true(bool(infantry_status.get("locked", false)), "Infantry should be locked after the change")
+
+    failures.clear()
+    event_bus.request_formation_change({
+        "unit_id": "infantry",
+        "formation_id": "shield_wall",
+        "source": "test",
+    })
+    asserts.is_true(failures.size() > 0, "A second change in the same turn should fail due to inertia")
+    var failure_payload: Dictionary = failures.back()
+    asserts.is_equal("inertia_locked", failure_payload.get("reason", ""), "Failure reason should cite inertia lock")
+
+    turn_manager.advance_turn()
+    turn_manager.advance_turn()
+
+    changes.clear()
+    event_bus.request_formation_change({
+        "unit_id": "infantry",
+        "formation_id": "shield_wall",
+        "source": "test",
+    })
+    asserts.is_true(changes.size() > 0, "Formation change should succeed after inertia expires")
+    change_payload = changes.back()
+    asserts.is_equal("shield_wall", change_payload.get("formation_id", ""), "Infantry should adopt shield wall")
+
+    var elan_state: Dictionary = elan_system.get_state_payload()
+    var available_elan: float = float(elan_state.get("current", 0.0))
+    asserts.is_true(available_elan < 1.0, "Élan should be deducted after two formation changes")
+
+    var spend_amount := max(available_elan - 0.4, 0.0)
+    if spend_amount > 0.0:
+        elan_system.spend_elan(spend_amount)
+
+    failures.clear()
+    event_bus.request_formation_change({
+        "unit_id": "cavalry",
+        "formation_id": "screen",
+        "source": "test",
+    })
+    asserts.is_true(failures.size() > 0, "Insufficient Élan should prevent the formation change")
+    failure_payload = failures.back()
+    asserts.is_equal("insufficient_elan", failure_payload.get("reason", ""), "Failure reason should cite Élan shortage")

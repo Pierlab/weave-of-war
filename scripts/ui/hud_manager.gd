@@ -80,6 +80,8 @@ const COMPETENCE_DEFAULT_STEP := 0.1
 @onready var impulse_result_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow/ImpulseResultLabel
 @onready var information_meter: ProgressBar = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/InformationRow/InformationMeter
 @onready var information_result_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/InformationRow/InformationResultLabel
+@onready var formation_panel: PanelContainer = $MarginContainer/VBoxContainer/FormationPanel
+@onready var formation_rows_container: VBoxContainer = $MarginContainer/VBoxContainer/FormationPanel/VBoxContainer/FormationRows
 
 const FEEDBACK_SAMPLE_RATE := 44100.0
 const FEEDBACK_DURATION := 0.12
@@ -123,6 +125,11 @@ var _suppress_competence_slider_signal := false
 var _competence_active_style: StyleBoxFlat
 var _competence_inactive_style: StyleBoxFlat
 var _intel_events: Array[Dictionary] = []
+var _formation_catalog: Dictionary = {}
+var _formation_rows: Dictionary = {}
+var _formation_status: Dictionary = {}
+var _formation_available_elan: float = 0.0
+var _suppress_formation_signal: Dictionary = {}
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -189,6 +196,12 @@ func _connect_event_bus() -> void:
         event_bus.espionage_ping.connect(_on_espionage_ping)
     if not event_bus.intel_intent_revealed.is_connected(_on_intel_intent_revealed):
         event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
+    if not event_bus.formation_status_updated.is_connected(_on_formation_status_updated):
+        event_bus.formation_status_updated.connect(_on_formation_status_updated)
+    if not event_bus.formation_change_failed.is_connected(_on_formation_change_failed):
+        event_bus.formation_change_failed.connect(_on_formation_change_failed)
+    if not event_bus.formation_changed.is_connected(_on_formation_changed):
+        event_bus.formation_changed.connect(_on_formation_changed)
 
 func _populate_from_data_loader() -> void:
     if data_loader == null or not data_loader.is_ready():
@@ -196,6 +209,7 @@ func _populate_from_data_loader() -> void:
     _populate_doctrines(data_loader.list_doctrines())
     _populate_orders(data_loader.list_orders())
     _refresh_terrain_tooltip(data_loader.list_terrain_definitions(), data_loader.list_terrain_tiles())
+    _setup_formation_panel()
     _update_weather_panel()
 
 func _ensure_competence_actions_registered() -> void:
@@ -390,6 +404,203 @@ func _build_competence_row(category: String, config: Dictionary) -> void:
             "inactive": inactive_style,
         },
     }
+
+func _setup_formation_panel() -> void:
+    if formation_rows_container == null:
+        return
+    for child in formation_rows_container.get_children():
+        child.queue_free()
+    _formation_rows.clear()
+    _formation_catalog.clear()
+
+    if data_loader == null or not data_loader.is_ready():
+        return
+
+    for entry_variant in data_loader.list_formations():
+        if not (entry_variant is Dictionary):
+            continue
+        var formation: Dictionary = entry_variant
+        var formation_id := str(formation.get("id", ""))
+        if formation_id.is_empty():
+            continue
+        _formation_catalog[formation_id] = {
+            "name": str(formation.get("name", formation_id)),
+            "posture": str(formation.get("posture", "")),
+            "elan_cost": float(formation.get("elan_cost", 0.0)),
+            "inertia_lock_turns": int(formation.get("inertia_lock_turns", 0)),
+            "description": str(formation.get("description", "")),
+        }
+
+    for unit_variant in data_loader.list_units():
+        if not (unit_variant is Dictionary):
+            continue
+        _build_formation_row(unit_variant)
+
+    _refresh_all_formation_rows()
+
+func _build_formation_row(unit_entry: Dictionary) -> void:
+    if formation_rows_container == null:
+        return
+    var unit_id := str(unit_entry.get("id", ""))
+    if unit_id.is_empty():
+        return
+    var unit_name := str(unit_entry.get("name", unit_id.capitalize()))
+
+    var panel := PanelContainer.new()
+    panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    panel.size_flags_vertical = Control.SIZE_FILL
+
+    var wrapper := VBoxContainer.new()
+    wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    wrapper.theme_override_constants["separation"] = 4
+    panel.add_child(wrapper)
+
+    var name_label := Label.new()
+    name_label.text = unit_name
+    name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    wrapper.add_child(name_label)
+
+    var selector := OptionButton.new()
+    selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    selector.focus_mode = Control.FOCUS_ALL
+    wrapper.add_child(selector)
+
+    var status_label := Label.new()
+    status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    wrapper.add_child(status_label)
+
+    var mapping: Dictionary = {}
+    var reverse: Dictionary = {}
+    var index := 0
+    for formation_variant in data_loader.list_formations_for_unit(unit_id):
+        if not (formation_variant is Dictionary):
+            continue
+        var formation: Dictionary = formation_variant
+        var formation_id := str(formation.get("id", ""))
+        if formation_id.is_empty():
+            continue
+        var info: Dictionary = _formation_catalog.get(formation_id, {})
+        selector.add_item(str(info.get("name", formation_id)))
+        selector.set_item_tooltip(index, _format_formation_tooltip(formation_id))
+        mapping[index] = formation_id
+        reverse[formation_id] = index
+        index += 1
+    selector.item_selected.connect(func(idx: int) -> void:
+        _on_formation_option_selected(unit_id, idx)
+    )
+
+    formation_rows_container.add_child(panel)
+    _formation_rows[unit_id] = {
+        "panel": panel,
+        "selector": selector,
+        "status_label": status_label,
+        "mapping": mapping,
+        "reverse": reverse,
+        "unit_name": unit_name,
+    }
+
+func _format_formation_tooltip(formation_id: String) -> String:
+    var info: Dictionary = _formation_catalog.get(formation_id, {})
+    if info.is_empty():
+        return ""
+    var lines: Array[String] = []
+    var posture := str(info.get("posture", ""))
+    if not posture.is_empty():
+        lines.append("Posture : %s" % posture)
+    lines.append("Coût : %.1f Élan" % float(info.get("elan_cost", 0.0)))
+    lines.append("Inertie : %d tour(s)" % int(info.get("inertia_lock_turns", 0)))
+    var description := str(info.get("description", ""))
+    if not description.is_empty():
+        lines.append(description)
+    return "\n".join(lines)
+
+func _on_formation_option_selected(unit_id: String, index: int) -> void:
+    if _suppress_formation_signal.get(unit_id, false):
+        return
+    if not _formation_rows.has(unit_id):
+        return
+    var row: Dictionary = _formation_rows.get(unit_id, {})
+    var mapping: Dictionary = row.get("mapping", {})
+    if not mapping.has(index):
+        return
+    var formation_id := str(mapping.get(index, ""))
+    if formation_id.is_empty():
+        return
+    if event_bus:
+        event_bus.request_formation_change({
+            "unit_id": unit_id,
+            "formation_id": formation_id,
+            "source": "hud",
+        })
+
+func _on_formation_status_updated(payload: Dictionary) -> void:
+    _formation_available_elan = float(payload.get("available_elan", _formation_available_elan))
+    var units_variant: Variant = payload.get("units", {})
+    if units_variant is Dictionary:
+        var units: Dictionary = units_variant as Dictionary
+        for unit_id_variant in units.keys():
+            var unit_id := str(unit_id_variant)
+            var status_variant: Variant = units.get(unit_id_variant, {})
+            if status_variant is Dictionary:
+                _formation_status[unit_id] = (status_variant as Dictionary).duplicate(true)
+                _refresh_formation_row(unit_id)
+
+func _refresh_all_formation_rows() -> void:
+    for unit_id_variant in _formation_rows.keys():
+        _refresh_formation_row(str(unit_id_variant))
+
+func _refresh_formation_row(unit_id: String) -> void:
+    if not _formation_rows.has(unit_id):
+        return
+    var row: Dictionary = _formation_rows.get(unit_id, {})
+    var selector: OptionButton = row.get("selector")
+    var status_label: Label = row.get("status_label")
+    var reverse: Dictionary = row.get("reverse", {})
+    var status: Dictionary = _formation_status.get(unit_id, {})
+    var formation_id := str(status.get("formation_id", ""))
+    if formation_id.is_empty() and reverse.size() > 0:
+        for key in reverse.keys():
+            formation_id = str(key)
+            break
+
+    _suppress_formation_signal[unit_id] = true
+    if reverse.has(formation_id):
+        selector.select(int(reverse.get(formation_id, -1)))
+    _suppress_formation_signal[unit_id] = false
+
+    var locked := bool(status.get("locked", false))
+    selector.disabled = locked
+
+    var info: Dictionary = _formation_catalog.get(formation_id, {})
+    var cost := float(status.get("elan_cost", info.get("elan_cost", 0.0)))
+    var lock_turns := int(status.get("inertia_lock_turns", info.get("inertia_lock_turns", 0)))
+    var turns_remaining := int(status.get("turns_remaining", 0))
+    var available := float(status.get("available_elan", _formation_available_elan))
+
+    var text_parts: Array[String] = []
+    text_parts.append("Coût %.1f Élan" % cost)
+    text_parts.append("Inertie %d tour(s)" % lock_turns)
+    if turns_remaining > 0:
+        text_parts.append("Verrouillée %d tour(s)" % turns_remaining)
+    if cost > available + 0.001:
+        text_parts.append("Élan dispo %.1f" % available)
+    status_label.text = " · ".join(text_parts)
+
+    var tooltip_lines: Array[String] = []
+    var posture := str(info.get("posture", status.get("posture", "")))
+    if not posture.is_empty():
+        tooltip_lines.append("Posture : %s" % posture)
+    var description := str(info.get("description", status.get("description", "")))
+    if not description.is_empty():
+        tooltip_lines.append(description)
+    status_label.tooltip_text = "\n".join(tooltip_lines)
+
+func _formation_unit_name(unit_id: String) -> String:
+    if _formation_rows.has(unit_id):
+        return str(_formation_rows.get(unit_id, {}).get("unit_name", unit_id))
+    if _formation_status.has(unit_id):
+        return str(_formation_status.get(unit_id, {}).get("unit_name", unit_id))
+    return unit_id
 
 func _on_competence_slider_changed(category: String, value: float) -> void:
     if _suppress_competence_slider_signal:
@@ -786,6 +997,7 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
     _populate_orders(collections.get("orders", []))
     if data_loader:
         _refresh_terrain_tooltip(data_loader.list_terrain_definitions(), data_loader.list_terrain_tiles())
+        _setup_formation_panel()
 
 func _on_doctrine_selected(payload: Dictionary) -> void:
     var doctrine_id: String = payload.get("id", "")
@@ -852,6 +1064,8 @@ func _on_elan_updated(payload: Dictionary) -> void:
             tooltip_lines.append("Décay imminent au prochain tour si aucun Élan n'est dépensé.")
         elan_label.tooltip_text = "\n".join(tooltip_lines)
     _refresh_order_button_state()
+    _formation_available_elan = _elan_state.get("current", _formation_available_elan)
+    _refresh_all_formation_rows()
 
 func _on_order_issued(payload: Dictionary) -> void:
     var order_id := str(payload.get("order_id", ""))
@@ -910,6 +1124,45 @@ func _on_intel_intent_revealed(payload: Dictionary) -> void:
         _intel_events.remove_at(0)
     _update_intel_panel()
     _play_feedback(600.0)
+
+func _on_formation_changed(payload: Dictionary) -> void:
+    if payload.is_empty():
+        return
+    var reason := str(payload.get("reason", ""))
+    if reason != "manual":
+        return
+    var unit_id := str(payload.get("unit_id", ""))
+    var formation_name := str(payload.get("formation_name", payload.get("formation_id", "")))
+    var unit_name := _formation_unit_name(unit_id)
+    _set_feedback("%s adopte la formation %s." % [unit_name, formation_name], true)
+    _play_feedback(560.0)
+
+func _on_formation_change_failed(payload: Dictionary) -> void:
+    if payload.is_empty():
+        return
+    var reason := str(payload.get("reason", "unknown"))
+    var unit_id := str(payload.get("unit_id", ""))
+    var unit_name := _formation_unit_name(unit_id)
+    match reason:
+        "insufficient_elan":
+            var required := float(payload.get("required", payload.get("elan_cost", 0.0)))
+            var available := float(payload.get("available", _formation_available_elan))
+            _set_feedback("Élan insuffisant pour %s : %.1f requis, %.1f disponible." % [unit_name, required, available], false)
+        "inertia_locked":
+            var remaining := int(payload.get("turns_remaining", 0))
+            _set_feedback("%s reste verrouillée %d tour(s) avant le prochain changement." % [unit_name, max(remaining, 0)], false)
+        "formation_not_allowed":
+            _set_feedback("%s ne peut pas adopter cette formation." % unit_name, false)
+        "unknown_formation":
+            _set_feedback("Formation inconnue.", false)
+        "unknown_unit":
+            _set_feedback("Unité inconnue pour le changement de formation.", false)
+        "not_allowed":
+            _set_feedback("Impossible d'appliquer la formation sélectionnée à %s." % unit_name, false)
+        _:
+            _set_feedback("Changement de formation refusé.", false)
+    _refresh_formation_row(unit_id)
+    _play_feedback(180.0)
 
 func _on_elan_spent(payload: Dictionary) -> void:
     var amount: float = -abs(float(payload.get("amount", 0.0)))

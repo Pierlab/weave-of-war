@@ -1,6 +1,15 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-22 — Intégré les postures de formation dans la résolution combat : `CombatSystem` ajoute désormais les bonus/malus de
+  formation et applique un multiplicateur moyen par pilier avant les facteurs terrain/météo/logistique, ce qui rend visibles les
+  échanges Position/Impulsion/Information lors d'un swap. Un test gdUnit compare "Advance Column" vs "Shield Wall" et confirme
+  les deltas, tandis que checklist/mission/README/doc tests reflètent l'achèvement de l'item 46.
+- 2025-12-21 — Ajouté le panneau HUD « Formations » avec menus déroulants par unité, validation des coûts d'Élan et des verrous
+  d'inertie côté `FormationSystem`. Un nouveau signal `formation_status_updated` synchronise l'état avec la HUD/tests, un panel
+  Godot dédié décrit chaque posture (coût, inertie, description), et les tentatives refusées surfacent les raisons (`Élan` ou
+  inertie) directement dans l'interface. README/CHANGELOG/mission/checklist documentent l'achèvement de l'item 45 et un test
+  gdUnit couvre le flux de requêtes réussies/échouées.
 - 2025-12-20 — `DataLoader` dérive désormais les archétypes par formation et expose des helpers (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `CombatSystem` s'appuie sur ce mapping pour ses fallbacks, `test_data_integrity.gd` vérifie la cartographie, et README/CHANGELOG/mission/checklist documentent l'achèvement de l'item 44.
 - 2025-12-19 — Documenté le guide d'usage des sliders de compétence : README détaille désormais la boucle complète (sélection, validations HUD, vérifications télémétrie et réactions combat/logistique/assistant) et `docs/tests/acceptance_tests.md` ajoute AT-16 pour refléter le walkthrough. Checklist item 43 clôturée, Godot headless toujours bloqué tant que le binaire n'est pas provisionné.
 - 2025-12-18 — Ajouté des tests gdUnit automatisant les sliders de compétence : les requêtes EventBus valides publient un nouvel événement `competence_reallocated` et les violations de delta/inertie renvoient `competence_allocation_failed` avec les raisons détaillées, clôturant la checklist item 42. Les commandes Godot headless restent en attente tant que le binaire n'est pas provisionné dans cet environnement.

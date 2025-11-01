@@ -3,6 +3,9 @@
     "id": "shield_wall",
     "name": "Shield Wall",
     "posture": "defensive",
+    "elan_cost": 1.5,
+    "inertia_lock_turns": 2,
+    "description": "Bloque la ligne pour encaisser les charges, augmente la Position au détriment de l'Impulsion.",
     "pillar_modifiers": {
       "position": 0.4,
       "impulse": -0.2,
@@ -16,6 +19,9 @@
     "id": "advance_column",
     "name": "Advance Column",
     "posture": "aggressive",
+    "elan_cost": 1.0,
+    "inertia_lock_turns": 1,
+    "description": "Colonne serrée pour percer rapidement, échange de la Position contre de l'Impulsion.",
     "pillar_modifiers": {
       "position": -0.1,
       "impulse": 0.3,
@@ -29,6 +35,9 @@
     "id": "wedge",
     "name": "Cavalry Wedge",
     "posture": "aggressive",
+    "elan_cost": 1.5,
+    "inertia_lock_turns": 2,
+    "description": "Pointe de cavalerie destinée à briser la ligne et générer un pic d'Impulsion.",
     "pillar_modifiers": {
       "position": 0.1,
       "impulse": 0.4,
@@ -42,6 +51,9 @@
     "id": "screen",
     "name": "Screen Formation",
     "posture": "balanced",
+    "elan_cost": 0.75,
+    "inertia_lock_turns": 1,
+    "description": "Écran flexible pour couvrir l'avance et garder des options de manœuvre ouvertes.",
     "pillar_modifiers": {
       "position": -0.05,
       "impulse": 0.1,
@@ -55,6 +67,9 @@
     "id": "skirmish",
     "name": "Skirmish Line",
     "posture": "fluid",
+    "elan_cost": 0.5,
+    "inertia_lock_turns": 1,
+    "description": "Escarmouche légère pour user l'ennemi et sonder ses intentions.",
     "pillar_modifiers": {
       "position": -0.1,
       "impulse": 0.05,
@@ -68,6 +83,9 @@
     "id": "observation",
     "name": "Observation Net",
     "posture": "recon",
+    "elan_cost": 0.5,
+    "inertia_lock_turns": 1,
+    "description": "Réseau d'observation maximisant la collecte d'information et la vigilance.",
     "pillar_modifiers": {
       "position": 0.0,
       "impulse": -0.05,
@@ -81,6 +99,9 @@
     "id": "volley_line",
     "name": "Volley Line",
     "posture": "ranged",
+    "elan_cost": 1.25,
+    "inertia_lock_turns": 2,
+    "description": "Ligne de tir coordonnée saturant la cible de projectiles.",
     "pillar_modifiers": {
       "position": 0.2,
       "impulse": 0.0,

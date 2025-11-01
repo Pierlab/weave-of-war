@@ -314,6 +314,14 @@ func test_formations_json_schema() -> void:
         if competence_weight is Dictionary:
             for key in competence_weight.keys():
                 _assert_number(competence_weight.get(key), context + ".competence_weight", key)
+        _assert_number(entry.get("elan_cost", -1.0), context, "elan_cost")
+        var lock_turns_variant := entry.get("inertia_lock_turns", -1)
+        asserts.is_true(lock_turns_variant is int or lock_turns_variant is float,
+            "%s.inertia_lock_turns should be an integer-like value" % context)
+        asserts.is_true(int(lock_turns_variant) >= 0,
+            "%s.inertia_lock_turns should be non-negative" % context)
+        if entry.has("description"):
+            _assert_string(entry.get("description"), context, "description")
 
 func test_data_loader_exposes_caches() -> void:
     var loader: DataLoader = DATA_LOADER.new()

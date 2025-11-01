@@ -8,6 +8,7 @@ const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 const WEATHER_SYSTEM := preload("res://scripts/systems/weather_system.gd")
 const COMBAT_SYSTEM := preload("res://scripts/systems/combat_system.gd")
 const ESPIONAGE_SYSTEM := preload("res://scripts/systems/espionage_system.gd")
+const FORMATION_SYSTEM := preload("res://scripts/systems/formation_system.gd")
 
 var event_bus: EventBus
 var turn_manager: TurnManager
@@ -18,6 +19,7 @@ var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
 var combat_system: CombatSystem
 var espionage_system: EspionageSystem
+var formation_system: FormationSystem
 
 var _core_systems_initialised: bool = false
 
@@ -46,6 +48,9 @@ func _ready() -> void:
 
     espionage_system = ESPIONAGE_SYSTEM.new()
     add_child(espionage_system)
+
+    formation_system = FORMATION_SYSTEM.new()
+    add_child(formation_system)
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)
@@ -95,6 +100,8 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
         var terrain_lookup: Dictionary = _build_terrain_lookup(payload)
         if not terrain_lookup.is_empty():
             espionage_system.configure_map(terrain_lookup)
+    if formation_system:
+        formation_system.setup(event_bus, data_loader, combat_system, elan_system, turn_manager)
 
     _core_systems_initialised = true
 

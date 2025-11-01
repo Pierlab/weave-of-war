@@ -202,6 +202,13 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
     var attacker_detection: float = _aggregate_unit_value(attacker_unit_ids, "recon_profile", "detection")
     var defender_counter: float = _aggregate_unit_value(defender_unit_ids, "recon_profile", "counter_intel")
 
+    var attacker_formation_bonus: Dictionary = _formation_bonus_for_units(attacker_unit_ids)
+    var defender_formation_bonus: Dictionary = _formation_bonus_for_units(defender_unit_ids)
+    var attacker_competence_bonus: Dictionary = _competence_bonus_for_units(attacker_unit_ids)
+    var defender_competence_bonus: Dictionary = _competence_bonus_for_units(defender_unit_ids)
+    var attacker_formation_multiplier: Dictionary = _formation_multiplier_map(attacker_formation_bonus, attacker_unit_ids.size())
+    var defender_formation_multiplier: Dictionary = _formation_multiplier_map(defender_formation_bonus, defender_unit_ids.size())
+
     var results: Dictionary = {}
     var attacker_wins: int = 0
     var defender_wins: int = 0
@@ -230,6 +237,12 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
             "defender_logistics_factor": defender_logistics_factor,
             "movement_cost": float(logistics_context.get("movement_cost", 1.0)),
             "logistics_severity": str(logistics_context.get("severity", "")),
+            "attacker_formation_bonus": attacker_formation_bonus,
+            "defender_formation_bonus": defender_formation_bonus,
+            "attacker_competence_bonus": attacker_competence_bonus,
+            "defender_competence_bonus": defender_competence_bonus,
+            "attacker_formation_multiplier": attacker_formation_multiplier,
+            "defender_formation_multiplier": defender_formation_multiplier,
         }
 
         var pillar_result: Dictionary = _resolve_pillar(
@@ -313,14 +326,6 @@ func _aggregate_unit_profile(unit_ids: Array, field: String, _side: String = "at
             for key in profile.keys():
                 totals[key] = float(totals.get(key, 0.0)) + float(profile.get(key, 0.0))
 
-    var formation_bonus: Dictionary = _formation_bonus_for_units(unit_ids)
-    for pillar in formation_bonus.keys():
-        totals[pillar] = float(totals.get(pillar, 0.0)) + float(formation_bonus.get(pillar, 0.0))
-
-    var competence_bonus: Dictionary = _competence_bonus_for_units(unit_ids)
-    for pillar in competence_bonus.keys():
-        totals[pillar] = float(totals.get(pillar, 0.0)) + float(competence_bonus.get(pillar, 0.0))
-
     return totals
 
 func _aggregate_unit_value(unit_ids: Array, field: String, key: String) -> float:
@@ -346,6 +351,15 @@ func _formation_bonus_for_units(unit_ids: Array) -> Dictionary:
             for pillar in modifiers.keys():
                 totals[pillar] = float(totals.get(pillar, 0.0)) + float(modifiers.get(pillar, 0.0))
     return totals
+
+func _formation_multiplier_map(bonus: Dictionary, unit_count: int) -> Dictionary:
+    var multipliers: Dictionary = {}
+    var count: int = max(unit_count, 1)
+    for pillar in PILLARS:
+        var total: float = float(bonus.get(pillar, 0.0))
+        var average: float = total / float(count)
+        multipliers[pillar] = clamp(1.0 + average * 0.25, 0.6, 1.4)
+    return multipliers
 
 func _competence_bonus_for_units(unit_ids: Array) -> Dictionary:
     var totals: Dictionary = {}
@@ -610,20 +624,32 @@ func _resolve_pillar(pillar: String, attacker_base: float, defender_base: float,
     var attacker_bonus: Dictionary = context.get("attacker_bonus", {})
     var defender_bonus: Dictionary = context.get("defender_bonus", {})
     var posture_bonus: Dictionary = context.get("posture_bonus", {})
+    var attacker_formation_bonus: Dictionary = context.get("attacker_formation_bonus", {})
+    var defender_formation_bonus: Dictionary = context.get("defender_formation_bonus", {})
+    var attacker_competence_bonus: Dictionary = context.get("attacker_competence_bonus", {})
+    var defender_competence_bonus: Dictionary = context.get("defender_competence_bonus", {})
+    var attacker_formation_multiplier: Dictionary = context.get("attacker_formation_multiplier", {})
+    var defender_formation_multiplier: Dictionary = context.get("defender_formation_multiplier", {})
 
     var attacker_strength: float = attacker_base
     attacker_strength += float(order_weights.get(pillar, 0.0))
     attacker_strength += float(doctrine_bonus.get(pillar, 0.0))
     attacker_strength += float(attacker_bonus.get(pillar, 0.0))
+    attacker_strength += float(attacker_formation_bonus.get(pillar, 0.0))
+    attacker_strength += float(attacker_competence_bonus.get(pillar, 0.0))
     attacker_strength = max(attacker_strength, 0.0)
 
     var defender_strength: float = defender_base
     defender_strength += float(posture_bonus.get(pillar, 0.0))
     defender_strength += float(defender_bonus.get(pillar, 0.0))
+    defender_strength += float(defender_formation_bonus.get(pillar, 0.0))
+    defender_strength += float(defender_competence_bonus.get(pillar, 0.0))
     defender_strength = max(defender_strength, 0.0)
 
     var terrain_factor: float = float(context.get("terrain_factor", 1.0))
     var weather_factor: float = float(context.get("weather_factor", 1.0))
+    attacker_strength *= float(attacker_formation_multiplier.get(pillar, 1.0))
+    defender_strength *= float(defender_formation_multiplier.get(pillar, 1.0))
     attacker_strength *= terrain_factor * weather_factor
     defender_strength *= terrain_factor * weather_factor
 
