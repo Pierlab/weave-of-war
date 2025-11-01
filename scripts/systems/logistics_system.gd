@@ -416,7 +416,8 @@ func _recalculate_state(reason: String) -> void:
     var logistics_config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
     var weather_config: Dictionary = _weather_by_id.get(_current_weather_id, {})
 
-    var flow_multiplier := _compute_flow_multiplier(logistics_config, weather_config)
+    var flow_context := _flow_context(logistics_config, weather_config)
+    var flow_multiplier := float(flow_context.get("final", 1.0))
     var supply_radius := int(logistics_config.get("supply_radius", 0))
     _pending_breaks.clear()
     var supply_zones := _build_supply_payload(supply_radius, flow_multiplier, weather_config, logistics_config)
@@ -425,6 +426,7 @@ func _recalculate_state(reason: String) -> void:
     var supply_deficits := _collect_supply_deficits(supply_zones, logistics_config)
     var convoy_statuses := _summarise_convoys(routes_payload)
     var total_competence_penalty := _aggregate_break_penalty()
+    var weather_adjustments := _build_weather_adjustments(flow_context, logistics_config, weather_config)
 
     _last_payload = {
         "reason": reason,
@@ -433,6 +435,7 @@ func _recalculate_state(reason: String) -> void:
         "logistics_id": _current_logistics_id,
         "weather_id": _current_weather_id,
         "flow_multiplier": flow_multiplier,
+        "weather_adjustments": weather_adjustments,
         "supply_zones": supply_zones,
         "routes": routes_payload,
         "reachable_tiles": reachable_tiles,
@@ -499,6 +502,7 @@ func _build_route_payload(flow_multiplier: float, logistics_config: Dictionary) 
         var eta := 0.0
         if state.get("active", false) and state.get("last_speed", 0.0) > 0.0:
             eta = max((route_length - state.get("progress", 0.0)) / state.get("last_speed", 0.01), 0.0)
+        var risk := _intercept_components(route, logistics_config, flow_multiplier)
         payload.append({
             "id": route_id,
             "type": route.get("type", "road"),
@@ -510,6 +514,12 @@ func _build_route_payload(flow_multiplier: float, logistics_config: Dictionary) 
                 "completed": state.get("completed", 0),
                 "last_event": state.get("last_event", "idle"),
                 "eta_turns": snapped(eta, 0.01),
+            },
+            "intercept_risk": {
+                "base": snapped(float(risk.get("base", 0.0)), 0.01),
+                "terrain_bonus": snapped(float(risk.get("terrain_bonus", 0.0)), 0.01),
+                "flow_penalty": snapped(float(risk.get("flow_penalty", 0.0)), 0.01),
+                "effective": snapped(float(risk.get("effective", 0.0)), 0.01),
             }
         })
         if state.get("last_event", "") == "intercepted" and not state.get("intercept_reported", false):
@@ -602,7 +612,7 @@ func _summarise_convoys(routes_payload: Array) -> Array:
 func _advance_convoys() -> void:
     var logistics_config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
     var weather_config: Dictionary = _weather_by_id.get(_current_weather_id, {})
-    var flow_multiplier := _compute_flow_multiplier(logistics_config, weather_config)
+    var flow_multiplier := float(_flow_context(logistics_config, weather_config).get("final", 1.0))
     var spawn_threshold := int(logistics_config.get("convoy_spawn_threshold", 4))
 
     for route in _routes:
@@ -674,13 +684,7 @@ func _route_speed(route_type: String, flow_multiplier: float) -> float:
     return max(base_speed * flow_multiplier, 0.0)
 
 func _compute_flow_multiplier(logistics_config: Dictionary, weather_config: Dictionary) -> float:
-    var base := float(weather_config.get("logistics_flow_modifier", 1.0))
-    var links: Dictionary = logistics_config.get("links", {})
-    if links.has("weather_modifiers"):
-        var weather_modifiers: Dictionary = links.get("weather_modifiers")
-        if weather_modifiers.has(_current_weather_id):
-            base += float(weather_modifiers.get(_current_weather_id))
-    return clamp(base, 0.2, 2.0)
+    return float(_flow_context(logistics_config, weather_config).get("final", 1.0))
 
 func _compute_tile_flow(flow_multiplier: float, terrain_id: String, distance: int, supply_radius: int) -> float:
     var penalty := 0.0
@@ -697,10 +701,8 @@ func _compute_tile_flow(flow_multiplier: float, terrain_id: String, distance: in
     return clamp(flow_multiplier - penalty - fringe_penalty, 0.0, 2.0)
 
 func _should_intercept(route: Dictionary, logistics_config: Dictionary, flow_multiplier: float) -> bool:
-    var base := clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
-    var terrain_bonus := _route_terrain_bonus(route)
-    var flow_penalty := max(0.0, 1.0 - flow_multiplier)
-    var effective := clamp(base + terrain_bonus + flow_penalty, 0.0, 1.0)
+    var components := _intercept_components(route, logistics_config, flow_multiplier)
+    var effective := float(components.get("effective", 0.0))
     if effective >= 1.0:
         return true
     return _rng.randf() < effective
@@ -772,4 +774,62 @@ func _tile_id_from_variant(node: Variant) -> String:
     if node is Array and node.size() >= 2:
         return _tile_id(int(node[0]), int(node[1]))
     return ""
+
+func _flow_context(logistics_config: Dictionary, weather_config: Dictionary) -> Dictionary:
+    var base := float(weather_config.get("logistics_flow_modifier", 1.0))
+    var adjustment := 0.0
+    var links: Dictionary = logistics_config.get("links", {})
+    if links.has("weather_modifiers"):
+        var weather_modifiers: Dictionary = links.get("weather_modifiers")
+        if weather_modifiers.has(_current_weather_id):
+            adjustment = float(weather_modifiers.get(_current_weather_id))
+    var raw := base + adjustment
+    var final_value := clamp(raw, 0.2, 2.0)
+    return {
+        "base": base,
+        "adjustment": adjustment,
+        "raw": raw,
+        "final": final_value,
+    }
+
+func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dictionary, weather_config: Dictionary) -> Dictionary:
+    var base_flow := float(flow_context.get("base", 1.0))
+    var adjustment := float(flow_context.get("adjustment", 0.0))
+    var final_flow := float(flow_context.get("final", base_flow))
+    var movement_modifier := float(weather_config.get("movement_modifier", 1.0))
+    var intercept_base := clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
+    var flow_penalty := max(0.0, 1.0 - final_flow)
+    var intercept_effective := clamp(intercept_base + flow_penalty, 0.0, 1.0)
+    var note_segments := PackedStringArray()
+    note_segments.append("Weather base %.2f" % base_flow)
+    if abs(adjustment) > 0.001:
+        note_segments.append("Scenario delta %.2f" % adjustment)
+    note_segments.append("Final flow %.2f" % final_flow)
+    note_segments.append("Intercept %.2f→%.2f" % [intercept_base, intercept_effective])
+    var notes := ""
+    if note_segments.size() > 0:
+        notes = "; ".join(note_segments)
+    return {
+        "weather_id": _current_weather_id,
+        "movement_modifier": snapped(movement_modifier, 0.01),
+        "base_flow_modifier": snapped(base_flow, 0.01),
+        "logistics_adjustment": snapped(adjustment, 0.01),
+        "final_flow_multiplier": snapped(final_flow, 0.01),
+        "flow_penalty": snapped(flow_penalty, 0.01),
+        "intercept_base": snapped(intercept_base, 0.01),
+        "intercept_effective": snapped(intercept_effective, 0.01),
+        "notes": notes,
+    }
+
+func _intercept_components(route: Dictionary, logistics_config: Dictionary, flow_multiplier: float) -> Dictionary:
+    var base := clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
+    var terrain_bonus := _route_terrain_bonus(route)
+    var flow_penalty := max(0.0, 1.0 - flow_multiplier)
+    var effective := clamp(base + terrain_bonus + flow_penalty, 0.0, 1.0)
+    return {
+        "base": base,
+        "terrain_bonus": terrain_bonus,
+        "flow_penalty": flow_penalty,
+        "effective": effective,
+    }
 

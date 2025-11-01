@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 - Introduced `WeatherSystem` to cycle weather states deterministically from `data/weather.json`, emit rich `weather_changed`
   payloads, and drive the new HUD weather panel. Added gdUnit coverage in `tests/gdunit/test_weather_system.gd` to lock the
   rotation order and seeded duration rolls.
+- Linked weather penalties directly to logistics throughput and convoy interception risk by extending `LogisticsSystem` with
+  `weather_adjustments` summaries and per-route `intercept_risk` data in every `logistics_update` payload.
 - Introduced [`data/terrain.json`](data/terrain.json) and wired it through `DataLoader`, the hex map, and HUD/debug overlay
   tooltips so Plains/Forest/Hill tiles display names, movement costs, and contextual summaries sourced directly from data.
 - Enriched `LogisticsSystem` `logistics_update` payloads with `reachable_tiles`, `supply_deficits`, and `convoy_statuses`, updating datasets, docs, and tests so downstream systems can react to supply health without rehydrating raw tile maps.

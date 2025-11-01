@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T15:53:54Z
+- Generated on: 2025-11-01T16:21:17Z
 - Branch: work
-- Commit when generated: 02dcc5f6add81db88a9e70c3bbb57043d2de94a1
-- Subject: Add terrain metadata and tooltips for logistics UI
+- Commit when generated: a5be3885b9957f9e0bd54bb74befd8cf44715cbf
+- Subject: Merge pull request #58 from Pierlab/codex/add-item-to-checklist.md-pnf7up
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
