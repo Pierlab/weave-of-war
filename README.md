@@ -96,6 +96,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   immediately drive supply payloads, with gdUnit coverage guarding the bootstrap path.
 - Logistics disruptions now raise a dedicated `logistics_break` event for analytics, capturing the disrupted tile/route, Élan and
   competence penalties, and current weather/logistics contexts for downstream dashboards.
+- Dedicated gdUnit cases in [`tests/gdunit/test_logistics_system.gd`](tests/gdunit/test_logistics_system.gd) now lock storm-driven reachability shrinkage, single-fire convoy interception breaks,
+  and the cadence of logistics-controlled weather rotations so downstream HUD and telemetry consumers stay in sync.
 - `WeatherSystem` now orchestrates the rotation of `sunny`/`rain`/`mist` states using the `duration_turns` ranges in
   [`data/weather.json`](data/weather.json), emitting deterministic `weather_changed` payloads with modifiers and remaining
   turns so logistics, combat, espionage, and UI consumers stay in sync without bespoke plumbing.
