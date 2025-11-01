@@ -138,6 +138,8 @@ func _notify_event_bus(result: Dictionary) -> void:
             "counts": counts,
             "collections": collections,
         })
+        var counts_json := JSON.stringify(counts)
+        print("[Autoload] DataLoaderAutoload ready → counts=%s" % counts_json)
     else:
         event_bus.emit_data_loader_error({
             "errors": result.get("errors"),

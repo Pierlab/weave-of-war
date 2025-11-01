@@ -1,0 +1,5 @@
+2025-11-01T09:59:05Z [Autoload] EventBusAutoload ready (signals registered: 22)
+2025-11-01T09:59:05Z [Autoload] TelemetryAutoload ready (event_bus_connected: true)
+2025-11-01T09:59:05Z [Autoload] AssistantAIAutoload ready (awaiting data_loader_ready)
+2025-11-01T09:59:05Z [Autoload] DataLoaderAutoload ready → counts={"doctrines":2,"orders":3,"units":4,"weather":3,"logistics":2,"formations":7}
+2025-11-01T09:59:05Z [Autoload] AssistantAIAutoload observed data_loader_ready (cache_ready: true)
