@@ -119,6 +119,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `CombatSystem` now resolves Manoeuvre/Feu/Moral contests by combining unit combat profiles, doctrine bonuses, terrain and
   weather multipliers, and the latest espionage confidence. Each resolution emits a `combat_resolved` payload for telemetry and
   upcoming HUD combat panels.
+- The HUD now surfaces a "Dernier engagement" panel summarising the latest `combat_resolved` payload with pillar gauges,
+  logistics context (flow, sévérité, mouvement) and Élan deltas so command decisions can be read without opening the debug
+  overlay.
 - Pillar calculations follow the SDS outline and blend additive profiles with multiplicative context:
   - **Position** multiplies the summed unit/formation/doctrine/order bonuses by terrain, weather, doctrine focus, logistics flow,
     movement-cost penalties, and espionage edge (+5%). Supply warnings reduce the total to 90%; critical deficits clamp at 75%.

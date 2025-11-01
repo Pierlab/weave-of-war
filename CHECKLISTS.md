@@ -44,7 +44,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 ## Phase 3 — Combat (3 Pillars)
 26. [x] **Instantiate CombatSystem.** Wire combat to order execution events plus logistics/weather/espionage signals via `EventBusAutoload`. *(2025-11-30 — `GameManager` ajoute désormais `CombatSystem`, relie `order_execution_requested`/`order_issued`/`logistics_update`, et les résolutions de combat incluent un bloc télémétrie `logistics` pour exposer flow/supply/severity.)*
 27. [x] **Implement pillar maths.** Encode Position/Impulse/Information calculations using doctrine, formation, terrain, weather, and intel modifiers exactly as SDS specifies. Annotate formulas in mission notes. *(2025-12-01 — Refactored `CombatSystem` pillar resolver with doctrine focus, logistics severity, movement cost, and intel multipliers; formulas documented in the mission brief.)*
-28. [ ] **Build combat UI.** Deliver HUD panels/modals showing gauges, textual summaries, and Élan adjustments; capture UI screenshots.
+28. [x] **Build combat UI.** Deliver HUD panels/modals showing gauges, textual summaries, and Élan adjustments; capture UI screenshots. *(2025-12-02 — HUD "Dernier engagement" panel affiche les piliers, le contexte logistique et les deltas d'Élan; capture écran à réaliser hors conteneur headless.)*
 29. [ ] **Record telemetry.** Emit `combat_resolved` payloads with per-pillar breakdowns and resulting unit states.
 30. [ ] **Automate combat checks.** Write gdUnit scenarios covering deterministic outcomes, tie-breakers, and edge cases. Archive result summaries.
 31. [ ] **Document combat loop.** Update `README.md` and the mission brief with instructions for triggering combat and interpreting results.
