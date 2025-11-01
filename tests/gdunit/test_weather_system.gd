@@ -1,6 +1,21 @@
 extends GdUnitLiteTestCase
 
 const WEATHER_SYSTEM := preload("res://scripts/systems/weather_system.gd")
+const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
+const TELEMETRY := preload("res://scripts/core/telemetry.gd")
+
+var _nodes_to_cleanup: Array = []
+
+func after_each() -> void:
+    var tree := Engine.get_main_loop()
+    if tree is SceneTree:
+        for node in _nodes_to_cleanup:
+            if is_instance_valid(node):
+                node.queue_free()
+        _nodes_to_cleanup.clear()
+        await tree.process_frame
+    EventBusAutoload._instance = null
+    TelemetryAutoload._instance = null
 
 class MockEventBus:
     var events: Array = []
@@ -110,6 +125,48 @@ func test_seed_reproducibility_for_duration_rolls() -> void:
     var first := _simulate_weather_sequence(1337, _variable_duration_entries(), 6)
     var second := _simulate_weather_sequence(1337, _variable_duration_entries(), 6)
     asserts.is_equal(first, second, "Using the same seed should reproduce weather durations and reasons")
+
+func test_weather_events_recorded_by_telemetry() -> void:
+    var tree := Engine.get_main_loop()
+    asserts.is_true(tree is SceneTree, "Telemetry capture requires a SceneTree main loop")
+    if not (tree is SceneTree):
+        return
+
+    var root := tree.get_root()
+    var event_bus: EventBusAutoload = EVENT_BUS.new()
+    var telemetry: TelemetryAutoload = TELEMETRY.new()
+    var system: WeatherSystem = WEATHER_SYSTEM.new()
+
+    root.add_child(event_bus)
+    root.add_child(telemetry)
+    root.add_child(system)
+
+    _nodes_to_cleanup.append_array([system, telemetry, event_bus])
+
+    await tree.process_frame
+
+    system.event_bus = event_bus
+    system.set_rng_seed(11)
+    system.configure(_basic_weather_entries())
+
+    await tree.process_frame
+
+    var buffer := telemetry.get_buffer()
+    var weather_entries: Array = []
+    for entry in buffer:
+        if entry.get("name") == StringName("weather_changed"):
+            weather_entries.append(entry)
+
+    asserts.is_equal(1, weather_entries.size(), "Telemetry should capture the initial weather_changed payload")
+    if weather_entries.is_empty():
+        return
+
+    var payload: Dictionary = weather_entries[0].get("payload", {})
+    asserts.is_equal("sunny", payload.get("weather_id"))
+    asserts.is_true(payload.has("movement_modifier"))
+    asserts.is_true(payload.has("logistics_flow_modifier"))
+    asserts.is_true(payload.has("duration_remaining"))
+    asserts.is_equal("initial", payload.get("reason"))
 
 func _simulate_weather_sequence(seed: int, entries: Array, turns: int) -> Array:
     var system: WeatherSystem = WEATHER_SYSTEM.new()

@@ -13,6 +13,7 @@ used. Keep it updated when events evolve or dashboards shift.
 | `elan_spent` | `ElanSystem` | `order_id`, `amount`, `remaining`, `reason` | How quickly do commanders burn Élan? Which orders drive the spend? |
 | `elan_gained` | `ElanSystem` | `amount`, `previous`, `current`, `reason` | What sources replenish Élan and how often do caps throttle gains? |
 | `combat_resolved` | `CombatSystem` | `pillars`, `victor`, `weather_id`, `doctrine_id` | Which pillars decide engagements? Does weather/doctrine skew victories? |
+| `weather_changed` | `WeatherSystem` | `weather_id`, `movement_modifier`, `logistics_flow_modifier`, `intel_noise`, `elan_regeneration_bonus`, `duration_remaining`, `reason` | How often does climate shift and how strong are the applied penalties/bonuses by scenario? |
 | `logistics_break` (new) | `LogisticsSystem` | `type`, `tile_id`/`route_id`, `elan_penalty`, `competence_penalty`, `weather_id` | Where do supply chains fail and what are the resulting costs? |
 | `espionage_ping` | `EspionageSystem` | `target`, `success`, `confidence`, `intention` | When do pings reveal intentions and how reliable is intel noise? |
 

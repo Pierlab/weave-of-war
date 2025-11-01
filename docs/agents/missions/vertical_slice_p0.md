@@ -93,6 +93,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   la HUD affiche une icône météo colorée avec tooltip détaillé; `tests/gdunit/test_weather_system.gd` verrouille l'ordre et les
   durées générées.
 - 2025-11-22 — `LogisticsSystem` applique les modificateurs météo/scénario au débit d'approvisionnement, calcule un `intercept_risk` détaillé par route, et expose un bloc `weather_adjustments` dans `logistics_update` pour documenter les pénalités et effets QA.
+- 2025-11-23 — `TelemetryAutoload` enregistre désormais chaque `weather_changed` avec modificateurs (mouvement, flux logistique, bruit d'intel, bonus d'Élan, durée restante) et une gdUnit vérifie la capture initiale, tandis que le plan KPI documente les champs pour les dashboards météo/logistique.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

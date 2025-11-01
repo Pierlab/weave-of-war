@@ -47,7 +47,7 @@ func _connect_signals() -> void:
     _event_bus.logistics_break.connect(_capture_event.bind("logistics_break"))
     _event_bus.combat_resolved.connect(_capture_event.bind("combat_resolved"))
     _event_bus.espionage_ping.connect(_capture_event.bind("espionage_ping"))
-    _event_bus.weather_changed.connect(_capture_event.bind("weather_changed"))
+    _event_bus.weather_changed.connect(_on_weather_changed)
     _event_bus.assistant_order_packet.connect(_capture_event.bind("assistant_order_packet"))
     _event_bus.data_loader_ready.connect(_capture_event.bind("data_loader_ready"))
     _event_bus.data_loader_error.connect(_capture_event.bind("data_loader_error"))
@@ -123,6 +123,30 @@ func _on_elan_gained(payload: Dictionary) -> void:
         "current": float(payload.get("current", 0.0)),
         "reason": str(payload.get("reason", "manual")),
         "metadata": metadata_dict.duplicate(true),
+    })
+
+func _on_weather_changed(payload: Dictionary) -> void:
+    var combat_variant: Variant = payload.get("combat_modifiers", {})
+    var combat_modifiers: Dictionary = combat_variant if combat_variant is Dictionary else {}
+    var duration_variant: Variant = payload.get("duration_range", [])
+    var duration_range: Array = []
+    if duration_variant is Array:
+        for entry in duration_variant:
+            duration_range.append(int(entry))
+    log_event("weather_changed", {
+        "weather_id": str(payload.get("weather_id", "")),
+        "name": str(payload.get("name", "")),
+        "effects": str(payload.get("effects", "")),
+        "movement_modifier": float(payload.get("movement_modifier", 1.0)),
+        "logistics_flow_modifier": float(payload.get("logistics_flow_modifier", 1.0)),
+        "intel_noise": float(payload.get("intel_noise", 0.0)),
+        "elan_regeneration_bonus": float(payload.get("elan_regeneration_bonus", 0.0)),
+        "combat_modifiers": combat_modifiers.duplicate(true),
+        "duration_remaining": int(payload.get("duration_remaining", 0)),
+        "duration_range": duration_range,
+        "turn": int(payload.get("turn", 0)),
+        "reason": str(payload.get("reason", "status")),
+        "source": str(payload.get("source", "weather_system")),
     })
 
 func _coerce_dictionary(value: Variant) -> Dictionary:

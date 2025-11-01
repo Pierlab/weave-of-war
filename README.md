@@ -99,6 +99,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `WeatherSystem` now orchestrates the rotation of `sunny`/`rain`/`mist` states using the `duration_turns` ranges in
   [`data/weather.json`](data/weather.json), emitting deterministic `weather_changed` payloads with modifiers and remaining
   turns so logistics, combat, espionage, and UI consumers stay in sync without bespoke plumbing.
+- `TelemetryAutoload` capture désormais chaque `weather_changed` avec un schéma normalisé (modificateurs de mouvement, flux
+  logistique, bruit d'intel, bonus d'Élan, durée restante), ce qui alimente directement les dashboards météo/logistique sans
+  devoir réhydrater les dictionnaires Godot côté analytique.
 - Weather-driven penalties now feed directly into logistics throughput: `LogisticsSystem` publishes a `weather_adjustments`
   summary and per-route `intercept_risk` blocks so QA/debug overlays can trace how rain or mist slow convoys and heighten
   interceptions across the hybrid supply network.
