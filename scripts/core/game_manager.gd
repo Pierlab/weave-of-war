@@ -4,12 +4,14 @@ const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 const DOCTRINE_SYSTEM := preload("res://scripts/systems/doctrine_system.gd")
 const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
+const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 
 var event_bus: EventBusAutoload
 var turn_manager: TurnManager
 var data_loader: DataLoaderAutoload
 var doctrine_system: DoctrineSystem
 var elan_system: ElanSystem
+var logistics_system: LogisticsSystem
 
 var _core_systems_initialised := false
 
@@ -26,6 +28,9 @@ func _ready() -> void:
 
     elan_system = ELAN_SYSTEM.new()
     add_child(elan_system)
+
+    logistics_system = LOGISTICS_SYSTEM.new()
+    add_child(logistics_system)
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)
@@ -62,6 +67,8 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
 
     doctrine_system.setup(event_bus, data_loader)
     elan_system.setup(event_bus, data_loader)
+    if logistics_system:
+        logistics_system.setup(event_bus, data_loader)
 
     _core_systems_initialised = true
 

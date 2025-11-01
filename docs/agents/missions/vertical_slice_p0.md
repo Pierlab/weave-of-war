@@ -27,7 +27,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 (Follow the numbered sequence in [`CHECKLISTS.md`](../../CHECKLISTS.md); each task must be completed in order with evidence linked back here.)
 - [ ] Phase 0 — Alignment, data hygiene, and instrumentation foundations.
 - [x] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry). *(2025-11-15 — Acceptation manuelle documentée dans `docs/tests/acceptance_tests.md` pour valider doctrines, ordres et télémétrie.)*
-- [ ] Phase 2 — Logistics backbone with terrain & weather integration.
+- [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-16 — Bootstrap complété : `GameManager` charge `LogisticsSystem` avec les autoloads partagés, prêt pour l'ingestion data/terrain.)*
 - [ ] Phase 3 — Combat (3 Pillars) resolution pipeline.
 - [ ] Phase 4 — Espionage systems and fog of war feedback.
 - [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
@@ -67,6 +67,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-13 — Ajouté des tests gdUnit (`tests/gdunit/test_command_elan_loop.gd`) vérifiant le refus/succès de changement de doctrine, les validations de dépense/gain d'Élan et l'émission de paquets `assistant_order_packet`. La commande `godot --headless --path . --script res://scripts/ci/gdunit_runner.gd` reste à lancer quand le binaire Godot sera provisionné; consigner le log attendu sous `docs/logs/gdunit_command_loop_2025-11-13.log`.
 - 2025-11-14 — Instrumentation complète de la boucle Commandement & Élan : `EventBusAutoload` expose désormais les signaux `order_rejected` et `elan_gained`, `TelemetryAutoload` sérialise des payloads normalisés (`doctrine_selected`, `order_issued`, `order_rejected`, `elan_spent`, `elan_gained`), et `tests/gdunit/test_command_elan_loop.gd` couvre les nouveaux cas de télémétrie (rejets doctrine/Élan, raisons de dépense, gains horodatés). La matrice KPI `docs/telemetry/dashboard_plan.md`/README reflète ces événements.
 - 2025-11-15 — Mise à jour d'`AT-07` dans `docs/tests/acceptance_tests.md` pour lister les étapes de swap doctrine, d'émission d'ordre et de revue du buffer `TelemetryAutoload`, clôturant l'action Phase 1 item 15.
+
+### Phase 2 progress
+- 2025-11-16 — `GameManager` instancie `LogisticsSystem`, partage les autoloads `EventBus`/`DataLoader`, et `tests/gdunit/test_game_manager_logistics_bootstrap.gd` capture la propagation des signaux de tour/toggle pour verrouiller l'intégration.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
