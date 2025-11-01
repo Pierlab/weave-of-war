@@ -66,7 +66,7 @@ func _connect_signals() -> void:
     _event_bus.assistant_order_packet.connect(_capture_event.bind("assistant_order_packet"))
     _event_bus.data_loader_ready.connect(_capture_event.bind("data_loader_ready"))
     _event_bus.data_loader_error.connect(_capture_event.bind("data_loader_error"))
-    _event_bus.competence_reallocated.connect(_capture_event.bind("competence_reallocated"))
+    _event_bus.competence_reallocated.connect(_on_competence_reallocated)
     _event_bus.competence_spent.connect(_capture_event.bind("competence_spent"))
     _event_bus.formation_changed.connect(_capture_event.bind("formation_changed"))
 
@@ -231,6 +231,64 @@ func _on_weather_changed(payload: Dictionary) -> void:
         "reason": str(payload.get("reason", "status")),
         "source": str(payload.get("source", "weather_system")),
     })
+
+func _on_competence_reallocated(payload: Dictionary) -> void:
+    var base_snapshot := _serialise_competence_snapshot(payload)
+    var before_snapshot := _serialise_competence_snapshot(payload.get("before", {}))
+    var after_snapshot := _serialise_competence_snapshot(payload.get("after", {}))
+    base_snapshot["reason"] = str(payload.get("reason", base_snapshot.get("reason", "status")))
+    base_snapshot["before"] = before_snapshot
+    base_snapshot["after"] = after_snapshot if not after_snapshot.is_empty() else base_snapshot.duplicate(true)
+    base_snapshot["last_event"] = _coerce_dictionary(payload.get("last_event", {}))
+    log_event("competence_reallocated", base_snapshot)
+
+func _serialise_competence_snapshot(value: Variant) -> Dictionary:
+    if not (value is Dictionary):
+        return {}
+    var snapshot: Dictionary = value
+    var result: Dictionary = {
+        "turn": int(snapshot.get("turn", 0)),
+        "turn_id": str(snapshot.get("turn_id", "")),
+        "revision": int(snapshot.get("revision", 0)),
+        "allocations": _serialise_competence_allocations(snapshot.get("allocations", {})),
+        "available": float(snapshot.get("available", 0.0)),
+        "budget": float(snapshot.get("budget", 0.0)),
+        "inertia": _serialise_competence_inertia(snapshot.get("inertia", {})),
+        "modifiers": _serialise_competence_modifiers(snapshot.get("modifiers", {})),
+    }
+    if snapshot.has("reason"):
+        result["reason"] = str(snapshot.get("reason", "status"))
+    if snapshot.has("last_event"):
+        result["last_event"] = _coerce_dictionary(snapshot.get("last_event", {}))
+    return result
+
+func _serialise_competence_allocations(value: Variant) -> Dictionary:
+    var result: Dictionary = {}
+    if value is Dictionary:
+        for key in (value as Dictionary).keys():
+            result[str(key)] = float((value as Dictionary).get(key, 0.0))
+    return result
+
+func _serialise_competence_inertia(value: Variant) -> Dictionary:
+    var result: Dictionary = {}
+    if value is Dictionary:
+        for key in (value as Dictionary).keys():
+            var entry_variant: Variant = (value as Dictionary).get(key, {})
+            if entry_variant is Dictionary:
+                var entry: Dictionary = entry_variant
+                result[str(key)] = {
+                    "turns_remaining": int(entry.get("turns_remaining", 0)),
+                    "spent_this_turn": float(entry.get("spent_this_turn", 0.0)),
+                    "max_delta_per_turn": float(entry.get("max_delta_per_turn", 0.0)),
+                }
+    return result
+
+func _serialise_competence_modifiers(value: Variant) -> Dictionary:
+    var result: Dictionary = {}
+    if value is Dictionary:
+        for key in (value as Dictionary).keys():
+            result[str(key)] = float((value as Dictionary).get(key, 0.0))
+    return result
 
 func _serialise_visibility_map(value: Variant) -> Array:
     if not (value is Array):

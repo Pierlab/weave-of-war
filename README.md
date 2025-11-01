@@ -81,7 +81,7 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - **Execute button** — The primary call-to-action reads `Exécuter l'ordre` when no resource cost applies, switches to `Exécuter (X.X Élan)` when Élan is required, and now disables itself when the remaining competence allocations fall short of an order's `competence_cost`. The tooltip explains whether an order must be selected, how much Élan is missing, or which competence buckets (par exemple `Tactics 0.4/1.0`) need to be reallocated so keyboard users receive the same inline validation as the feedback label.
 - **Feedback label** — Success messages adopt a cool blue tint (`Color(0.7, 0.9, 1.0)`) and include copy such as `Doctrine active : {Nom}` ou `Ordre '{Nom}' exécuté (X.X Élan restant)`. Validation errors reuse warm amber (`Color(1.0, 0.65, 0.5)`) with explicit guidance: `Doctrine verrouillée par l'inertie`, `Élan insuffisant : X.X requis, X.X disponible`, `Compétence insuffisante (Tactics 0.4/1.0)` ou `Choisissez un ordre à exécuter.`
 - **Compétence panel** — A dedicated panel now renders the Tactics/Strategy/Logistics allocations streamed by `TurnManager`. Each row displays the current points, min/max bounds, per-turn delta cap, and remaining inertia lock so reallocations stay transparent. Keyboard and controller shortcuts jump directly to a slider (`[1]`/`[2]`/`[3]`, `JOY_BUTTON_X`/`Y`/`B`), while `←/→`, `A/D`, or the d-pad adjust values in step with the configured slider granularity. The budget label surfaces logistics penalties in real time, and failed adjustments play inline feedback explaining whether inertia, delta caps, or total budget caused the rejection.
-- **Compétence propagation** — Slider allocations now influence downstream systems instantly: high Tactics ratios amplify the `CombatSystem` impulse multiplier, Strategy informs Assistant AI confidence forecasts, and Logistics allocations scale the `LogisticsSystem` flow multiplier/intercept odds. Every `competence_reallocated` payload carries the allocations, ratios, and efficiency multipliers that HUD, telemetry, and analytics consumers require to explain these shifts.
+- **Compétence propagation** — Slider allocations now influence downstream systems instantly: high Tactics ratios amplify the `CombatSystem` impulse multiplier, Strategy informs Assistant AI confidence forecasts, and Logistics allocations scale the `LogisticsSystem` flow multiplier/intercept odds. Every `competence_reallocated` payload now bundles a `turn_id` and explicit `before`/`after` snapshots (allocations, remaining budget, inertia, modifiers) so HUD tooling, telemetry, and analytics consumers can compare deltas per revision without reconstructing history.
 - **Audio cues** — Positive actions (doctrine swap, order execution) trigger short sine tones at 660 Hz and 520 Hz, while validation warnings play 200 Hz or 220 Hz cues. All tones last 0.12 s at volume 0.2, share a 44.1 kHz sample rate, and fade with a fast attack envelope to avoid harsh peaks.
 - **Logistics toggle** — The logistics overlay button swaps between `Show Logistics` and `Hide Logistics`, keeping the action verb front-loaded for screen-reader clarity and future localisation keys.
 - **Weather panel** — A compact colour-coded icon sits next to the logistics toggle, updating whenever `WeatherSystem` broadcasts
@@ -188,13 +188,14 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
 ## Competence sliders & formations (Semaine 6)
 - `TurnManager` now ingests slider definitions from [`data/competence_sliders.json`](data/competence_sliders.json), enforces
   per-category inertia locks and delta caps, and exposes modifier state (`logistics_penalty`, remaining reallocation bandwidth)
-  in every `competence_reallocated` payload. Manual reallocations emit telemetry snapshots while logistics breaks consume
-  available points automatically, keeping the command economy responsive to convoy disruptions.
+  in every `competence_reallocated` payload. Each emission now records both the previous and current competence snapshots with a
+  `turn_id`/`revision` pair so manual reallocations and logistics-driven penalties leave an auditable trail while the command
+  economy stays responsive to convoy disruptions.
 - Unit formations are described in the new [`data/formations.json`](data/formations.json) catalogue. `CombatSystem` tracks the
   active formation for each unit, publishes `formation_changed` events, and folds formation posture bonuses into pillar
   resolution alongside competence allocations.
-- `DataLoader` exposes the formations dataset, while `Telemetry` records competence and formation events so gdUnit tests can
-  assert on the complete Semaine 6 loop.
+- `DataLoader` exposes the formations dataset, while `Telemetry` records competence and formation events with the enriched
+  before/after snapshots so gdUnit tests and dashboards can assert on the complete Semaine 6 loop without diffing raw payloads.
 
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove

@@ -36,6 +36,7 @@ var _inertia_state: Dictionary = {}
 var _modifier_state: Dictionary = {
     "logistics_penalty": 0.0,
 }
+var _last_competence_snapshot: Dictionary = {}
 
 func _ready() -> void:
     var bus := EVENT_BUS.get_instance()
@@ -121,6 +122,7 @@ func request_competence_cost(costs: Dictionary, context: Dictionary = {}) -> Dic
 func get_competence_payload(reason := "status") -> Dictionary:
     return {
         "turn": current_turn,
+        "turn_id": _build_turn_identifier(),
         "allocations": _competence_allocations.duplicate(true),
         "available": _available_competence,
         "budget": _competence_budget,
@@ -237,10 +239,19 @@ func _sum_allocations() -> float:
     return total
 
 func _emit_competence(reason: String) -> void:
+    var before_snapshot := _last_competence_snapshot.duplicate(true)
     _competence_revision += 1
     var payload := get_competence_payload(reason)
+    payload["turn_id"] = _build_turn_identifier()
+    var after_snapshot := _build_competence_snapshot(payload)
+    if before_snapshot.is_empty():
+        before_snapshot = after_snapshot.duplicate(true)
+        before_snapshot["revision"] = max(int(after_snapshot.get("revision", 1)) - 1, 0)
+    payload["before"] = before_snapshot.duplicate(true)
+    payload["after"] = after_snapshot.duplicate(true)
     if event_bus:
         event_bus.emit_competence_reallocated(payload)
+    _last_competence_snapshot = after_snapshot.duplicate(true)
 
 func _sanitize_competence_cost(raw: Dictionary) -> Dictionary:
     var cleaned: Dictionary = {}
@@ -411,6 +422,28 @@ func _reset_inertia_state() -> void:
             "turns_remaining": 0,
             "spent_this_turn": 0.0,
         }
+
+func _build_turn_identifier() -> String:
+    return "turn_%03d_rev_%03d" % [current_turn, _competence_revision]
+
+func _build_competence_snapshot(payload: Dictionary) -> Dictionary:
+    return {
+        "turn": int(payload.get("turn", current_turn)),
+        "turn_id": str(payload.get("turn_id", "")),
+        "revision": int(payload.get("revision", _competence_revision)),
+        "allocations": _duplicate_dictionary(payload.get("allocations", {})),
+        "available": float(payload.get("available", 0.0)),
+        "budget": float(payload.get("budget", 0.0)),
+        "inertia": _duplicate_dictionary(payload.get("inertia", {})),
+        "modifiers": _duplicate_dictionary(payload.get("modifiers", {})),
+        "last_event": _duplicate_dictionary(payload.get("last_event", {})),
+        "reason": str(payload.get("reason", "status")),
+    }
+
+func _duplicate_dictionary(value: Variant) -> Dictionary:
+    if value is Dictionary:
+        return (value as Dictionary).duplicate(true)
+    return {}
 
 func _decrement_inertia_locks() -> void:
     for category in COMPETENCE_CATEGORIES:

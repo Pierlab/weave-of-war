@@ -111,7 +111,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 ### AT-15: HUD Compétence — sliders & raccourcis
 - **Given** le panneau HUD « Compétence » affiche les allocations Tactique/Stratégie/Logistique et la HUD indique le budget restant
 - **When** j'utilise les raccourcis `[1]`, `[2]`, `[3]` (ou `JOY_BUTTON_X/Y/B`) pour cibler un slider, puis `←`/`→` (`A`/`D`, d-pad) pour ajuster les valeurs par pas configuré
-- **Then** les labels de statut reflètent immédiatement l'allocation courante, les bornes min/max et le delta consommé, et la télémétrie `competence_reallocated` capture la mise à jour avec un nouveau `revision`
+- **Then** les labels de statut reflètent immédiatement l'allocation courante, les bornes min/max et le delta consommé, et la télémétrie `competence_reallocated` capture la mise à jour avec un nouveau `revision`, un `turn_id` unique et des blocs `before`/`after` détaillant allocations, budget restant, inertie et modificateurs
 - **And** si je dépasse la limite de delta du tour ou une case verrouillée par l'inertie, la HUD rejette l'ajustement, affiche un message explicite (delta max ou verrou restant) et restaure la valeur précédente
 - **And** l'étiquette de budget signale toute pénalité logistique active tandis que l'historique `TelemetryAutoload` continue d'archiver les événements `competence_reallocated`
 - **And** en augmentant la jauge Tactique au-dessus de sa valeur de base, le prochain engagement affiche une jauge d'Impulsion amplifiée (`combat_resolved.pillars.impulse.attacker`) et l'assistant AI annonce un `competence_alignment` > 1 avec une confiance ajustée supérieure à la valeur de base
