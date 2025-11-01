@@ -184,9 +184,10 @@ compétence. L'overlay debug complète cette vue avec une timeline détaillée (
 avant/après) pour valider rapidement les tirages pendant les sessions QA, tandis que la télémétrie conserve l'historique complet accessible via `TelemetryAutoload.get_history`.
 
 ## Competence sliders & formations (Semaine 6)
-- `TurnManager` now maintains a per-turn competence budget across the `tactics`, `strategy`, and `logistics` sliders. Manual
-  reallocations emit `competence_reallocated` telemetry and logistics breaks consume available points automatically, keeping the
-  command economy responsive to convoy disruptions.
+- `TurnManager` now ingests slider definitions from [`data/competence_sliders.json`](data/competence_sliders.json), enforces
+  per-category inertia locks and delta caps, and exposes modifier state (`logistics_penalty`, remaining reallocation bandwidth)
+  in every `competence_reallocated` payload. Manual reallocations emit telemetry snapshots while logistics breaks consume
+  available points automatically, keeping the command economy responsive to convoy disruptions.
 - Unit formations are described in the new [`data/formations.json`](data/formations.json) catalogue. `CombatSystem` tracks the
   active formation for each unit, publishes `formation_changed` events, and folds formation posture bonuses into pillar
   resolution alongside competence allocations.

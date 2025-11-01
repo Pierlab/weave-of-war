@@ -1,6 +1,10 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-14 — Étendu `TurnManager` pour charger [`data/competence_sliders.json`](data/competence_sliders.json), appliquer des
+  caps de réallocation par tour/inertie et publier l'état des modificateurs (`logistics_penalty`, deltas restants) dans
+  `competence_reallocated`. Ajouté le dataset, la validation `DataLoader`, des tests gdUnit ciblant l'inertie et mis à jour les
+  docs (README, CHANGELOG, mission/checklist) pour refléter la boucle compétence.
 - 2025-12-13 — Ajouté des tests gdUnit pour `EspionageSystem` couvrant la diffusion du brouillard, l'échantillonnage probabiliste des pings et la décroissance du contre-espionnage afin de verrouiller l'item 37 de la checklist.
 - 2025-12-12 — Instrumenté `EspionageSystem` et `TelemetryAutoload` : les pings publient désormais un événement `intel_intent_revealed` dédié, la HUD/debug overlay consigne ces révélations, et `TelemetryAutoload.get_history` préserve l'historique complet des `espionage_ping`/intentions pour les dashboards.
 - 2025-12-11 — Le panneau HUD "Renseignements" affiche maintenant chaque ping `espionage_ping` (succès/échec, intention, probabilité vs jet),

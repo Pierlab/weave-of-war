@@ -152,6 +152,35 @@ func test_orders_json_schema() -> void:
                 for key in competence_cost.keys():
                     _assert_number(competence_cost.get(key), context + ".competence_cost", key)
 
+func test_competence_sliders_json_schema() -> void:
+    var sliders := _load_json_array("res://data/competence_sliders.json", "competence_sliders")
+    asserts.is_true(sliders.size() > 0, "competence sliders should contain at least one entry")
+    for entry in sliders:
+        var context := _entry_context(entry, "CompetenceSlider")
+        _assert_is_dictionary(entry, context)
+        _assert_has_keys(entry, [
+            "id",
+            "name",
+            "description",
+            "base_allocation",
+            "min_allocation",
+            "max_allocation",
+            "max_delta_per_turn",
+            "inertia_lock_turns",
+            "logistics_penalty_multiplier",
+        ], context)
+        _assert_string(entry.get("id"), context, "id")
+        _assert_string(entry.get("name"), context, "name")
+        _assert_string(entry.get("description"), context, "description")
+        _assert_number(entry.get("base_allocation"), context, "base_allocation")
+        _assert_number(entry.get("min_allocation"), context, "min_allocation")
+        _assert_number(entry.get("max_allocation"), context, "max_allocation")
+        _assert_number(entry.get("max_delta_per_turn"), context, "max_delta_per_turn")
+        _assert_integerish(entry.get("inertia_lock_turns"), context, "inertia_lock_turns")
+        _assert_number(entry.get("logistics_penalty_multiplier"), context, "logistics_penalty_multiplier")
+        if entry.has("telemetry_tags"):
+            _assert_array_of_strings(entry.get("telemetry_tags"), context, "telemetry_tags")
+
 func test_units_json_schema() -> void:
     var units := _load_json_array("res://data/units.json", "units")
     asserts.is_true(units.size() > 0, "units should contain at least one entry")
