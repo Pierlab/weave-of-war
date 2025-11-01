@@ -9,7 +9,9 @@ class StubCommandEventBus:
     var doctrine_failures: Array = []
     var elan_updates: Array = []
     var elan_spent_events: Array = []
+    var elan_gained_events: Array = []
     var orders_issued: Array = []
+    var orders_rejected: Array = []
     var assistant_packets: Array = []
 
     func emit_doctrine_selected(payload: Dictionary) -> void:
@@ -24,8 +26,14 @@ class StubCommandEventBus:
     func emit_elan_spent(payload: Dictionary) -> void:
         elan_spent_events.append(payload)
 
+    func emit_elan_gained(payload: Dictionary) -> void:
+        elan_gained_events.append(payload)
+
     func emit_order_issued(payload: Dictionary) -> void:
         orders_issued.append(payload)
+
+    func emit_order_rejected(payload: Dictionary) -> void:
+        orders_rejected.append(payload)
 
     func emit_assistant_order_packet(payload: Dictionary) -> void:
         assistant_packets.append(payload)
@@ -273,14 +281,24 @@ func test_elan_system_emits_updates_and_blocks_invalid_orders() -> void:
     elan_system.add_elan(2.0)
 
     asserts.is_equal("gain", event_bus.elan_updates.back().get("reason", ""), "Adding Élan should emit a gain payload.")
+    asserts.is_equal(1, event_bus.elan_gained_events.size(), "Gaining Élan should emit a telemetry payload.")
+    var gain_payload: Dictionary = event_bus.elan_gained_events.back()
+    asserts.is_equal(2.0, gain_payload.get("amount", 0.0), "Telemetry payload should record the gained amount.")
+    asserts.is_equal("manual", gain_payload.get("reason", ""), "Manual injections should mark the gain reason.")
 
     elan_system._on_order_execution_requested("assault")
     asserts.is_equal(1, event_bus.doctrine_failures.size(), "Blocked orders should emit a failure payload.")
     var doctrine_failure := event_bus.doctrine_failures.back()
     asserts.is_equal("doctrine_locked", doctrine_failure.get("reason", ""), "Failure reason should flag doctrine gating.")
+    asserts.is_equal(1, event_bus.orders_rejected.size(), "Blocked orders should emit a telemetry rejection payload.")
+    var rejection_payload: Dictionary = event_bus.orders_rejected.back()
+    asserts.is_equal("assault", rejection_payload.get("order_id", ""), "Telemetry payload should include the blocked order id.")
+    asserts.is_false(rejection_payload.get("allowed", true), "Doctrine-locked orders should report allowed = false.")
 
     elan_system._on_order_execution_requested("advance")
     asserts.is_equal(1, event_bus.elan_spent_events.size(), "Successful order execution should emit an Élan spend event.")
+    var spend_payload: Dictionary = event_bus.elan_spent_events.back()
+    asserts.is_equal("order_cost", spend_payload.get("reason", ""), "Spend payload should mark the order cost reason.")
     asserts.is_equal("advance", event_bus.orders_issued.back().get("order_id", ""), "Issued payload should echo the order id.")
 
     elan_system.set_allowed_orders(["advance", "assault"])
@@ -289,6 +307,7 @@ func test_elan_system_emits_updates_and_blocks_invalid_orders() -> void:
     var insufficient_payload := event_bus.doctrine_failures.back()
     asserts.is_equal("insufficient_elan", insufficient_payload.get("reason", ""), "Failure should report insufficient Élan.")
     asserts.is_equal(3.0, insufficient_payload.get("required", 0.0), "Payload should expose the required Élan amount.")
+    asserts.is_equal(2, event_bus.orders_rejected.size(), "Each blocked order should emit a telemetry rejection payload.")
 
 func test_assistant_ai_acknowledges_order_packets() -> void:
     var event_bus := StubCommandEventBus.new()

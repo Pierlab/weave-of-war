@@ -56,12 +56,22 @@ func configure(order_entries: Array, unit_entries: Array) -> void:
     _turn_income = _calculate_turn_income(unit_entries)
     _emit_state("configure")
 
-func add_elan(amount: float) -> void:
+func add_elan(amount: float, reason: String = "manual", metadata: Dictionary = {}) -> void:
     if amount == 0.0:
         return
-    var new_value: float = clamp(_current_elan + amount, 0.0, max_elan)
-    if !is_equal_approx(new_value, _current_elan):
+    var previous_value := _current_elan
+    var new_value: float = clamp(previous_value + amount, 0.0, max_elan)
+    if !is_equal_approx(new_value, previous_value):
         _current_elan = new_value
+        var gained := max(new_value - previous_value, 0.0)
+        if gained > 0.0 and event_bus:
+            event_bus.emit_elan_gained({
+                "amount": gained,
+                "previous": previous_value,
+                "current": _current_elan,
+                "reason": reason,
+                "metadata": metadata.duplicate(true),
+            })
         _emit_state("gain")
     _update_cap_tracking()
 
@@ -169,7 +179,7 @@ func _on_turn_started(_turn_number: int) -> void:
     _apply_decay_if_needed()
     _apply_doctrine_upkeep()
     if _turn_income > 0.0:
-        add_elan(_turn_income)
+        add_elan(_turn_income, "turn_income", {"turn": _turn_number})
 
 func _on_turn_ended(_turn_number: int) -> void:
     if _is_at_cap():
@@ -203,6 +213,14 @@ func _on_order_execution_requested(order_id: String) -> void:
                 "required": result.get("required", 0.0),
                 "available": result.get("available", _current_elan),
             })
+            event_bus.emit_order_rejected({
+                "reason": result.get("reason", "unknown"),
+                "order_id": order_id,
+                "required": result.get("required", 0.0),
+                "available": result.get("available", _current_elan),
+                "doctrine_id": _current_doctrine_id,
+                "allowed": _allowed_order_ids.has(order_id),
+            })
         return
 
     var order: Dictionary = result.get("order", {})
@@ -220,6 +238,7 @@ func _on_order_execution_requested(order_id: String) -> void:
             "order_id": order_id,
             "amount": payload.get("cost", 0.0),
             "remaining": payload.get("remaining", _current_elan),
+            "reason": "order_cost",
         })
         event_bus.emit_order_issued(payload)
 
