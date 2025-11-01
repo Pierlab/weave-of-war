@@ -39,6 +39,18 @@ const INTEL_INTENTION_COLORS := {
     "unknown": Color(0.7, 0.7, 0.7, 1.0),
 }
 const MAX_INTEL_EVENTS := 6
+const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]
+const COMPETENCE_HOTKEY_LABELS := {
+    "tactics": "[1]",
+    "strategy": "[2]",
+    "logistics": "[3]",
+}
+const COMPETENCE_ACTIONS := {
+    "tactics": "competence_focus_tactics",
+    "strategy": "competence_focus_strategy",
+    "logistics": "competence_focus_logistics",
+}
+const COMPETENCE_DEFAULT_STEP := 0.1
 
 @onready var next_turn_button: Button = $MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $MarginContainer/VBoxContainer/ToggleLogisticsButton
@@ -59,6 +71,9 @@ const MAX_INTEL_EVENTS := 6
 @onready var combat_summary_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/CombatSummaryLabel
 @onready var combat_logistics_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/CombatLogisticsLabel
 @onready var combat_elan_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/CombatElanLabel
+@onready var competence_panel: PanelContainer = $MarginContainer/VBoxContainer/CompetencePanel
+@onready var competence_available_label: Label = $MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer/CompetenceAvailableLabel
+@onready var competence_rows_container: VBoxContainer = $MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer/CompetenceRows
 @onready var position_meter: ProgressBar = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/PositionRow/PositionMeter
 @onready var position_result_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/PositionRow/PositionResultLabel
 @onready var impulse_meter: ProgressBar = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow/ImpulseMeter
@@ -102,6 +117,11 @@ var _elan_adjustments: Dictionary = {}
 var _last_elan_gain: Dictionary = {}
 var _last_elan_event: Dictionary = {}
 var _competence_state: Dictionary = {}
+var _competence_rows: Dictionary = {}
+var _active_competence_category: String = ""
+var _suppress_competence_slider_signal := false
+var _competence_active_style: StyleBoxFlat
+var _competence_inactive_style: StyleBoxFlat
 var _intel_events: Array[Dictionary] = []
 
 func _ready() -> void:
@@ -116,6 +136,9 @@ func _ready() -> void:
             data_loader = DATA_LOADER.get_instance()
 
     _wire_ui()
+    _ensure_competence_actions_registered()
+    _init_competence_styles()
+    _setup_competence_panel()
     _connect_event_bus()
     _populate_from_data_loader()
     _initialise_combat_panel()
@@ -160,10 +183,12 @@ func _connect_event_bus() -> void:
         event_bus.elan_gained.connect(_on_elan_gained)
     if not event_bus.competence_reallocated.is_connected(_on_competence_reallocated):
         event_bus.competence_reallocated.connect(_on_competence_reallocated)
-        if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
-            event_bus.espionage_ping.connect(_on_espionage_ping)
-        if not event_bus.intel_intent_revealed.is_connected(_on_intel_intent_revealed):
-            event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
+    if not event_bus.competence_allocation_failed.is_connected(_on_competence_allocation_failed):
+        event_bus.competence_allocation_failed.connect(_on_competence_allocation_failed)
+    if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
+        event_bus.espionage_ping.connect(_on_espionage_ping)
+    if not event_bus.intel_intent_revealed.is_connected(_on_intel_intent_revealed):
+        event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
 
 func _populate_from_data_loader() -> void:
     if data_loader == null or not data_loader.is_ready():
@@ -172,6 +197,407 @@ func _populate_from_data_loader() -> void:
     _populate_orders(data_loader.list_orders())
     _refresh_terrain_tooltip(data_loader.list_terrain_definitions(), data_loader.list_terrain_tiles())
     _update_weather_panel()
+
+func _ensure_competence_actions_registered() -> void:
+    var action_map := {
+        "competence_focus_tactics": [
+            _make_key_event(KEY_1),
+            _make_key_event(KEY_Q),
+            _make_joy_button_event(JOY_BUTTON_X),
+        ],
+        "competence_focus_strategy": [
+            _make_key_event(KEY_2),
+            _make_key_event(KEY_W),
+            _make_joy_button_event(JOY_BUTTON_Y),
+        ],
+        "competence_focus_logistics": [
+            _make_key_event(KEY_3),
+            _make_key_event(KEY_E),
+            _make_joy_button_event(JOY_BUTTON_B),
+        ],
+        "competence_increase": [
+            _make_key_event(KEY_RIGHT),
+            _make_key_event(KEY_D),
+            _make_joy_button_event(JOY_BUTTON_DPAD_RIGHT),
+        ],
+        "competence_decrease": [
+            _make_key_event(KEY_LEFT),
+            _make_key_event(KEY_A),
+            _make_joy_button_event(JOY_BUTTON_DPAD_LEFT),
+        ],
+    }
+
+    for action_name in action_map.keys():
+        _register_action_if_missing(action_name, action_map.get(action_name, []))
+
+func _register_action_if_missing(action_name: String, events: Array) -> void:
+    if not InputMap.has_action(action_name):
+        InputMap.add_action(action_name)
+    for event in events:
+        if event == null:
+            continue
+        if not InputMap.action_has_event(action_name, event):
+            InputMap.action_add_event(action_name, event)
+
+func _make_key_event(keycode: Key) -> InputEventKey:
+    var event := InputEventKey.new()
+    event.keycode = keycode
+    event.physical_keycode = keycode
+    event.pressed = false
+    return event
+
+func _make_joy_button_event(button_index: int) -> InputEventJoypadButton:
+    var event := InputEventJoypadButton.new()
+    event.button_index = button_index
+    event.pressed = false
+    return event
+
+func _init_competence_styles() -> void:
+    if _competence_active_style == null:
+        _competence_active_style = StyleBoxFlat.new()
+        _competence_active_style.bg_color = Color(0.26, 0.36, 0.48, 0.95)
+        _competence_active_style.corner_radius_top_left = 6
+        _competence_active_style.corner_radius_top_right = 6
+        _competence_active_style.corner_radius_bottom_left = 6
+        _competence_active_style.corner_radius_bottom_right = 6
+        _competence_active_style.content_margin_left = 8
+        _competence_active_style.content_margin_right = 8
+        _competence_active_style.content_margin_top = 6
+        _competence_active_style.content_margin_bottom = 8
+    if _competence_inactive_style == null:
+        _competence_inactive_style = StyleBoxFlat.new()
+        _competence_inactive_style.bg_color = Color(0.16, 0.18, 0.22, 0.9)
+        _competence_inactive_style.corner_radius_top_left = 6
+        _competence_inactive_style.corner_radius_top_right = 6
+        _competence_inactive_style.corner_radius_bottom_left = 6
+        _competence_inactive_style.corner_radius_bottom_right = 6
+        _competence_inactive_style.content_margin_left = 8
+        _competence_inactive_style.content_margin_right = 8
+        _competence_inactive_style.content_margin_top = 6
+        _competence_inactive_style.content_margin_bottom = 8
+
+func _setup_competence_panel() -> void:
+    if competence_rows_container == null:
+        return
+    for child in competence_rows_container.get_children():
+        child.queue_free()
+    _competence_rows.clear()
+
+    var config_map := _extract_competence_config()
+    for category in COMPETENCE_CATEGORIES:
+        var config: Dictionary = config_map.get(category, {})
+        _build_competence_row(category, config)
+
+    if _active_competence_category.is_empty() and not COMPETENCE_CATEGORIES.is_empty():
+        _active_competence_category = COMPETENCE_CATEGORIES[0]
+    _highlight_competence_row(_active_competence_category)
+    _update_competence_panel()
+
+func _extract_competence_config() -> Dictionary:
+    var config_map: Dictionary = {}
+    var state_config: Variant = _competence_state.get("config", {})
+    if state_config is Dictionary:
+        for key in (state_config as Dictionary).keys():
+            var entry_variant: Variant = (state_config as Dictionary).get(key)
+            if entry_variant is Dictionary:
+                config_map[key] = (entry_variant as Dictionary).duplicate(true)
+    if config_map.is_empty() and data_loader and data_loader.is_ready():
+        for entry in data_loader.list_competence_sliders():
+            if not (entry is Dictionary):
+                continue
+            var identifier := str(entry.get("id", ""))
+            if identifier.is_empty():
+                continue
+            config_map[identifier] = entry.duplicate(true)
+    if config_map.is_empty():
+        for category in COMPETENCE_CATEGORIES:
+            config_map[category] = {
+                "id": category,
+                "name": category.capitalize(),
+                "description": "",
+                "min_allocation": 0.0,
+                "max_allocation": 6.0,
+                "max_delta_per_turn": 1.0,
+                "inertia_lock_turns": 1,
+            }
+    return config_map
+
+func _build_competence_row(category: String, config: Dictionary) -> void:
+    if competence_rows_container == null:
+        return
+
+    var panel := PanelContainer.new()
+    panel.name = "%sCompetencePanel" % category.capitalize()
+    panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    panel.size_flags_vertical = Control.SIZE_FILL
+    var inactive_style := _competence_inactive_style.duplicate()
+    panel.set("theme_override_styles/panel", inactive_style)
+
+    var wrapper := VBoxContainer.new()
+    wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    wrapper.size_flags_vertical = Control.SIZE_FILL
+    wrapper.theme_override_constants["separation"] = 4
+    panel.add_child(wrapper)
+
+    var header := HBoxContainer.new()
+    header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    header.theme_override_constants["separation"] = 6
+    wrapper.add_child(header)
+
+    var hotkey_label := Label.new()
+    hotkey_label.text = COMPETENCE_HOTKEY_LABELS.get(category, "")
+    hotkey_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+    hotkey_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    header.add_child(hotkey_label)
+
+    var name_label := Label.new()
+    name_label.text = str(config.get("name", category.capitalize()))
+    name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    header.add_child(name_label)
+
+    var status_label := Label.new()
+    status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    wrapper.add_child(status_label)
+
+    var slider := HSlider.new()
+    slider.focus_mode = Control.FOCUS_ALL
+    slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    slider.size_flags_vertical = Control.SIZE_FILL
+    slider.min_value = float(config.get("min_allocation", 0.0))
+    slider.max_value = float(config.get("max_allocation", slider.min_value))
+    slider.step = COMPETENCE_DEFAULT_STEP
+    slider.tooltip_text = str(config.get("description", ""))
+    wrapper.add_child(slider)
+
+    slider.value_changed.connect(func(value: float) -> void:
+        _on_competence_slider_changed(category, value)
+    )
+    slider.focus_entered.connect(func() -> void:
+        _highlight_competence_row(category)
+    )
+
+    competence_rows_container.add_child(panel)
+    _competence_rows[category] = {
+        "panel": panel,
+        "hotkey_label": hotkey_label,
+        "name_label": name_label,
+        "status_label": status_label,
+        "slider": slider,
+        "styles": {
+            "active": _competence_active_style.duplicate(),
+            "inactive": inactive_style,
+        },
+    }
+
+func _on_competence_slider_changed(category: String, value: float) -> void:
+    if _suppress_competence_slider_signal:
+        return
+    if not _competence_rows.has(category):
+        return
+    var target_value := snapped(value, 0.01)
+    var row: Dictionary = _competence_rows.get(category, {})
+    var slider: HSlider = row.get("slider")
+    if slider and abs(slider.value - target_value) > 0.0001:
+        _suppress_competence_slider_signal = true
+        slider.value = target_value
+        _suppress_competence_slider_signal = false
+    var allocations_variant: Variant = _competence_state.get("allocations", {})
+    var current_allocation: float = target_value
+    if allocations_variant is Dictionary:
+        current_allocation = float((allocations_variant as Dictionary).get(category, target_value))
+    if abs(current_allocation - target_value) <= 0.001:
+        _update_competence_panel(true)
+        return
+    var requested := _gather_competence_allocations_from_sliders()
+    requested[category] = target_value
+    if event_bus:
+        event_bus.request_competence_allocation(requested)
+    _update_competence_panel(true)
+
+func _gather_competence_allocations_from_sliders() -> Dictionary:
+    var allocations: Dictionary = {}
+    for category in _competence_rows.keys():
+        var row: Dictionary = _competence_rows.get(category, {})
+        var slider: HSlider = row.get("slider")
+        if slider:
+            allocations[category] = snapped(slider.value, 0.01)
+    return allocations
+
+func _highlight_competence_row(category: String) -> void:
+    if category.is_empty() and not COMPETENCE_CATEGORIES.is_empty():
+        category = COMPETENCE_CATEGORIES[0]
+    _active_competence_category = category
+    for entry in _competence_rows.keys():
+        var row: Dictionary = _competence_rows.get(entry, {})
+        var panel: PanelContainer = row.get("panel")
+        var styles: Dictionary = row.get("styles", {})
+        if panel and styles:
+            var style_key := "active" if entry == category else "inactive"
+            var style_box: StyleBox = styles.get(style_key)
+            if style_box:
+                panel.set("theme_override_styles/panel", style_box)
+        var name_label: Label = row.get("name_label")
+        var hotkey_label: Label = row.get("hotkey_label")
+        var color := Color(0.92, 0.95, 1.0, 1.0) if entry == category else Color(0.82, 0.85, 0.9, 1.0)
+        if name_label:
+            name_label.add_theme_color_override("font_color", color)
+        if hotkey_label:
+            hotkey_label.add_theme_color_override("font_color", color)
+
+func _focus_competence_slider(category: String) -> void:
+    if category.is_empty():
+        return
+    _active_competence_category = category
+    if not _competence_rows.has(category):
+        _highlight_competence_row(category)
+        return
+    var row: Dictionary = _competence_rows.get(category, {})
+    var slider: HSlider = row.get("slider")
+    if slider:
+        slider.grab_focus()
+    else:
+        _highlight_competence_row(category)
+
+func _nudge_competence_slider(category: String, step_multiplier: float) -> void:
+    if category.is_empty() or not _competence_rows.has(category):
+        return
+    var row: Dictionary = _competence_rows.get(category, {})
+    var slider: HSlider = row.get("slider")
+    if slider == null:
+        return
+    var step := slider.step if slider.step > 0.0 else COMPETENCE_DEFAULT_STEP
+    var next_value := clamp(slider.value + step * step_multiplier, slider.min_value, slider.max_value)
+    if abs(next_value - slider.value) <= 0.0001:
+        return
+    _suppress_competence_slider_signal = true
+    slider.value = snapped(next_value, 0.01)
+    _suppress_competence_slider_signal = false
+    _on_competence_slider_changed(category, slider.value)
+
+func _update_competence_panel(use_slider_values := false) -> void:
+    if competence_panel == null:
+        return
+    if _competence_state.is_empty():
+        competence_panel.visible = false
+        return
+    competence_panel.visible = true
+    if _active_competence_category.is_empty() and not COMPETENCE_CATEGORIES.is_empty():
+        _active_competence_category = COMPETENCE_CATEGORIES[0]
+
+    var allocations_variant: Variant = _competence_state.get("allocations", {})
+    var allocations: Dictionary = {}
+    if allocations_variant is Dictionary:
+        allocations = (allocations_variant as Dictionary)
+    var inertia_variant: Variant = _competence_state.get("inertia", {})
+    var inertia_map: Dictionary = {}
+    if inertia_variant is Dictionary:
+        inertia_map = (inertia_variant as Dictionary)
+    var config_map := _extract_competence_config()
+
+    _suppress_competence_slider_signal = true
+    for category in COMPETENCE_CATEGORIES:
+        if not _competence_rows.has(category):
+            continue
+        var row: Dictionary = _competence_rows.get(category, {})
+        var slider: HSlider = row.get("slider")
+        var name_label: Label = row.get("name_label")
+        var hotkey_label: Label = row.get("hotkey_label")
+        var status_label: Label = row.get("status_label")
+        var config: Dictionary = config_map.get(category, {})
+        if name_label:
+            name_label.text = str(config.get("name", category.capitalize()))
+        if hotkey_label:
+            hotkey_label.text = COMPETENCE_HOTKEY_LABELS.get(category, "")
+        if slider:
+            slider.min_value = float(config.get("min_allocation", slider.min_value))
+            slider.max_value = float(config.get("max_allocation", slider.max_value))
+            slider.step = COMPETENCE_DEFAULT_STEP
+            slider.tooltip_text = str(config.get("description", ""))
+        var base_value := float(allocations.get(category, slider.value if slider else 0.0))
+        var display_value := snapped(base_value, 0.01)
+        if use_slider_values and slider:
+            display_value = snapped(slider.value, 0.01)
+        elif slider:
+            slider.value = display_value
+        var inertia_state: Dictionary = {}
+        if inertia_map.has(category) and inertia_map.get(category) is Dictionary:
+            inertia_state = inertia_map.get(category, {})
+        if status_label:
+            status_label.text = _format_competence_status(category, display_value, config, inertia_state)
+    _suppress_competence_slider_signal = false
+
+    _highlight_competence_row(_active_competence_category)
+
+    var budget := float(_competence_state.get("budget", 0.0))
+    var available := float(_competence_state.get("available", 0.0))
+    var used := max(budget - available, 0.0)
+    var modifiers_variant: Variant = _competence_state.get("modifiers", {})
+    var penalty := 0.0
+    if modifiers_variant is Dictionary:
+        penalty = float((modifiers_variant as Dictionary).get("logistics_penalty", 0.0))
+    var label_text := "Budget : %.2f pts (Utilisés %.2f · Restant %.2f)" % [budget, used, available]
+    if penalty > 0.0:
+        label_text += " | Pénalité logistique %.2f" % penalty
+    if competence_available_label:
+        competence_available_label.text = label_text
+
+func _format_competence_status(category: String, allocation: float, config: Dictionary, inertia_state: Dictionary) -> String:
+    var min_value := float(config.get("min_allocation", 0.0))
+    var max_value := float(config.get("max_allocation", min_value))
+    if max_value < min_value:
+        max_value = min_value
+    var parts: Array[String] = []
+    parts.append("Allocation %.2f pts" % allocation)
+    parts.append("Bornes %.2f–%.2f" % [min_value, max_value])
+    var max_delta := float(inertia_state.get("max_delta_per_turn", config.get("max_delta_per_turn", 0.0)))
+    var spent := float(inertia_state.get("spent_this_turn", 0.0))
+    parts.append("Δ %.2f / %.2f" % [spent, max_delta])
+    var turns := int(inertia_state.get("turns_remaining", 0))
+    if turns > 0:
+        parts.append("Verrou %dT" % turns)
+    else:
+        parts.append("Verrou 0T")
+    return " | ".join(parts)
+
+func _competence_display_name(category: String) -> String:
+    if _competence_rows.has(category):
+        var row: Dictionary = _competence_rows.get(category, {})
+        var name_label: Label = row.get("name_label")
+        if name_label:
+            return name_label.text
+    return category.capitalize()
+
+func _unhandled_input(event: InputEvent) -> void:
+    if competence_panel == null or not competence_panel.visible:
+        return
+    if event.is_echo():
+        return
+    if event.is_action_pressed("competence_focus_tactics"):
+        _focus_competence_slider("tactics")
+        accept_event()
+        return
+    if event.is_action_pressed("competence_focus_strategy"):
+        _focus_competence_slider("strategy")
+        accept_event()
+        return
+    if event.is_action_pressed("competence_focus_logistics"):
+        _focus_competence_slider("logistics")
+        accept_event()
+        return
+    if event.is_action_pressed("competence_increase"):
+        if _active_competence_category.is_empty() and not COMPETENCE_CATEGORIES.is_empty():
+            _active_competence_category = COMPETENCE_CATEGORIES[0]
+        _nudge_competence_slider(_active_competence_category, 1.0)
+        accept_event()
+        return
+    if event.is_action_pressed("competence_decrease"):
+        if _active_competence_category.is_empty() and not COMPETENCE_CATEGORIES.is_empty():
+            _active_competence_category = COMPETENCE_CATEGORIES[0]
+        _nudge_competence_slider(_active_competence_category, -1.0)
+        accept_event()
+        return
 
 func _populate_doctrines(entries: Array) -> void:
     if doctrine_selector == null:
@@ -511,7 +937,39 @@ func _on_elan_gained(payload: Dictionary) -> void:
 
 func _on_competence_reallocated(payload: Dictionary) -> void:
     _competence_state = payload.duplicate(true)
+    if _competence_rows.is_empty():
+        _setup_competence_panel()
+    else:
+        _update_competence_panel()
+    var reason := str(payload.get("reason", ""))
+    if reason == "manual":
+        _set_feedback("Compétence redistribuée.", true)
+        _play_feedback(520.0)
     _refresh_order_button_state()
+
+func _on_competence_allocation_failed(payload: Dictionary) -> void:
+    var reason := str(payload.get("reason", "unknown"))
+    var message := ""
+    match reason:
+        "inertia_locked":
+            var category := str(payload.get("category", ""))
+            var turns := int(payload.get("turns_remaining", 0))
+            message = "Verrou d'inertie sur %s (%d tour(s) restant(s))." % [_competence_display_name(category), turns]
+            _focus_competence_slider(category)
+        "delta_exceeds_cap":
+            var category_delta := str(payload.get("category", ""))
+            var max_delta := float(payload.get("max_delta", 0.0))
+            message = "Delta maximal dépassé pour %s (≤ %.2f pts/ tour)." % [_competence_display_name(category_delta), max_delta]
+            _focus_competence_slider(category_delta)
+        "over_budget":
+            var requested := float(payload.get("requested", 0.0))
+            var budget := float(payload.get("budget", 0.0))
+            message = "Budget compétence dépassé : %.2f / %.2f pts." % [requested, budget]
+        _:
+            message = "Réallocation compétence refusée (%s)." % reason
+    _set_feedback(message, false)
+    _play_feedback(200.0)
+    _update_competence_panel()
 
 func _update_doctrine_selector_state(selected_id := "") -> void:
     if doctrine_selector == null:

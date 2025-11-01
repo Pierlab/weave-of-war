@@ -32,7 +32,8 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [x] Phase 4 — Espionage systems and fog of war feedback. *(2025-12-10 — Recon flows added: `recon_probe`/`deep_cover` orders consume competence, auto-trigger `espionage_ping`, and HUD/tooling surface the validation.)*
 - [x] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia. *(2025-12-14 — `TurnManager` consomme désormais
   `data/competence_sliders.json`, applique des caps de réallocation/inertie par catégorie, expose l'état des modificateurs et la
-  télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI.)*
+  télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
+  livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
 - [ ] Phase 6 — Unit formations/postures influencing combat outcomes.
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
@@ -144,6 +145,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   de compétence restant pour suivre la qualité des pings.
 
 ### Phase 5 progress
+- 2025-12-15 — HUD « Compétence » disponible : sliders dynamiques pour Tactique/Stratégie/Logistique, requêtes `EventBus` (`competence_allocation_requested`) et retours d'échec (`competence_allocation_failed`), feedback inline (budget, inertie, delta max) et raccourcis `[1]/[2]/[3]` + d-pad/`A`/`D` pour piloter les allocations sans souris.
 - 2025-12-14 — `TurnManager` charge désormais [`data/competence_sliders.json`](../../data/competence_sliders.json), applique des caps
   de réallocation par tour et des verrous d'inertie par catégorie, archive les pénalités logistiques dans les modificateurs et
   publie l'état complet (`allocations`, `inertia`, `modifiers`) dans chaque événement `competence_reallocated`. Les tests

@@ -59,7 +59,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 
 ## Phase 5 — Competence Sliders (Tactics / Strategy / Logistics)
 38. [x] **Extend TurnManager.** Track competence budget, inertia, and modifiers following SDS guidelines; expose state to HUD/telemetry. *(2025-12-14 — `TurnManager` consomme `data/competence_sliders.json`, verrouille les deltas par tour/inertie, publie `inertia`/`modifiers` dans `competence_reallocated`, ajoute les tests gdUnit et met à jour docs & datasets.)*
-39. [ ] **Ship HUD sliders.** Build slider controls with visual feedback and keyboard/controller shortcuts; capture interaction clips.
+39. [x] **Ship HUD sliders.** Build slider controls with visual feedback and keyboard/controller shortcuts; capture interaction clips. *(2025-12-15 — HUD Compétence panel delivers dynamic sliders, event bus allocation requests/failures, keyboard/D-pad shortcuts, and refreshed docs/checklist evidence.)*
 40. [ ] **Propagate slider effects.** Apply slider values to combat impulse, assistant AI planning, and logistics efficiency.
 41. [ ] **Emit competence telemetry.** Publish `competence_reallocated` events with before/after values and turn IDs.
 42. [ ] **Automate slider behaviour.** Cover inertia constraints and downstream effects via gdUnit tests; store logs.
