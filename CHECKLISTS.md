@@ -38,7 +38,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 21. [x] **Implement weather controller.** Cycle through Sunny/Rain/Mist (plus optional Snow/Storm hooks) using deterministic seeds for tests; expose state on HUD icons. *(2025-11-21 — `WeatherSystem` orchestre la rotation seeded, publie les modificateurs restants, HUD météo colorée + test gdUnit dédiés.)*
 22. [x] **Link weather to logistics.** Apply weather modifiers to logistics throughput/convoy vulnerability as per SDS and log the adjustments for QA. *(2025-11-22 — `LogisticsSystem` now folds weather/scenario penalties into flow multipliers, surfaces per-route `intercept_risk`, and emits a `weather_adjustments` breakdown in each `logistics_update` payload.)*
 23. [x] **Emit weather telemetry.** Send `weather_changed` events with applied modifiers and record schemas. *(2025-11-23 — `TelemetryAutoload` consigne désormais un payload normalisé `weather_changed`, tests gdUnit vérifient la capture et le plan dashboard liste les champs clés.)*
-24. [ ] **Extend automated tests.** Add gdUnit coverage for logistics reachability, convoy interception hooks, and weather rotation cadence; commit outputs.
+24. [x] **Extend automated tests.** Add gdUnit coverage for logistics reachability, convoy interception hooks, and weather rotation cadence; commit outputs. *(2025-11-24 — Added targeted cases in `tests/gdunit/test_logistics_system.gd` validating reachability shrinkage under storms, single-shot convoy intercept breaks, and logistics-driven weather rotation cadence.)*
 25. [ ] **Refresh manual tests.** Update `docs/tests/acceptance_tests.md` with logistics overlay toggles, terrain tooltip checks, and weather-driven changes.
 
 ## Phase 3 — Combat (3 Pillars)

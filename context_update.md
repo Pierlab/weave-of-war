@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-24 — `tests/gdunit/test_logistics_system.gd` couvre maintenant la réduction de portée sous météo `storm`, l'unicité des événements `logistics_break` lors des interceptions successives et la cadence de rotation météo contrôlée par la logistique; README, CHANGELOG, mission brief et checklist ont été alignés.
 - 2025-11-19 — `LogisticsSystem` diffuse désormais des payloads `logistics_update` incluant les tuiles atteignables (`reachable_tiles`), les déficits de ravitaillement classés par sévérité et un résumé `convoy_statuses` pour chaque route; documentation (README, tests d'acceptation, mission brief) et données (`data/logistics.json`) reflètent les nouveaux champs.
 - 2025-11-20 — `data/terrain.json` décrit désormais chaque hexagone (Plaines/Forêt/Colline) avec noms, coûts de mouvement et texte descriptif; la carte applique ces métadonnées, les payloads logistiques incluent `terrain_name`, et les boutons HUD/debug exposent un tooltip synthétique pour suivre les biomes et leurs coûts.
 - 2025-11-21 — `WeatherSystem` pilote maintenant la rotation `sunny/rain/mist` via les plages `duration_turns`, publie des payloads

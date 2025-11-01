@@ -5,12 +5,16 @@ const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 class MockEventBus:
     var updates: Array = []
     var breaks: Array = []
+    var weather_events: Array = []
 
     func emit_logistics_update(payload: Dictionary) -> void:
         updates.append(payload)
 
     func emit_logistics_break(payload: Dictionary) -> void:
         breaks.append(payload)
+
+    func emit_weather_changed(payload: Dictionary) -> void:
+        weather_events.append(payload)
 
 func _baseline_logistics_entry() -> Dictionary:
     return {
@@ -50,6 +54,25 @@ func _weather_entries() -> Array:
             "id": "mist",
             "movement_modifier": 0.9,
             "logistics_flow_modifier": 0.8,
+        },
+    ]
+
+func _stormy_weather_entries() -> Array:
+    return [
+        {
+            "id": "clear",
+            "movement_modifier": 1.0,
+            "logistics_flow_modifier": 1.0,
+        },
+        {
+            "id": "storm",
+            "movement_modifier": 0.5,
+            "logistics_flow_modifier": 0.2,
+        },
+        {
+            "id": "mist",
+            "movement_modifier": 0.9,
+            "logistics_flow_modifier": 0.7,
         },
     ]
 
@@ -163,3 +186,94 @@ func test_payload_tracks_reachability_thresholds() -> void:
     asserts.is_equal(0, reachable_isolated.size(), "Reachable tiles should exclude isolated zones")
     var warning_deficits := deficits.filter(func(tile): return tile.get("severity") == "warning")
     asserts.is_true(warning_deficits.size() > 0, "Threshold should mark fringe tiles with low flow as warnings")
+
+func test_reachable_tiles_shrink_under_storm_penalties() -> void:
+    var system: LogisticsSystem = LOGISTICS_SYSTEM.new()
+    var entry := _baseline_logistics_entry()
+    entry["links"] = {
+        "weather_modifiers": {
+            "storm": -0.8,
+        }
+    }
+    entry["supply_radius"] = 2
+    system.set_rng_seed(1)
+    var bus := MockEventBus.new()
+    system.event_bus = bus
+    system.configure([entry], _stormy_weather_entries())
+    system.configure_map(_simple_map(), _supply_centers(), _routes())
+
+    asserts.is_true(bus.updates.size() > 0, "Configuring logistics should emit an initial payload")
+    var clear_payload: Dictionary = bus.updates.back()
+    var clear_reachable: Array = clear_payload.get("reachable_tiles", [])
+    asserts.is_true(clear_reachable.size() > 0, "Clear weather should expose reachable tiles")
+
+    bus.updates.clear()
+    system.set_weather_state("storm", "manual_test")
+    asserts.is_true(bus.updates.size() > 0, "Weather change should emit a logistics payload")
+    var storm_payload: Dictionary = bus.updates.back()
+    var storm_reachable: Array = storm_payload.get("reachable_tiles", [])
+    asserts.is_true(storm_reachable.size() < clear_reachable.size(), "Storm penalties should reduce the number of reachable tiles")
+    for entry_payload in storm_reachable:
+        asserts.is_true(float(entry_payload.get("logistics_flow", 1.0)) <= 0.5, "Storm flow should cap reachable logistics flow at or below 0.5")
+
+func test_convoy_intercept_break_emits_once_per_event() -> void:
+    var system: LogisticsSystem = LOGISTICS_SYSTEM.new()
+    var entry := _forward_entry()
+    entry["weather_rotation_turns"] = 2
+    entry["intercept_chance"] = 1.0
+    entry["convoy_spawn_threshold"] = 1
+    var bus := MockEventBus.new()
+    system.event_bus = bus
+    system.set_rng_seed(7)
+    system.configure([entry], _weather_entries())
+    system.configure_map(_simple_map(), _supply_centers(), _routes())
+
+    bus.breaks.clear()
+    system.advance_turn()
+    asserts.is_equal(1, bus.breaks.size(), "First intercept should produce a single break event")
+
+    system.advance_turn()
+    asserts.is_equal(1, bus.breaks.size(), "Follow-up turns should not duplicate the same intercept break")
+
+    system.advance_turn()
+    asserts.is_equal(2, bus.breaks.size(), "A new convoy interception should emit a fresh break event")
+
+func test_weather_rotation_uses_configured_cadence() -> void:
+    var system: LogisticsSystem = LOGISTICS_SYSTEM.new()
+    var entry := _baseline_logistics_entry()
+    entry["weather_rotation_turns"] = 2
+    entry["links"] = {
+        "weather_modifiers": {
+            "rain": -0.2,
+            "mist": -0.1,
+        }
+    }
+    var bus := MockEventBus.new()
+    system.event_bus = bus
+    system.configure([entry], _weather_entries())
+    system.configure_map(_simple_map(), _supply_centers(), _routes())
+
+    bus.weather_events.clear()
+    bus.updates.clear()
+
+    system.advance_turn()
+    asserts.is_equal(0, bus.weather_events.size(), "Weather should not rotate before the cadence threshold")
+    asserts.is_true(bus.updates.size() == 1, "Each turn should emit a logistics update payload")
+    var first_turn_payload: Dictionary = bus.updates.back()
+    asserts.is_equal("sunny", first_turn_payload.get("weather_id"))
+
+    bus.updates.clear()
+    system.advance_turn()
+    asserts.is_equal(1, bus.weather_events.size(), "Weather rotation should fire when cadence threshold is met")
+    var rotation_event: Dictionary = bus.weather_events.back()
+    asserts.is_equal("rotation", rotation_event.get("reason"))
+    asserts.is_equal(2, rotation_event.get("turn"))
+
+    asserts.is_true(bus.updates.size() > 0, "Rotation should trigger a fresh logistics payload")
+    var rotation_payload: Dictionary = bus.updates.back()
+    asserts.is_equal(rotation_event.get("weather_id"), rotation_payload.get("weather_id"), "Logistics payload should adopt the rotated weather state")
+    asserts.is_true(rotation_payload.get("flow_multiplier") < first_turn_payload.get("flow_multiplier"), "Weather penalties should affect flow after rotation")
+
+    bus.updates.clear()
+    system.advance_turn()
+    asserts.is_equal(1, bus.weather_events.size(), "Cadence should prevent back-to-back weather rotations")

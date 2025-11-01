@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 - Introduced `WeatherSystem` to cycle weather states deterministically from `data/weather.json`, emit rich `weather_changed`
   payloads, and drive the new HUD weather panel. Added gdUnit coverage in `tests/gdunit/test_weather_system.gd` to lock the
   rotation order and seeded duration rolls.
+- Extended `tests/gdunit/test_logistics_system.gd` with coverage for storm-driven reachability, single-fire convoy interception breaks,
+  and logistics-triggered weather rotation cadence so supply telemetry stays deterministic under adverse conditions.
 - Normalised `weather_changed` telemetry in `TelemetryAutoload`, added gdUnit coverage to ensure the buffer captures the
   schema, and documented the dashboard fields so analytics consumers can track climate-driven modifiers.
 - Linked weather penalties directly to logistics throughput and convoy interception risk by extending `LogisticsSystem` with
