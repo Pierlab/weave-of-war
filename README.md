@@ -52,6 +52,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   inertia multipliers, and lists the orders authorised by the active doctrine.
 - Order execution routes through the Élan system, enforcing Élan caps, doctrine-based restrictions, and inertia impacts before
   emitting `order_issued` telemetry.
+- `AssistantAIAutoload` now records the latest order packets, emits enriched `assistant_order_packet` payloads, and the debug
+  overlay surfaces a scrollable log (order, target, intent, confidence) so designers can verify the propagation loop without
+  leaving the HUD.
 - Doctrine swaps and order execution now scale inertia using the SDS multipliers (`command_profile.inertia_multiplier` plus
   `orders[].inertia_profile.doctrine_multipliers`), guaranteeing at least one full turn of lock when orders are issued while
   reporting the remaining inertia through HUD tooltips and telemetry payloads.

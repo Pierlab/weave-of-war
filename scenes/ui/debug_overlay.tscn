@@ -19,7 +19,7 @@ anchors_preset = 1
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 200.0
-offset_bottom = 160.0
+offset_bottom = 320.0
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
@@ -40,3 +40,21 @@ text = "Show Logistics"
 [node name="SpawnUnitButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Spawn Unit"
+
+[node name="AssistantSection" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="AssistantLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/AssistantSection"]
+layout_mode = 2
+text = "Assistant AI"
+
+[node name="AssistantLog" type="RichTextLabel" parent="PanelContainer/MarginContainer/VBoxContainer/AssistantSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 180)
+autowrap_mode = 2
+scroll_active = true
+selection_enabled = true
