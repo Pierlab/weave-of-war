@@ -119,6 +119,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `CombatSystem` now resolves Manoeuvre/Feu/Moral contests by combining unit combat profiles, doctrine bonuses, terrain and
   weather multipliers, and the latest espionage confidence. Each resolution emits a `combat_resolved` payload for telemetry and
   upcoming HUD combat panels.
+- `combat_resolved` telemetry now bundles a pillar summary (totals, decisive pillars, margin score) plus unit state entries for
+  every attacker/defender (formation, casualties, remaining strength, logistics notes) so dashboards and HUD overlays can
+  explain why engagements tipped without rehydrating runtime dictionaries.
 - The HUD now surfaces a "Dernier engagement" panel summarising the latest `combat_resolved` payload with pillar gauges,
   logistics context (flow, sévérité, mouvement) and Élan deltas so command decisions can be read without opening the debug
   overlay.

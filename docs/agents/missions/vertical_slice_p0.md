@@ -108,6 +108,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   - **Information** = (profil unités + doctrine + formation + ordre + bonus attaque) × terrain × météo × focus doctrinal × facteur logistique × `[0,6 + intel_confidence + espionage_bonus + signal_strength + 0,4*(detection-counter_intel)]`.
   - Défenseurs : posture + bonus défense appliqués avant multiplications; pénalités logistiques warning/critical (×0,95/×0,8) et contrepoids d'intel `[0,9 + counter_intel + profil_counter - 0,4*espionage_bonus]` sur Information, `[1 + 0,6*posture_impulse + 0,2*counter_intel - 0,2*espionage_bonus]` sur Impulsion, `[1 + 0,5*posture_position] × clamp(1 - 0,3*(intel_confidence-0,5))` sur Position.
 - 2025-12-02 — Panneau HUD "Dernier engagement" connecté à `combat_resolved` : jauges par pilier, résumé logistique (flow, sévérité, coût de mouvement, hex cible) et rappel des dépenses/gains d'Élan. Capture écran à prendre lors d'un run Godot graphique.
+- 2025-12-03 — `combat_resolved` inclut désormais un résumé des piliers (totaux, marge normalisée, piliers décisifs) et un état
+  par unité (formation, pertes estimées, remarques supply). `TelemetryAutoload` sérialise ces champs pour les dashboards et un
+  test gdUnit vérifie la présence des blocs `pillar_summary`/`units`.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

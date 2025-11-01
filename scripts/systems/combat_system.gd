@@ -242,6 +242,9 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
         victor = "contested"
 
     var intel_source := _recent_intel.get(target_hex, {}).get("source", "baseline") if _recent_intel.has(target_hex) else "baseline"
+    var pillar_summary := _summarise_pillars(results)
+    var unit_states := _build_unit_states(attacker_unit_ids, defender_unit_ids, victor, pillar_summary, logistics_context)
+
     var payload := {
         "engagement_id": engagement.get("engagement_id", order_id if order_id != "" else "skirmish"),
         "order_id": order_id,
@@ -249,6 +252,7 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
         "weather_id": weather_id,
         "doctrine_id": _current_doctrine_id,
         "pillars": results,
+        "pillar_summary": pillar_summary,
         "victor": victor,
         "intel": {
             "confidence": snapped(clamp(intel_confidence + espionage_bonus, 0.0, 1.0), 0.01),
@@ -256,6 +260,7 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
         },
         "reason": engagement.get("reason", "resolution"),
         "logistics": logistics_context,
+        "units": unit_states,
     }
 
     _last_resolution = payload.duplicate(true)
@@ -677,3 +682,168 @@ func _information_defender_multiplier(context: Dictionary) -> float:
     var counter_profile := float(intel_profile.get("counter_intel", 0.0))
     var modifier := 0.9 + defender_counter + counter_profile - espionage_bonus * 0.4
     return clamp(modifier, 0.3, 2.2)
+
+func _summarise_pillars(pillars: Dictionary) -> Dictionary:
+    var attacker_total := 0.0
+    var defender_total := 0.0
+    for pillar_key in pillars.keys():
+        var pillar_entry := pillars.get(pillar_key, {})
+        if not (pillar_entry is Dictionary):
+            continue
+        attacker_total += float(pillar_entry.get("attacker", 0.0))
+        defender_total += float(pillar_entry.get("defender", 0.0))
+
+    var combined := attacker_total + defender_total
+    var margin_score := 0.0
+    if combined > 0.0:
+        margin_score = clamp((attacker_total - defender_total) / combined, -1.0, 1.0)
+
+    var decisive: Array = []
+    for pillar_id in PILLARS:
+        var pillar_entry := pillars.get(pillar_id, {})
+        if not (pillar_entry is Dictionary):
+            continue
+        var winner := str(pillar_entry.get("winner", "stalemate"))
+        if winner == "attacker" or winner == "defender":
+            decisive.append({
+                "pillar": pillar_id,
+                "winner": winner,
+                "margin": float(pillar_entry.get("margin", 0.0)),
+            })
+
+    return {
+        "attacker_total": snapped(attacker_total, 0.01),
+        "defender_total": snapped(defender_total, 0.01),
+        "margin_score": snapped(margin_score, 0.01),
+        "decisive_pillars": decisive,
+    }
+
+func _build_unit_states(attacker_ids: Array, defender_ids: Array, victor: String, summary: Dictionary, logistics_context: Dictionary) -> Dictionary:
+    var attacker_margin := float(summary.get("margin_score", 0.0))
+    var attacker_casualties := _estimate_casualty_ratio("attacker", victor, attacker_margin, logistics_context)
+    var defender_casualties := _estimate_casualty_ratio("defender", victor, attacker_margin, logistics_context)
+
+    var attacker_states: Array = []
+    for unit_id in attacker_ids:
+        attacker_states.append(_unit_state_payload(str(unit_id), "attacker", attacker_casualties, victor, logistics_context))
+
+    var defender_states: Array = []
+    for unit_id in defender_ids:
+        defender_states.append(_unit_state_payload(str(unit_id), "defender", defender_casualties, victor, logistics_context))
+
+    return {
+        "attacker": attacker_states,
+        "defender": defender_states,
+    }
+
+func _estimate_casualty_ratio(side: String, victor: String, attacker_margin_score: float, logistics_context: Dictionary) -> float:
+    var advantage := attacker_margin_score
+    if side == "defender":
+        advantage = -attacker_margin_score
+
+    var base := 0.22 - advantage * 0.12
+    match victor:
+        "stalemate":
+            base = 0.18
+        "contested":
+            base = 0.26 - advantage * 0.08
+        _:
+            if victor == side:
+                base = 0.12 - advantage * 0.15
+            else:
+                base = 0.32 - advantage * 0.05
+
+    var severity := str(logistics_context.get("severity", ""))
+    var factor_key := "attacker_factor" if side == "attacker" else "defender_factor"
+    var logistics_factor := float(logistics_context.get(factor_key, 1.0))
+
+    match severity:
+        "warning":
+            if side == "attacker":
+                base += 0.05
+        "critical":
+            if side == "attacker":
+                base += 0.12
+    if logistics_factor < 0.8:
+        base += 0.08
+    elif logistics_factor > 1.1:
+        base -= 0.05
+
+    return clamp(snapped(base, 0.01), 0.02, 0.9)
+
+func _unit_state_payload(unit_id: String, side: String, casualties: float, victor: String, logistics_context: Dictionary) -> Dictionary:
+    var unit_entry: Dictionary = _units_by_id.get(unit_id, {})
+    var formation_id := get_unit_formation(unit_id)
+    var formation: Dictionary = _formations_by_id.get(formation_id, {})
+    var pillar_profile := _unit_pillar_profile(unit_entry, formation)
+    var status := _determine_unit_status(side, victor, casualties, logistics_context)
+
+    return {
+        "unit_id": unit_id,
+        "name": str(unit_entry.get("name", unit_id.capitalize())),
+        "side": side,
+        "formation_id": formation_id,
+        "formation_name": str(formation.get("name", formation_id)),
+        "status": status.get("label", "steady"),
+        "casualties": casualties,
+        "strength_remaining": snapped(clamp(1.0 - casualties, 0.0, 1.0), 0.01),
+        "notes": status.get("notes", ""),
+        "pillar_profile": pillar_profile,
+    }
+
+func _determine_unit_status(side: String, victor: String, casualties: float, logistics_context: Dictionary) -> Dictionary:
+    var status := "steady"
+    var notes := []
+
+    if victor == side:
+        if casualties <= 0.08:
+            status = "pressing"
+        elif casualties <= 0.18:
+            status = "steady"
+        else:
+            status = "exhausted"
+    elif victor == "stalemate":
+        status = "contested" if casualties >= 0.2 else "steady"
+    elif victor == "contested":
+        status = "locked"
+    else:
+        if casualties >= 0.45:
+            status = "routed"
+        elif casualties >= 0.25:
+            status = "shaken"
+        else:
+            status = "holding"
+
+    var severity := str(logistics_context.get("severity", ""))
+    if side == "attacker":
+        match severity:
+            "warning":
+                notes.append("Supply warning at target hex.")
+            "critical":
+                notes.append("Critical supply deficit on approach.")
+
+    var factor_key := "attacker_factor" if side == "attacker" else "defender_factor"
+    var logistics_factor := float(logistics_context.get(factor_key, 1.0))
+    if logistics_factor < 0.9:
+        notes.append("Logistics factor %.2f" % logistics_factor)
+    elif logistics_factor > 1.1:
+        notes.append("Logistics surge %.2f" % logistics_factor)
+
+    return {
+        "label": status,
+        "notes": ", ".join(notes) if not notes.is_empty() else "",
+    }
+
+func _unit_pillar_profile(unit_entry: Dictionary, formation: Dictionary) -> Dictionary:
+    var profile: Dictionary = {}
+    var base_profile: Dictionary = unit_entry.get("combat_profile", {})
+    if base_profile is Dictionary:
+        for key in base_profile.keys():
+            profile[key] = float(base_profile.get(key, 0.0))
+
+    var modifiers: Dictionary = formation.get("pillar_modifiers", {})
+    if modifiers is Dictionary:
+        for key in modifiers.keys():
+            profile[key] = float(profile.get(key, 0.0)) + float(modifiers.get(key, 0.0))
+
+    return profile
