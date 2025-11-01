@@ -202,7 +202,14 @@ func test_combat_system_applies_competence_bonus() -> void:
     var baseline := system.resolve_engagement(engagement)
     var baseline_impulse := baseline.get("pillars", {}).get("impulse", {}).get("attacker", 0.0)
 
-    system._on_competence_reallocated({"allocations": {"tactics": 4.0, "strategy": 1.0, "logistics": 1.0}})
+    system._on_competence_reallocated({
+        "allocations": {"tactics": 4.0, "strategy": 1.0, "logistics": 1.0},
+        "config": {
+            "tactics": {"base_allocation": 2.0},
+            "strategy": {"base_allocation": 2.0},
+            "logistics": {"base_allocation": 2.0},
+        },
+    })
     system.set_unit_formation("infantry", "advance_column")
     system.set_rng_seed(5)
     var boosted := system.resolve_engagement(engagement)

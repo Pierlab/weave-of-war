@@ -9,6 +9,12 @@ static var _instance: AssistantAI
 var _event_bus: EventBus
 var _data_loader: DataLoader
 var _recent_packets: Array[Dictionary] = []
+var _competence_allocations: Dictionary = {
+    "tactics": 0.0,
+    "strategy": 0.0,
+    "logistics": 0.0,
+}
+var _competence_config: Dictionary = {}
 
 const MAX_PACKET_HISTORY := 10
 
@@ -39,10 +45,15 @@ func _on_order_issued(payload: Dictionary) -> void:
     var order_data := _data_loader.get_order(order_id) if _data_loader else {}
     var intention := str(order_data.get("intention", "unknown"))
     var signal_strength := float(order_data.get("intel_profile", {}).get("signal_strength", 0.4))
+    var pillar_weights: Dictionary = order_data.get("pillar_weights", {})
+    var competence_alignment := _competence_alignment(pillar_weights)
+    var adjusted_confidence := clamp(signal_strength * competence_alignment, 0.1, 0.95)
     var enriched_order := payload.duplicate(true)
     enriched_order["order_id"] = order_id
     enriched_order["intention"] = intention
-    enriched_order["pillar_weights"] = order_data.get("pillar_weights", {})
+    enriched_order["pillar_weights"] = pillar_weights
+    enriched_order["competence_alignment"] = competence_alignment
+    enriched_order["adjusted_confidence"] = adjusted_confidence
     var competence_variant: Variant = order_data.get("competence_cost", {})
     if competence_variant is Dictionary:
         enriched_order["competence_cost"] = (competence_variant as Dictionary).duplicate(true)
@@ -52,7 +63,9 @@ func _on_order_issued(payload: Dictionary) -> void:
     var intents := {}
     intents[order_id] = {
         "intention": intention,
-        "confidence": signal_strength,
+        "confidence": adjusted_confidence,
+        "base_confidence": signal_strength,
+        "competence_alignment": competence_alignment,
         "target": enriched_order.get("target", enriched_order.get("target_hex", "")),
     }
 
@@ -62,7 +75,7 @@ func _on_order_issued(payload: Dictionary) -> void:
         "attacker_unit_ids": enriched_order.get("unit_ids", []),
         "defender_unit_ids": enriched_order.get("defender_unit_ids", []),
         "terrain": enriched_order.get("terrain", "plains"),
-        "intel_confidence": signal_strength,
+        "intel_confidence": adjusted_confidence,
         "reason": "assistant_prediction",
     }
 
@@ -70,6 +83,7 @@ func _on_order_issued(payload: Dictionary) -> void:
         "orders": [enriched_order],
         "intents": intents,
         "expected_engagements": [engagement],
+        "competence_snapshot": _build_competence_snapshot(),
     }
 
     if _event_bus:
@@ -80,9 +94,13 @@ func _on_doctrine_selected(_payload: Dictionary) -> void:
     # Placeholder for doctrine awareness; will influence packet generation in Checklist C.
     pass
 
-func _on_competence_reallocated(_payload: Dictionary) -> void:
-    # Placeholder for competence budgeting hooks to adjust assistant intent suggestions.
-    pass
+func _on_competence_reallocated(payload: Dictionary) -> void:
+    var allocations: Dictionary = payload.get("allocations", {})
+    for category in _competence_allocations.keys():
+        _competence_allocations[category] = float(allocations.get(category, _competence_allocations.get(category, 0.0)))
+    var config_variant: Variant = payload.get("config", {})
+    if config_variant is Dictionary:
+        _competence_config = (config_variant as Dictionary).duplicate(true)
 
 func _on_data_ready(_payload: Dictionary) -> void:
     if _data_loader == null:
@@ -97,3 +115,44 @@ func _record_packet(packet: Dictionary) -> void:
     _recent_packets.append(packet.duplicate(true))
     while _recent_packets.size() > MAX_PACKET_HISTORY:
         _recent_packets.remove_at(0)
+
+func _build_competence_snapshot() -> Dictionary:
+    return {
+        "allocations": _competence_allocations.duplicate(true),
+        "ratios": _current_competence_ratios(),
+    }
+
+func _current_competence_ratios() -> Dictionary:
+    var ratios: Dictionary = {}
+    for category in _competence_allocations.keys():
+        ratios[category] = _competence_ratio(category)
+    return ratios
+
+func _competence_ratio(category: String) -> float:
+    var allocation: float = max(float(_competence_allocations.get(category, 0.0)), 0.0)
+    var config: Dictionary = {}
+    if _competence_config.has(category) and _competence_config.get(category) is Dictionary:
+        config = (_competence_config.get(category) as Dictionary)
+    var base_allocation: float = float(config.get("base_allocation", 0.0))
+    if base_allocation <= 0.01:
+        base_allocation = allocation if allocation > 0.0 else 1.0
+    return clamp(allocation / base_allocation, 0.2, 3.0)
+
+func _competence_alignment(pillar_weights: Dictionary) -> float:
+    var mapping := {
+        "position": _competence_ratio("logistics"),
+        "impulse": _competence_ratio("tactics"),
+        "information": _competence_ratio("strategy"),
+    }
+    var total_weight: float = 0.0
+    var weighted_sum: float = 0.0
+    for pillar in mapping.keys():
+        var weight: float = float(pillar_weights.get(pillar, 0.0))
+        if abs(weight) <= 0.001:
+            continue
+        total_weight += abs(weight)
+        weighted_sum += weight * float(mapping.get(pillar, 1.0))
+    if total_weight <= 0.0:
+        return 1.0
+    var alignment: float = weighted_sum / total_weight
+    return clamp(alignment, 0.5, 1.5)

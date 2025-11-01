@@ -114,5 +114,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Then** les labels de statut reflètent immédiatement l'allocation courante, les bornes min/max et le delta consommé, et la télémétrie `competence_reallocated` capture la mise à jour avec un nouveau `revision`
 - **And** si je dépasse la limite de delta du tour ou une case verrouillée par l'inertie, la HUD rejette l'ajustement, affiche un message explicite (delta max ou verrou restant) et restaure la valeur précédente
 - **And** l'étiquette de budget signale toute pénalité logistique active tandis que l'historique `TelemetryAutoload` continue d'archiver les événements `competence_reallocated`
+- **And** en augmentant la jauge Tactique au-dessus de sa valeur de base, le prochain engagement affiche une jauge d'Impulsion amplifiée (`combat_resolved.pillars.impulse.attacker`) et l'assistant AI annonce un `competence_alignment` > 1 avec une confiance ajustée supérieure à la valeur de base
+- **And** en réduisant l'allocation Logistique sous son seuil de base, le payload `logistics_update` met à jour `competence_multiplier` et `flow_multiplier` à la baisse, ce qui se reflète dans l'overlay HUD/logistique
 
 All tests must pass without Godot warnings or errors in the console.

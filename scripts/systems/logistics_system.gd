@@ -29,6 +29,14 @@ var _rng := RandomNumberGenerator.new()
 var _pending_breaks: Array = []
 var _previous_supply_levels: Dictionary = {}
 var _weather_controlled_externally := false
+var _competence_allocations: Dictionary = {
+    "tactics": 0.0,
+    "strategy": 0.0,
+    "logistics": 0.0,
+}
+var _competence_config: Dictionary = {}
+var _logistics_competence_ratio: float = 1.0
+var _logistics_competence_efficiency: float = 1.0
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -54,6 +62,8 @@ func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
             event_bus.logistics_toggled.connect(_on_logistics_toggled)
         if not event_bus.weather_changed.is_connected(_on_weather_changed):
             event_bus.weather_changed.connect(_on_weather_changed)
+        if not event_bus.competence_reallocated.is_connected(_on_competence_reallocated):
+            event_bus.competence_reallocated.connect(_on_competence_reallocated)
 
     _recalculate_state("ready")
 
@@ -155,6 +165,20 @@ func _on_weather_changed(payload: Dictionary) -> void:
     _current_weather_id = weather_id
     var reason := str(payload.get("reason", "weather_event"))
     _recalculate_state(reason)
+
+func _on_competence_reallocated(payload: Dictionary) -> void:
+    _ingest_competence_payload(payload)
+    _recalculate_state("competence_update")
+
+func _ingest_competence_payload(payload: Dictionary) -> void:
+    var allocations: Dictionary = payload.get("allocations", {})
+    for category in _competence_allocations.keys():
+        _competence_allocations[category] = float(allocations.get(category, _competence_allocations.get(category, 0.0)))
+    var config_variant: Variant = payload.get("config", {})
+    if config_variant is Dictionary:
+        _competence_config = (config_variant as Dictionary).duplicate(true)
+    _logistics_competence_ratio = _compute_competence_ratio("logistics")
+    _logistics_competence_efficiency = _compute_logistics_efficiency()
 
 func _generate_default_map() -> void:
     _terrain_lookup.clear()
@@ -436,6 +460,8 @@ func _recalculate_state(reason: String) -> void:
         "logistics_id": _current_logistics_id,
         "weather_id": _current_weather_id,
         "flow_multiplier": flow_multiplier,
+        "competence_multiplier": _logistics_competence_efficiency,
+        "competence_ratio": _logistics_competence_ratio,
         "weather_adjustments": weather_adjustments,
         "supply_zones": supply_zones,
         "routes": routes_payload,
@@ -786,11 +812,14 @@ func _flow_context(logistics_config: Dictionary, weather_config: Dictionary) -> 
         if weather_modifiers.has(_current_weather_id):
             adjustment = float(weather_modifiers.get(_current_weather_id))
     var raw := base + adjustment
-    var final_value: float = clamp(raw, 0.2, 2.0)
+    var adjusted := raw * _logistics_competence_efficiency
+    var final_value: float = clamp(adjusted, 0.2, 2.5)
     return {
         "base": base,
         "adjustment": adjustment,
         "raw": raw,
+        "competence_efficiency": _logistics_competence_efficiency,
+        "competence_ratio": _logistics_competence_ratio,
         "final": final_value,
     }
 
@@ -798,6 +827,8 @@ func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dict
     var base_flow: float = float(flow_context.get("base", 1.0))
     var adjustment: float = float(flow_context.get("adjustment", 0.0))
     var final_flow: float = float(flow_context.get("final", base_flow))
+    var competence_efficiency: float = float(flow_context.get("competence_efficiency", 1.0))
+    var competence_ratio: float = float(flow_context.get("competence_ratio", 1.0))
     var movement_modifier: float = float(weather_config.get("movement_modifier", 1.0))
     var intercept_base: float = clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
     var flow_penalty: float = max(0.0, 1.0 - final_flow)
@@ -808,6 +839,8 @@ func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dict
         note_segments.append("Scenario delta %.2f" % adjustment)
     note_segments.append("Final flow %.2f" % final_flow)
     note_segments.append("Intercept %.2f→%.2f" % [intercept_base, intercept_effective])
+    if abs(competence_efficiency - 1.0) > 0.01:
+        note_segments.append("Competence %.2fx" % competence_efficiency)
     var notes: String = ""
     if not note_segments.is_empty():
         notes = String("; ").join(note_segments)
@@ -820,6 +853,8 @@ func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dict
         "flow_penalty": snapped(flow_penalty, 0.01),
         "intercept_base": snapped(intercept_base, 0.01),
         "intercept_effective": snapped(intercept_effective, 0.01),
+        "competence_efficiency": snapped(competence_efficiency, 0.01),
+        "competence_ratio": snapped(competence_ratio, 0.01),
         "notes": notes,
     }
 
@@ -834,4 +869,23 @@ func _intercept_components(route: Dictionary, logistics_config: Dictionary, flow
         "flow_penalty": flow_penalty,
         "effective": effective,
     }
+
+func _compute_competence_ratio(category: String) -> float:
+    var allocation: float = max(float(_competence_allocations.get(category, 0.0)), 0.0)
+    var config: Dictionary = {}
+    if _competence_config.has(category) and _competence_config.get(category) is Dictionary:
+        config = (_competence_config.get(category) as Dictionary)
+    var base_allocation: float = float(config.get("base_allocation", 0.0))
+    if base_allocation <= 0.01:
+        base_allocation = allocation if allocation > 0.0 else 1.0
+    return clamp(allocation / base_allocation, 0.2, 3.0)
+
+func _compute_logistics_efficiency() -> float:
+    var config: Dictionary = {}
+    if _competence_config.has("logistics") and _competence_config.get("logistics") is Dictionary:
+        config = (_competence_config.get("logistics") as Dictionary)
+    var penalty_multiplier: float = max(float(config.get("logistics_penalty_multiplier", 1.0)), 0.1)
+    var ratio := _compute_competence_ratio("logistics")
+    var modifier := (ratio - 1.0) * 0.4 * penalty_multiplier
+    return clamp(1.0 + modifier, 0.4, 2.0)
 

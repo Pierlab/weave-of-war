@@ -407,6 +407,18 @@ func test_assistant_ai_acknowledges_order_packets() -> void:
     var assistant: AssistantAI = ASSISTANT_AI.new()
     assistant._event_bus = event_bus
     assistant._data_loader = data_loader
+    assistant._on_competence_reallocated({
+        "allocations": {
+            "tactics": 3.5,
+            "strategy": 2.0,
+            "logistics": 1.0,
+        },
+        "config": {
+            "tactics": {"base_allocation": 2.0},
+            "strategy": {"base_allocation": 2.0},
+            "logistics": {"base_allocation": 2.0},
+        },
+    })
 
     assistant._on_order_issued({
         "order_id": "advance",
@@ -419,4 +431,12 @@ func test_assistant_ai_acknowledges_order_packets() -> void:
     var packet: Dictionary = event_bus.assistant_packets.back()
     asserts.is_true(packet.has("orders"), "Packet should include the enriched orders array.")
     asserts.is_equal("offense", packet.get("intents", {}).get("advance", {}).get("intention", ""), "Intention should mirror data loader metadata.")
+    var intent: Dictionary = packet.get("intents", {}).get("advance", {})
+    asserts.is_true(intent.has("competence_alignment"), "Intent should expose the competence alignment factor.")
+    asserts.is_true(intent.has("base_confidence"), "Intent should preserve the base confidence for comparison.")
+    asserts.is_true(float(intent.get("confidence", 0.0)) > float(intent.get("base_confidence", 0.0)),
+        "Adjusted confidence should exceed the base confidence when tactics allocation is above baseline.")
+    var snapshot: Dictionary = packet.get("competence_snapshot", {})
+    asserts.is_true(snapshot.has("allocations") and snapshot.has("ratios"),
+        "Packets should embed competence allocations and derived ratios for downstream consumers.")
     asserts.is_equal(1, assistant.get_recent_packets().size(), "Assistant AI should retain the packet in its rolling history.")
