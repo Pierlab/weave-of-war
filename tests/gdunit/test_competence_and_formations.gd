@@ -9,6 +9,35 @@ func test_turn_manager_competence_budget_and_penalties() -> void:
     event_bus._ready()
 
     var manager: TurnManager = TURN_MANAGER.new()
+    manager.configure_sliders([
+        {
+            "id": "tactics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 2,
+            "logistics_penalty_multiplier": 1.0,
+        },
+        {
+            "id": "strategy",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 0.75,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 0.8,
+        },
+        {
+            "id": "logistics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 1.2,
+        }
+    ])
     manager.setup(event_bus)
 
     var events: Array = []
@@ -42,6 +71,77 @@ func test_turn_manager_competence_budget_and_penalties() -> void:
     var payload := manager.get_competence_payload()
     asserts.is_true(float(payload.get("available", baseline_available)) < baseline_available,
         "Logistics breaks should reduce available competence points")
+    var modifiers: Variant = payload.get("modifiers", {})
+    asserts.is_true(modifiers is Dictionary, "Competence payload should expose modifier state")
+    asserts.is_true(float((modifiers as Dictionary).get("logistics_penalty", 0.0)) > 0.0,
+        "Modifier state should accumulate logistics penalty for the current turn")
+    var inertia_variant: Variant = payload.get("inertia", {})
+    asserts.is_true(inertia_variant is Dictionary, "Competence payload should expose inertia state")
+
+func test_turn_manager_enforces_competence_inertia() -> void:
+    var event_bus: EventBus = EVENT_BUS.new()
+    event_bus._ready()
+
+    var manager: TurnManager = TURN_MANAGER.new()
+    manager.configure_sliders([
+        {
+            "id": "tactics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 2,
+            "logistics_penalty_multiplier": 1.0,
+        },
+        {
+            "id": "strategy",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 0.75,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 0.8,
+        },
+        {
+            "id": "logistics",
+            "base_allocation": 2.0,
+            "min_allocation": 0.5,
+            "max_allocation": 6.0,
+            "max_delta_per_turn": 1.0,
+            "inertia_lock_turns": 1,
+            "logistics_penalty_multiplier": 1.2,
+        }
+    ])
+    manager.setup(event_bus)
+    manager.start_game()
+
+    var first_allocation := manager.set_competence_allocations({
+        "tactics": 3.0,
+        "strategy": 2.0,
+        "logistics": 1.0,
+    })
+    asserts.is_true(first_allocation.get("success", false), "Initial reallocation should respect slider caps")
+
+    var over_delta := manager.set_competence_allocations({
+        "tactics": 4.2,
+        "strategy": 1.3,
+        "logistics": 0.5,
+    })
+    asserts.is_false(over_delta.get("success", true), "Competence change exceeding delta cap should fail in the same turn")
+    asserts.is_equal("delta_exceeds_cap", over_delta.get("reason", ""), "Reason should cite delta limit overflow")
+
+    manager.advance_turn()
+
+    var locked_attempt := manager.set_competence_allocations({
+        "tactics": 2.4,
+        "strategy": 2.4,
+        "logistics": 1.2,
+    })
+    asserts.is_false(locked_attempt.get("success", true), "Inertia lock should block adjustments on the following turn")
+    asserts.is_equal("inertia_locked", locked_attempt.get("reason", ""), "Reason should cite inertia lock status")
+
+    var inertia_state: Dictionary = manager.get_competence_payload().get("inertia", {})
+    asserts.is_true(inertia_state.has("tactics"), "Inertia payload should report remaining lock state for each category")
 
 func test_combat_system_applies_competence_bonus() -> void:
     var system: CombatSystem = COMBAT_SYSTEM.new()

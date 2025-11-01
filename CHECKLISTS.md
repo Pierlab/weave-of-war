@@ -58,7 +58,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 37. [x] **Test espionage systems.** Add gdUnit coverage for fog toggling, ping probability distribution, and intel decay. Attach outputs to mission notes. *(2025-12-13 — Expanded `tests/gdunit/test_combat_and_espionage_systems.gd` with fog snapshot regression, probabilistic ping sampling, and intel decay clamps.)*
 
 ## Phase 5 — Competence Sliders (Tactics / Strategy / Logistics)
-38. [ ] **Extend TurnManager.** Track competence budget, inertia, and modifiers following SDS guidelines; expose state to HUD/telemetry.
+38. [x] **Extend TurnManager.** Track competence budget, inertia, and modifiers following SDS guidelines; expose state to HUD/telemetry. *(2025-12-14 — `TurnManager` consomme `data/competence_sliders.json`, verrouille les deltas par tour/inertie, publie `inertia`/`modifiers` dans `competence_reallocated`, ajoute les tests gdUnit et met à jour docs & datasets.)*
 39. [ ] **Ship HUD sliders.** Build slider controls with visual feedback and keyboard/controller shortcuts; capture interaction clips.
 40. [ ] **Propagate slider effects.** Apply slider values to combat impulse, assistant AI planning, and logistics efficiency.
 41. [ ] **Emit competence telemetry.** Publish `competence_reallocated` events with before/after values and turn IDs.

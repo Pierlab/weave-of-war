@@ -11,6 +11,7 @@ const DATA_FILES := {
     "logistics": "res://data/logistics.json",
     "formations": "res://data/formations.json",
     "terrain": "res://data/terrain.json",
+    "competence_sliders": "res://data/competence_sliders.json",
 }
 
 const COMBAT_PILLARS := ["position", "impulse", "information"]
@@ -134,6 +135,12 @@ func get_terrain_tile(id: String) -> Dictionary:
         return entry
     return {}
 
+func list_competence_sliders() -> Array:
+    return _collections.get("competence_sliders", [])
+
+func get_competence_slider(id: String) -> Dictionary:
+    return _indexed.get("competence_sliders", {}).get(id, {})
+
 func get_summary() -> Dictionary:
     return {
         "ready": _is_ready,
@@ -145,6 +152,7 @@ func get_summary() -> Dictionary:
             "logistics": list_logistics_states().size(),
             "formations": list_formations().size(),
             "terrain": list_terrain_tiles().size(),
+            "competence_sliders": list_competence_sliders().size(),
         }
     }
 
@@ -271,6 +279,8 @@ static func _validate_entry(label: String, entry: Dictionary, context: String) -
             return _validate_formation(entry, context)
         "terrain":
             return _validate_terrain(entry, context)
+        "competence_sliders":
+            return _validate_competence_slider(entry, context)
         _:
             return []
 
@@ -831,6 +841,58 @@ static func _validate_terrain(entry: Dictionary, context: String) -> Array:
                 errors += _ensure_strings("terrain", entry, ["name"], context)
             if entry.has("description"):
                 errors += _ensure_strings("terrain", entry, ["description"], context)
+
+    return errors
+
+static func _validate_competence_slider(entry: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("competence_sliders", entry, [
+        "id",
+        "name",
+        "description",
+        "base_allocation",
+        "min_allocation",
+        "max_allocation",
+        "max_delta_per_turn",
+        "inertia_lock_turns",
+        "logistics_penalty_multiplier",
+    ], context)
+    errors += _ensure_strings("competence_sliders", entry, ["id", "name", "description"], context)
+    errors += _ensure_numeric("competence_sliders", entry, [
+        "base_allocation",
+        "min_allocation",
+        "max_allocation",
+        "max_delta_per_turn",
+        "logistics_penalty_multiplier",
+    ], context)
+    errors += _ensure_integerish("competence_sliders", entry, ["inertia_lock_turns"], context)
+
+    if entry.has("telemetry_tags"):
+        errors += _ensure_array_of_strings("competence_sliders", entry, "telemetry_tags", context)
+
+    var identifier: String = str(entry.get("id", ""))
+    if identifier != "" and not COMPETENCE_CATEGORIES.has(identifier):
+        errors.append(_error("competence_sliders", context + ".id", "invalid_enum", identifier))
+
+    var min_value: float = float(entry.get("min_allocation", 0.0))
+    var max_value: float = float(entry.get("max_allocation", 0.0))
+    if min_value > max_value + 0.001:
+        errors.append(_error("competence_sliders", context + ".min_allocation", "invalid_range", "min_greater_than_max"))
+    var base_value: float = float(entry.get("base_allocation", min_value))
+    if base_value < min_value - 0.001 or base_value > max_value + 0.001:
+        errors.append(_error("competence_sliders", context + ".base_allocation", "invalid_range", "base_out_of_bounds"))
+
+    var delta_cap: float = float(entry.get("max_delta_per_turn", 0.0))
+    if delta_cap <= 0.0:
+        errors.append(_error("competence_sliders", context + ".max_delta_per_turn", "invalid_range", "delta_must_be_positive"))
+
+    var inertia_lock := int(entry.get("inertia_lock_turns", 0))
+    if inertia_lock < 0:
+        errors.append(_error("competence_sliders", context + ".inertia_lock_turns", "invalid_range", "lock_turns_must_be_positive"))
+
+    var penalty_multiplier: float = float(entry.get("logistics_penalty_multiplier", 0.0))
+    if penalty_multiplier < 0.0:
+        errors.append(_error("competence_sliders", context + ".logistics_penalty_multiplier", "invalid_range", "multiplier_negative"))
 
     return errors
 

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "tactics",
+    "name": "Tactics",
+    "description": "Short-term battlefield initiative and improvisation budget.",
+    "base_allocation": 2.5,
+    "min_allocation": 0.5,
+    "max_allocation": 6.0,
+    "max_delta_per_turn": 1.5,
+    "inertia_lock_turns": 1,
+    "logistics_penalty_multiplier": 1.0,
+    "telemetry_tags": ["combat", "impulse"]
+  },
+  {
+    "id": "strategy",
+    "name": "Strategy",
+    "description": "Operational planning reserve that feeds long-horizon gambits and deception arcs.",
+    "base_allocation": 2.0,
+    "min_allocation": 0.5,
+    "max_allocation": 6.0,
+    "max_delta_per_turn": 1.0,
+    "inertia_lock_turns": 2,
+    "logistics_penalty_multiplier": 0.8,
+    "telemetry_tags": ["planning", "doctrine"]
+  },
+  {
+    "id": "logistics",
+    "name": "Logistics",
+    "description": "Sustainment bandwidth for supply reroutes, convoy escorts, and infrastructure pushes.",
+    "base_allocation": 1.5,
+    "min_allocation": 0.25,
+    "max_allocation": 6.0,
+    "max_delta_per_turn": 1.25,
+    "inertia_lock_turns": 1,
+    "logistics_penalty_multiplier": 1.2,
+    "telemetry_tags": ["supply", "resilience"]
+  }
+]

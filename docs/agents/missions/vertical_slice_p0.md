@@ -30,7 +30,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-22 — Les pénalités météo alimentent désormais le flux logistique et le risque d'interception; restent à brancher la télémétrie météo et la couverture de tests additionnelle.)*
 - [~] Phase 3 — Combat (3 Pillars) resolution pipeline. *(2025-11-30 — CombatSystem instancié côté GameManager et connecté aux flux `order_*`/`logistics_update`.)*
 - [x] Phase 4 — Espionage systems and fog of war feedback. *(2025-12-10 — Recon flows added: `recon_probe`/`deep_cover` orders consume competence, auto-trigger `espionage_ping`, and HUD/tooling surface the validation.)*
-- [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
+- [x] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia. *(2025-12-14 — `TurnManager` consomme désormais
+  `data/competence_sliders.json`, applique des caps de réallocation/inertie par catégorie, expose l'état des modificateurs et la
+  télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI.)*
 - [ ] Phase 6 — Unit formations/postures influencing combat outcomes.
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
@@ -140,6 +142,13 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-12-11 — La HUD accueille un panneau "Renseignements" (résumé coloré, probabilité vs jet) et l'overlay debug une timeline
   détaillée; `EspionageSystem` enrichit les payloads `espionage_ping` avec roll, bonus de détection, deltas de visibilité et budget
   de compétence restant pour suivre la qualité des pings.
+
+### Phase 5 progress
+- 2025-12-14 — `TurnManager` charge désormais [`data/competence_sliders.json`](../../data/competence_sliders.json), applique des caps
+  de réallocation par tour et des verrous d'inertie par catégorie, archive les pénalités logistiques dans les modificateurs et
+  publie l'état complet (`allocations`, `inertia`, `modifiers`) dans chaque événement `competence_reallocated`. Les tests
+  `tests/gdunit/test_competence_and_formations.gd` couvrent les refus pour dépassement de delta et l'inertie multi-tours, tandis
+  que la documentation (README, CHANGELOG, checklist) reflète les nouveaux contrats.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
