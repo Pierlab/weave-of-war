@@ -37,7 +37,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 20. [x] **Attach terrain metadata.** Extend map tiles to include Plains/Forest/Hill descriptors sourced from data, and surface tooltips in HUD/debug overlay. *(2025-11-20 — `data/terrain.json` fournit les biomes, la carte affiche les noms/coûts et les tooltips HUD/debug résument les terrains.)*
 21. [x] **Implement weather controller.** Cycle through Sunny/Rain/Mist (plus optional Snow/Storm hooks) using deterministic seeds for tests; expose state on HUD icons. *(2025-11-21 — `WeatherSystem` orchestre la rotation seeded, publie les modificateurs restants, HUD météo colorée + test gdUnit dédiés.)*
 22. [x] **Link weather to logistics.** Apply weather modifiers to logistics throughput/convoy vulnerability as per SDS and log the adjustments for QA. *(2025-11-22 — `LogisticsSystem` now folds weather/scenario penalties into flow multipliers, surfaces per-route `intercept_risk`, and emits a `weather_adjustments` breakdown in each `logistics_update` payload.)*
-23. [ ] **Emit weather telemetry.** Send `weather_changed` events with applied modifiers and record schemas.
+23. [x] **Emit weather telemetry.** Send `weather_changed` events with applied modifiers and record schemas. *(2025-11-23 — `TelemetryAutoload` consigne désormais un payload normalisé `weather_changed`, tests gdUnit vérifient la capture et le plan dashboard liste les champs clés.)*
 24. [ ] **Extend automated tests.** Add gdUnit coverage for logistics reachability, convoy interception hooks, and weather rotation cadence; commit outputs.
 25. [ ] **Refresh manual tests.** Update `docs/tests/acceptance_tests.md` with logistics overlay toggles, terrain tooltip checks, and weather-driven changes.
 
