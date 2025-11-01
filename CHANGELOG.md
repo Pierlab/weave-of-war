@@ -118,3 +118,8 @@ All notable changes to this project will be documented in this file.
   `AudioStreamGeneratorPlayback.clear_buffer` errors or leak playback instances at shutdown.
 - Guarded the HUD feedback generator's stop-and-clear sequence so `clear_buffer()` only runs once playback is fully inactive,
   eliminating the `Condition "active" is true` assertions that resurfaced during doctrine changes and turn advances.
+
+### Fixed
+- Restored Godot 4.5+ project loading by suppressing the new `class_name`/autoload warning and adding explicit type hints across
+  `DataLoader`, logistics/weather/terrain systems, and UI scripts; replaced deprecated APIs (`Array.join`, float modulo) so
+  warnings-as-errors no longer block autoload initialisation or logistics overlay rendering.

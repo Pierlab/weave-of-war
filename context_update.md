@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-26 — Neutralisé l'avertissement Godot 4.5 `class_name_hides_autoload`, ajouté des hints typés explicites dans `DataLoader`, les systèmes logistique/terrain/météo et les scripts HUD pour éviter les inférences `Variant`, et remplacé les API obsolètes (`Array.join`, opérateur `%` sur float) afin que le projet se charge sans erreurs. README et CHANGELOG reflètent la procédure de suppression.
 - 2025-11-25 — `docs/tests/acceptance_tests.md` couvre maintenant la bascule HUD/debug du overlay logistique, les tooltips terrain dynamiques et la rotation météo sur la portée/logistique; README, CHANGELOG, mission brief et checklist ont été alignés.
 - 2025-11-24 — `tests/gdunit/test_logistics_system.gd` couvre maintenant la réduction de portée sous météo `storm`, l'unicité des événements `logistics_break` lors des interceptions successives et la cadence de rotation météo contrôlée par la logistique; README, CHANGELOG, mission brief et checklist ont été alignés.
 - 2025-11-19 — `LogisticsSystem` diffuse désormais des payloads `logistics_update` incluant les tuiles atteignables (`reachable_tiles`), les déficits de ravitaillement classés par sévérité et un résumé `convoy_statuses` pour chaque route; documentation (README, tests d'acceptation, mission brief) et données (`data/logistics.json`) reflètent les nouveaux champs.

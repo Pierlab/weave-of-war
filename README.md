@@ -175,9 +175,10 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - If you encounter `Unexpected "class_name" here` parse errors, declare the `class_name` **before** the `extends` line. The
   core systems and autoloads (for example `scripts/core/event_bus.gd`) now follow this order for compatibility with older
   editor builds that still read the project.
-- Treating warnings as errors is intentional. To avoid the `class_name`/autoload conflict introduced in Godot 4.5, autoload
-  scripts now declare distinct `class_name` identifiers (for example `EventBusAutoload`, `DataLoaderAutoload`). Follow that
-  naming pattern for any new autoload services to keep the parser clean without suppressing warnings.
+- Treating warnings as errors is intentional. Godot 4.5+ flags autoloads whose `class_name` matches the singleton name; we
+  suppress that warning explicitly with `@warning_ignore("class_name_hides_autoload")` so the runtime globals stay aligned
+  with their class identifiers (`EventBusAutoload`, `DataLoaderAutoload`, etc.). Mirror that pattern when you add new
+  autoloads so the parser remains noise-free without renaming the singletons.
 - When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
   `:=` inference. Godot 4.5 infers such values as `Variant`, which now triggers blocking parse errors. Inspect
   `scripts/core/data_loader.gd`, `scripts/systems/elan_system.gd`, and `scripts/ui/hud_manager.gd` for the preferred explicit

@@ -344,7 +344,7 @@ func _on_elan_updated(payload: Dictionary) -> void:
         ]
         if rounds_at_cap > 0:
             tooltip_lines.append("Décay imminent au prochain tour si aucun Élan n'est dépensé.")
-        elan_label.tooltip_text = tooltip_lines.join("\n")
+        elan_label.tooltip_text = "\n".join(tooltip_lines)
     _refresh_order_button_state()
 
 func _on_order_issued(payload: Dictionary) -> void:

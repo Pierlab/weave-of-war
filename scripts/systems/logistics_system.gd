@@ -164,7 +164,7 @@ func _generate_default_map() -> void:
     for q in range(map_columns):
         for r in range(map_rows):
             var terrain_id := str(terrain_keys[(q + r) % terrain_count]) if terrain_count > 0 else "plains"
-            var terrain := _terrain_definitions.get(terrain_id, {"movement_cost": 1})
+            var terrain: Dictionary = _terrain_definitions.get(terrain_id, {"movement_cost": 1})
             var movement := float(terrain.get("movement_cost", 1))
             var tile_id := _tile_id(q, r)
             _terrain_lookup[tile_id] = {
@@ -240,7 +240,7 @@ func _merge_terrain_definitions(definitions: Array) -> void:
         var id := str(entry.get("id", ""))
         if id.is_empty():
             continue
-        var current := _terrain_definitions.get(id, {})
+        var current: Dictionary = _terrain_definitions.get(id, {})
         var definition := {
             "name": str(entry.get("name", current.get("name", id.capitalize()))),
             "movement_cost": float(entry.get("movement_cost", current.get("movement_cost", 1.0))),
@@ -256,8 +256,8 @@ func _apply_terrain_tiles(tiles: Array) -> void:
         var r := int(entry.get("r", 0))
         var tile_id := _tile_id(q, r)
         var terrain_id := str(entry.get("terrain", "plains"))
-        var definition := _terrain_definitions.get(terrain_id, {})
-        var tile := _terrain_lookup.get(tile_id, {
+        var definition: Dictionary = _terrain_definitions.get(terrain_id, {})
+        var tile: Dictionary = _terrain_lookup.get(tile_id, {
             "q": q,
             "r": r,
         })
@@ -267,7 +267,7 @@ func _apply_terrain_tiles(tiles: Array) -> void:
         tile["terrain"] = terrain_id
         tile["name"] = str(entry.get("name", definition.get("name", terrain_id.capitalize())))
         tile["description"] = str(entry.get("description", definition.get("description", "")))
-        var base_cost := definition.get("movement_cost", tile.get("base_movement_cost", 1.0))
+        var base_cost: Variant = definition.get("movement_cost", tile.get("base_movement_cost", 1.0))
         if entry.has("movement_cost"):
             base_cost = entry.get("movement_cost")
         tile["base_movement_cost"] = float(base_cost)
@@ -275,7 +275,7 @@ func _apply_terrain_tiles(tiles: Array) -> void:
 
 func _ensure_tile_metadata() -> void:
     for tile_id in _terrain_lookup.keys():
-        var tile := _terrain_lookup.get(tile_id, {})
+        var tile: Dictionary = _terrain_lookup.get(tile_id, {})
         var q := int(tile.get("q", 0))
         var r := int(tile.get("r", 0))
         tile["q"] = q
@@ -285,34 +285,35 @@ func _ensure_tile_metadata() -> void:
         if terrain_id.is_empty():
             terrain_id = "plains"
             tile["terrain"] = terrain_id
-        var definition := _terrain_definitions.get(terrain_id, {})
-        if not tile.has("name") or String(tile.get("name", "")).is_empty():
+        var definition: Dictionary = _terrain_definitions.get(terrain_id, {})
+        if not tile.has("name") or str(tile.get("name", "")).is_empty():
             tile["name"] = str(definition.get("name", terrain_id.capitalize()))
         if not tile.has("description"):
             tile["description"] = str(definition.get("description", ""))
-        var movement_variant := tile.get("base_movement_cost", definition.get("movement_cost", 1.0))
+        var movement_variant: Variant = tile.get("base_movement_cost", definition.get("movement_cost", 1.0))
         tile["base_movement_cost"] = float(movement_variant)
         _terrain_lookup[tile_id] = tile
 
 func _apply_logistics_map(logistics_config: Dictionary) -> void:
     if not logistics_config.has("map"):
         return
-    var map_data := logistics_config.get("map")
+    var map_data: Variant = logistics_config.get("map")
     if not (map_data is Dictionary):
         return
+    var map_dict: Dictionary = map_data
 
     var updated := false
-    if map_data.has("columns") or map_data.has("rows"):
-        map_columns = int(map_data.get("columns", map_columns))
-        map_rows = int(map_data.get("rows", map_rows))
+    if map_dict.has("columns") or map_dict.has("rows"):
+        map_columns = int(map_dict.get("columns", map_columns))
+        map_rows = int(map_dict.get("rows", map_rows))
         _generate_default_map()
         updated = true
     elif _terrain_lookup.is_empty():
         _generate_default_map()
 
-    if map_data.has("supply_centers") and map_data.get("supply_centers") is Array:
+    if map_dict.has("supply_centers") and map_dict.get("supply_centers") is Array:
         var centers: Array = []
-        for center_data in map_data.get("supply_centers"):
+        for center_data in map_dict.get("supply_centers"):
             if not (center_data is Dictionary):
                 continue
             var center_id := str(center_data.get("id", ""))
@@ -328,9 +329,9 @@ func _apply_logistics_map(logistics_config: Dictionary) -> void:
             _supply_centers = centers
             updated = true
 
-    if map_data.has("routes") and map_data.get("routes") is Array:
+    if map_dict.has("routes") and map_dict.get("routes") is Array:
         var routes: Array = []
-        for route_data in map_data.get("routes"):
+        for route_data in map_dict.get("routes"):
             if not (route_data is Dictionary):
                 continue
             var route_id := str(route_data.get("id", ""))
@@ -494,19 +495,20 @@ func _build_route_payload(flow_multiplier: float, logistics_config: Dictionary) 
     for route in _routes:
         if not (route is Dictionary):
             continue
-        var route_id := route.get("id", "")
+        var route_id := str(route.get("id", ""))
         if route_id.is_empty():
             continue
         var state: Dictionary = _convoys_by_route.get(route_id, _new_convoy_state())
-        var route_length := max(route.get("path", []).size() - 1, 1)
+        var path: Array = route.get("path", [])
+        var route_length: int = max(path.size() - 1, 1)
         var eta := 0.0
         if state.get("active", false) and state.get("last_speed", 0.0) > 0.0:
             eta = max((route_length - state.get("progress", 0.0)) / state.get("last_speed", 0.01), 0.0)
-        var risk := _intercept_components(route, logistics_config, flow_multiplier)
+        var risk: Dictionary = _intercept_components(route, logistics_config, flow_multiplier)
         payload.append({
             "id": route_id,
             "type": route.get("type", "road"),
-            "path": route.get("path", []),
+            "path": path,
             "convoy": {
                 "active": state.get("active", false),
                 "progress": snapped(state.get("progress", 0.0), 0.01),
@@ -553,7 +555,7 @@ func _derive_reachable_tiles(zones: Array) -> Array:
             "terrain_name": zone.get("terrain_name", ""),
             "movement_cost": zone.get("movement_cost", 0.0),
         })
-    reachable.sort_custom(func(a, b): return String(a.get("tile_id", "")) < String(b.get("tile_id", "")))
+    reachable.sort_custom(func(a, b): return str(a.get("tile_id", "")) < str(b.get("tile_id", "")))
     return reachable
 
 func _collect_supply_deficits(zones: Array, logistics_config: Dictionary) -> Array:
@@ -583,7 +585,7 @@ func _collect_supply_deficits(zones: Array, logistics_config: Dictionary) -> Arr
             "terrain_name": zone.get("terrain_name", ""),
             "movement_cost": zone.get("movement_cost", 0.0),
         })
-    deficits.sort_custom(func(a, b): return String(a.get("tile_id", "")) < String(b.get("tile_id", "")))
+    deficits.sort_custom(func(a, b): return str(a.get("tile_id", "")) < str(b.get("tile_id", "")))
     return deficits
 
 func _summarise_convoys(routes_payload: Array) -> Array:
@@ -606,7 +608,7 @@ func _summarise_convoys(routes_payload: Array) -> Array:
             "intercepted": bool(convoy.get("intercepted", false)),
             "completed": int(convoy.get("completed", 0)),
         })
-    statuses.sort_custom(func(a, b): return String(a.get("route_id", "")) < String(b.get("route_id", "")))
+    statuses.sort_custom(func(a, b): return str(a.get("route_id", "")) < str(b.get("route_id", "")))
     return statuses
 
 func _advance_convoys() -> void:
@@ -618,11 +620,11 @@ func _advance_convoys() -> void:
     for route in _routes:
         if not (route is Dictionary):
             continue
-        var route_id := route.get("id", "")
+        var route_id := str(route.get("id", ""))
         if route_id.is_empty():
             continue
         var state: Dictionary = _convoys_by_route.get(route_id, _new_convoy_state())
-        var route_length := max(route.get("path", []).size() - 1, 1)
+        var route_length: int = max(route.get("path", []).size() - 1, 1)
         if not state.get("active", false):
             state["spawn_timer"] = int(state.get("spawn_timer", 0)) + 1
             if state.get("spawn_timer") >= spawn_threshold:
@@ -808,7 +810,7 @@ func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dict
     note_segments.append("Intercept %.2f→%.2f" % [intercept_base, intercept_effective])
     var notes := ""
     if note_segments.size() > 0:
-        notes = "; ".join(note_segments)
+        notes = note_segments.join("; ")
     return {
         "weather_id": _current_weather_id,
         "movement_modifier": snapped(movement_modifier, 0.01),
@@ -822,10 +824,10 @@ func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dict
     }
 
 func _intercept_components(route: Dictionary, logistics_config: Dictionary, flow_multiplier: float) -> Dictionary:
-    var base := clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
-    var terrain_bonus := _route_terrain_bonus(route)
-    var flow_penalty := max(0.0, 1.0 - flow_multiplier)
-    var effective := clamp(base + terrain_bonus + flow_penalty, 0.0, 1.0)
+    var base: float = clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
+    var terrain_bonus: float = _route_terrain_bonus(route)
+    var flow_penalty: float = max(0.0, 1.0 - flow_multiplier)
+    var effective: float = clamp(base + terrain_bonus + flow_penalty, 0.0, 1.0)
     return {
         "base": base,
         "terrain_bonus": terrain_bonus,

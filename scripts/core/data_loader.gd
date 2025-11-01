@@ -1,3 +1,4 @@
+@warning_ignore("class_name_hides_autoload")
 class_name DataLoaderAutoload
 extends Node
 
@@ -115,11 +116,11 @@ func list_terrain_entries() -> Array:
 
 func list_terrain_definitions() -> Array:
     return list_terrain_entries().filter(func(entry):
-        return entry is Dictionary and String(entry.get("type", "")) == "definition")
+        return entry is Dictionary and str(entry.get("type", "")) == "definition")
 
 func list_terrain_tiles() -> Array:
     return list_terrain_entries().filter(func(entry):
-        return entry is Dictionary and String(entry.get("type", "")) == "tile")
+        return entry is Dictionary and str(entry.get("type", "")) == "tile")
 
 func get_terrain_definition(id: String) -> Dictionary:
     var entry: Dictionary = _indexed.get("terrain", {}).get(id, {})
@@ -160,7 +161,7 @@ func _notify_event_bus(result: Dictionary) -> void:
             if value is Array:
                 if key == "terrain":
                     counts[key] = value.filter(func(entry):
-                        return entry is Dictionary and String(entry.get("type", "")) == "tile").size()
+                        return entry is Dictionary and str(entry.get("type", "")) == "tile").size()
                 else:
                     counts[key] = value.size()
             else:
@@ -307,13 +308,13 @@ static func _validate_doctrine_effects(effects: Dictionary, context: String) -> 
     var errors: Array = []
     errors += _require_keys("doctrines", effects, ["combat_pillar_focus", "combat_bonus"], context)
     if effects.has("combat_pillar_focus"):
-        var focus := effects.get("combat_pillar_focus")
+        var focus: Variant = effects.get("combat_pillar_focus")
         if typeof(focus) != TYPE_STRING:
             errors.append(_error("doctrines", context + ".combat_pillar_focus", "invalid_type", "string"))
         elif not COMBAT_PILLARS.has(focus):
-            errors.append(_error("doctrines", context + ".combat_pillar_focus", "invalid_enum", String(focus)))
+            errors.append(_error("doctrines", context + ".combat_pillar_focus", "invalid_enum", str(focus)))
     if effects.has("combat_bonus"):
-        var bonus := effects.get("combat_bonus")
+        var bonus: Variant = effects.get("combat_bonus")
         if typeof(bonus) != TYPE_DICTIONARY:
             errors.append(_error("doctrines", context + ".combat_bonus", "invalid_type", "dictionary"))
         else:
@@ -335,7 +336,7 @@ static func _validate_doctrine_command_profile(profile: Dictionary, context: Str
     ], context)
     errors += _ensure_integerish("doctrines", profile, ["cp_cap_delta", "swap_token_budget"], context)
     if profile.has("swap_token_budget"):
-        var tokens := profile.get("swap_token_budget")
+        var tokens: Variant = profile.get("swap_token_budget")
         if typeof(tokens) in [TYPE_INT, TYPE_FLOAT] and int(tokens) < 0:
             errors.append(_error("doctrines", context + ".swap_token_budget", "invalid_range", "value_must_be_non_negative"))
     if profile.has("inertia_multiplier"):
@@ -349,13 +350,13 @@ static func _validate_doctrine_logistics(data: Dictionary, context: String) -> A
     var errors: Array = []
     errors += _require_keys("doctrines", data, ["minimum_supply_state", "supply_ring_bonus"], context)
     if data.has("minimum_supply_state"):
-        var state := data.get("minimum_supply_state")
+        var state: Variant = data.get("minimum_supply_state")
         if typeof(state) != TYPE_STRING:
             errors.append(_error("doctrines", context + ".minimum_supply_state", "invalid_type", "string"))
         elif not SUPPLY_STATES.has(state):
             errors.append(_error("doctrines", context + ".minimum_supply_state", "invalid_enum", state))
     if data.has("supply_ring_bonus"):
-        var bonus := data.get("supply_ring_bonus")
+        var bonus: Variant = data.get("supply_ring_bonus")
         if typeof(bonus) == TYPE_INT:
             pass
         elif typeof(bonus) == TYPE_FLOAT and is_equal_approx(bonus, round(bonus)):
@@ -404,7 +405,7 @@ static func _validate_order(entry: Dictionary, context: String) -> Array:
     ], context)
 
     if entry.has("intention"):
-        var intention := entry.get("intention")
+        var intention: Variant = entry.get("intention")
         if typeof(intention) == TYPE_STRING and not ORDER_INTENTIONS.has(intention):
             errors.append(_error("orders", context + ".intention", "invalid_enum", intention))
 
@@ -435,7 +436,7 @@ static func _validate_order_doctrine_requirements(data: Dictionary, context: Str
     errors += _ensure_array_of_strings("orders", data, "required_tags", context)
     errors += _ensure_integerish("orders", data, ["minimum_swap_tokens"], context)
     if data.has("minimum_swap_tokens"):
-        var tokens := data.get("minimum_swap_tokens")
+        var tokens: Variant = data.get("minimum_swap_tokens")
         if typeof(tokens) in [TYPE_INT, TYPE_FLOAT]:
             if float(tokens) < 0.0:
                 errors.append(_error("orders", context + ".minimum_swap_tokens", "invalid_range", "value_must_be_non_negative"))
@@ -447,13 +448,13 @@ static func _validate_order_logistics(data: Dictionary, context: String) -> Arra
     var errors: Array = []
     errors += _require_keys("orders", data, ["minimum_supply_state", "convoy_usage"], context)
     if data.has("minimum_supply_state"):
-        var state := data.get("minimum_supply_state")
+        var state: Variant = data.get("minimum_supply_state")
         if typeof(state) != TYPE_STRING:
             errors.append(_error("orders", context + ".minimum_supply_state", "invalid_type", "string"))
         elif not SUPPLY_STATES.has(state):
             errors.append(_error("orders", context + ".minimum_supply_state", "invalid_enum", state))
     if data.has("convoy_usage"):
-        var usage := data.get("convoy_usage")
+        var usage: Variant = data.get("convoy_usage")
         if typeof(usage) != TYPE_STRING:
             errors.append(_error("orders", context + ".convoy_usage", "invalid_type", "string"))
         elif not CONVOY_USAGE.has(usage):
@@ -471,7 +472,7 @@ static func _validate_order_inertia_profile(data: Dictionary, context: String) -
         errors += _ensure_numeric_dictionary("orders", multipliers, context + ".logistics_state_multipliers")
         for state in multipliers.keys():
             if typeof(state) == TYPE_STRING and not SUPPLY_STATES.has(state):
-                errors.append(_error("orders", context + ".logistics_state_multipliers", "invalid_enum", String(state)))
+                errors.append(_error("orders", context + ".logistics_state_multipliers", "invalid_enum", str(state)))
     if data.has("competence_offsets") and data.get("competence_offsets") is Dictionary:
         errors += _ensure_numeric_dictionary("orders", data.get("competence_offsets"), context + ".competence_offsets")
     return errors
@@ -480,7 +481,7 @@ static func _validate_order_targeting(data: Dictionary, context: String) -> Arra
     var errors: Array = []
     errors += _require_keys("orders", data, ["scope", "requires_line_of_sight", "preferred_unit_classes", "allowed_postures", "max_concurrent"], context)
     if data.has("scope"):
-        var scope := data.get("scope")
+        var scope: Variant = data.get("scope")
         if typeof(scope) != TYPE_STRING:
             errors.append(_error("orders", context + ".scope", "invalid_type", "string"))
         elif not ORDER_TARGET_SCOPES.has(scope):
@@ -495,7 +496,7 @@ static func _validate_order_targeting(data: Dictionary, context: String) -> Arra
                 errors.append(_error("orders", context + ".allowed_postures", "invalid_enum", posture))
     errors += _ensure_integerish("orders", data, ["max_concurrent"], context)
     if data.has("max_concurrent"):
-        var concurrent := data.get("max_concurrent")
+        var concurrent: Variant = data.get("max_concurrent")
         if typeof(concurrent) in [TYPE_INT, TYPE_FLOAT] and int(concurrent) < 1:
             errors.append(_error("orders", context + ".max_concurrent", "invalid_range", "value_must_be_positive"))
     return errors
@@ -519,7 +520,7 @@ static func _validate_assistant_metadata(data: Dictionary, context: String) -> A
     if data.has("intent_profile") and data.get("intent_profile") is Dictionary:
         errors += _ensure_numeric_dictionary("orders", data.get("intent_profile"), context + ".intent_profile")
     if data.has("risk_level"):
-        var risk := data.get("risk_level")
+        var risk: Variant = data.get("risk_level")
         if typeof(risk) != TYPE_STRING:
             errors.append(_error("orders", context + ".risk_level", "invalid_type", "string"))
         elif not ORDER_RISK_LEVELS.has(risk):
@@ -534,7 +535,7 @@ static func _validate_order_resolution(data: Dictionary, context: String) -> Arr
     if data.has("position_bias"):
         errors += _ensure_numeric_value("orders", data.get("position_bias"), context + ".position_bias")
     if data.has("intel_reveal"):
-        var reveal := data.get("intel_reveal")
+        var reveal: Variant = data.get("intel_reveal")
         if typeof(reveal) != TYPE_STRING:
             errors.append(_error("orders", context + ".intel_reveal", "invalid_type", "string"))
     return errors
@@ -622,7 +623,7 @@ static func _validate_weather(entry: Dictionary, context: String) -> Array:
     errors += _ensure_strings("weather", entry, ["id", "name", "effects"], context)
     errors += _ensure_numeric("weather", entry, ["movement_modifier", "logistics_flow_modifier", "intel_noise", "elan_regeneration_bonus"], context)
     if entry.has("duration_turns"):
-        var duration := entry.get("duration_turns")
+        var duration: Variant = entry.get("duration_turns")
         if typeof(duration) != TYPE_ARRAY:
             errors.append(_error("weather", context + ".duration_turns", "invalid_type", "array"))
         elif duration.size() != 2:
@@ -678,7 +679,7 @@ static func _validate_logistics_links(data: Dictionary, context: String) -> Arra
     if data.has("doctrine_synergy"):
         errors += _ensure_array_of_strings("logistics", data, "doctrine_synergy", context)
     if data.has("weather_modifiers"):
-        var modifiers := data.get("weather_modifiers")
+        var modifiers: Variant = data.get("weather_modifiers")
         if typeof(modifiers) != TYPE_DICTIONARY:
             errors.append(_error("logistics", context + ".weather_modifiers", "invalid_type", "dictionary"))
         else:
@@ -703,11 +704,11 @@ static func _validate_logistics_map(data: Dictionary, context: String) -> Array:
         if centers.is_empty():
             errors.append(_error("logistics", context + ".supply_centers", "missing_value", "at least one supply center"))
         for index in range(centers.size()):
-            var entry := centers[index]
+            var entry: Variant = centers[index]
             if typeof(entry) != TYPE_DICTIONARY:
                 errors.append(_error("logistics", "%s.supply_centers[%d]" % [context, index], "invalid_type", "dictionary"))
                 continue
-            var entry_context := "%s.supply_centers[%s]" % [context, entry.get("id", String(index))]
+            var entry_context: String = "%s.supply_centers[%s]" % [context, entry.get("id", str(index))]
             if not entry.has("id"):
                 errors.append(_error("logistics", entry_context, "missing_key", "id"))
             if not entry.has("type"):
@@ -730,20 +731,20 @@ static func _validate_logistics_map(data: Dictionary, context: String) -> Array:
     if routes.is_empty():
         errors.append(_error("logistics", context + ".routes", "missing_value", "at least one route"))
     for index in range(routes.size()):
-        var route := routes[index]
+        var route: Variant = routes[index]
         if typeof(route) != TYPE_DICTIONARY:
             errors.append(_error("logistics", "%s.routes[%d]" % [context, index], "invalid_type", "dictionary"))
             continue
-        var route_context := "%s.routes[%s]" % [context, route.get("id", String(index))]
+        var route_context: String = "%s.routes[%s]" % [context, route.get("id", str(index))]
         if not route.has("id"):
             errors.append(_error("logistics", route_context, "missing_key", "id"))
         if not route.has("type"):
             errors.append(_error("logistics", route_context, "missing_key", "type"))
         errors += _ensure_strings("logistics", route, ["id", "type"], route_context)
         if route.has("type"):
-            var route_type := route.get("type")
+            var route_type: Variant = route.get("type")
             if typeof(route_type) == TYPE_STRING and not LOGISTICS_ROUTE_TYPES.has(route_type):
-                errors.append(_error("logistics", route_context + ".type", "invalid_enum", String(route_type)))
+                errors.append(_error("logistics", route_context + ".type", "invalid_enum", str(route_type)))
         if route.has("origin"):
             errors += _ensure_strings("logistics", route, ["origin"], route_context)
         if route.has("destination"):
@@ -751,18 +752,18 @@ static func _validate_logistics_map(data: Dictionary, context: String) -> Array:
         if not route.has("path"):
             errors.append(_error("logistics", route_context, "missing_key", "path"))
             continue
-        var path := route.get("path")
+        var path: Variant = route.get("path")
         if typeof(path) != TYPE_ARRAY:
             errors.append(_error("logistics", route_context + ".path", "invalid_type", "array"))
             continue
         if path.size() < 2:
             errors.append(_error("logistics", route_context + ".path", "missing_value", "at least two nodes"))
         for node_index in range(path.size()):
-            var node := path[node_index]
+            var node: Variant = path[node_index]
             if typeof(node) != TYPE_DICTIONARY:
                 errors.append(_error("logistics", "%s.path[%d]" % [route_context, node_index], "invalid_type", "dictionary"))
                 continue
-            var node_context := "%s.path[%d]" % [route_context, node_index]
+            var node_context: String = "%s.path[%d]" % [route_context, node_index]
             errors += _ensure_integerish("logistics", node, ["q", "r"], node_context)
     return errors
 
@@ -792,7 +793,7 @@ static func _validate_formation(entry: Dictionary, context: String) -> Array:
 static func _validate_terrain(entry: Dictionary, context: String) -> Array:
     var errors: Array = []
     errors += _require_keys("terrain", entry, ["type"], context)
-    var entry_type := String(entry.get("type", ""))
+    var entry_type: String = str(entry.get("type", ""))
     if not TERRAIN_ENTRY_TYPES.has(entry_type):
         errors.append(_error("terrain", context + ".type", "invalid_enum", entry_type))
         return errors
@@ -820,39 +821,39 @@ func _validate_cross_references() -> Array:
     var formation_ids := _collect_ids(_collections.get("formations", []))
     var weather_ids := _collect_ids(_collections.get("weather", []))
 
-    var units := _collections.get("units", [])
+    var units: Array = _collections.get("units", [])
     for index in range(units.size()):
-        var unit_entry := units[index]
+        var unit_entry: Variant = units[index]
         if unit_entry is Dictionary and unit_entry.has("default_formations"):
             var unit_context := _entry_context("units", unit_entry, index)
             for formation_id in unit_entry.get("default_formations"):
                 if typeof(formation_id) == TYPE_STRING and not formation_ids.has(formation_id):
                     errors.append(_error("units", unit_context + ".default_formations", "unknown_reference", formation_id))
 
-    var logistics := _collections.get("logistics", [])
+    var logistics: Array = _collections.get("logistics", [])
     for index in range(logistics.size()):
-        var logistics_entry := logistics[index]
+        var logistics_entry: Variant = logistics[index]
         if logistics_entry is Dictionary and logistics_entry.has("links"):
             var log_context := _entry_context("logistics", logistics_entry, index)
-            var links := logistics_entry.get("links")
+            var links: Variant = logistics_entry.get("links")
             if typeof(links) == TYPE_DICTIONARY:
                 if links.has("weather_modifiers") and links.get("weather_modifiers") is Dictionary:
                     for weather_id in links.get("weather_modifiers").keys():
                         if typeof(weather_id) == TYPE_STRING and not weather_ids.has(weather_id):
                             errors.append(_error("logistics", log_context + ".links.weather_modifiers", "unknown_reference", weather_id))
 
-    var terrain_entries := _collections.get("terrain", [])
-    var terrain_definitions := {}
+    var terrain_entries: Array = _collections.get("terrain", [])
+    var terrain_definitions: Dictionary = {}
     for index in range(terrain_entries.size()):
-        var terrain_entry := terrain_entries[index]
-        if terrain_entry is Dictionary and String(terrain_entry.get("type", "")) == "definition":
-            var def_id := String(terrain_entry.get("id", ""))
+        var terrain_entry: Variant = terrain_entries[index]
+        if terrain_entry is Dictionary and str(terrain_entry.get("type", "")) == "definition":
+            var def_id := str(terrain_entry.get("id", ""))
             if def_id != "":
                 terrain_definitions[def_id] = true
     for index in range(terrain_entries.size()):
-        var terrain_entry := terrain_entries[index]
-        if terrain_entry is Dictionary and String(terrain_entry.get("type", "")) == "tile":
-            var terrain_id := String(terrain_entry.get("terrain", ""))
+        var terrain_entry: Variant = terrain_entries[index]
+        if terrain_entry is Dictionary and str(terrain_entry.get("type", "")) == "tile":
+            var terrain_id := str(terrain_entry.get("terrain", ""))
             if terrain_id != "" and not terrain_definitions.has(terrain_id):
                 errors.append(_error("terrain", _entry_context("terrain", terrain_entry, index) + ".terrain", "unknown_reference", terrain_id))
 
@@ -894,7 +895,7 @@ static func _ensure_dictionaries(label: String, entry: Dictionary, keys: Array, 
 static func _ensure_array_of_strings(label: String, entry: Dictionary, key: String, context: String) -> Array:
     if not entry.has(key):
         return []
-    var value := entry.get(key)
+    var value: Variant = entry.get(key)
     if typeof(value) != TYPE_ARRAY:
         return [_error(label, context + "." + key, "invalid_type", "array")]
     var errors: Array = []
@@ -934,7 +935,7 @@ static func _ensure_numeric(label: String, entry: Dictionary, keys: Array, conte
 static func _ensure_numeric_dictionary(label: String, data: Dictionary, context: String) -> Array:
     var errors: Array = []
     for key in data.keys():
-        errors += _ensure_numeric_value(label, data.get(key), context + "." + String(key))
+        errors += _ensure_numeric_value(label, data.get(key), context + "." + str(key))
     return errors
 
 static func _ensure_numeric_value(label: String, value: Variant, context: String) -> Array:
