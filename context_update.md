@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-16 — Propagé les sliders de compétence dans tout le pipeline : Tactique module désormais le multiplicateur d'Impulsion du `CombatSystem`, `AssistantAIAutoload` ajuste ses prévisions (`competence_alignment`, snapshot allocations/ratios) et `LogisticsSystem` publie un `competence_multiplier` qui influence `flow_multiplier`/`intercept_risk`. README, CHANGELOG, mission brief, acceptance tests et gdUnit (logistique/assistant/combat) couvrent ce comportement.
 - 2025-12-15 — Livré le panneau HUD « Compétence » avec sliders dynamiques (Tactique/Stratégie/Logistique), signaux `EventBus` dédiés aux demandes/échecs (`competence_allocation_requested`/`competence_allocation_failed`), et des raccourcis clavier/manette pour piloter les allocations en surface les verrous d'inertie, les deltas maximum et les pénalités logistiques en temps réel.
   README, CHANGELOG, mission brief et checklist mis à jour en conséquence.
 - 2025-12-14 — Étendu `TurnManager` pour charger [`data/competence_sliders.json`](data/competence_sliders.json), appliquer des

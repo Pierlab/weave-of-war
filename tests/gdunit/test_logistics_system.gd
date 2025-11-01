@@ -143,6 +143,52 @@ func test_weather_updates_movement_and_flow() -> void:
     var sunny_payload := system.get_last_payload()
     asserts.is_true(sunny_payload.get("flow_multiplier") > rain_payload.get("flow_multiplier"), "Sunny flow should recover")
 
+func test_competence_allocation_modifies_logistics_flow() -> void:
+    var system: LogisticsSystem = LOGISTICS_SYSTEM.new()
+    system.configure([_baseline_logistics_entry()], _weather_entries())
+    system.configure_map(_simple_map(), _supply_centers(), _routes())
+
+    var baseline_payload := system.get_last_payload()
+    var baseline_flow := float(baseline_payload.get("flow_multiplier", 1.0))
+
+    system._on_competence_reallocated({
+        "allocations": {
+            "logistics": 4.0,
+            "tactics": 1.5,
+            "strategy": 1.5,
+        },
+        "config": {
+            "logistics": {"base_allocation": 2.0, "logistics_penalty_multiplier": 1.2},
+            "tactics": {"base_allocation": 2.0},
+            "strategy": {"base_allocation": 2.0},
+        },
+    })
+
+    var boosted_payload := system.get_last_payload()
+    asserts.is_true(float(boosted_payload.get("flow_multiplier", 0.0)) > baseline_flow,
+        "Increasing logistics competence should raise the flow multiplier")
+    asserts.is_true(float(boosted_payload.get("competence_multiplier", 1.0)) > 1.0,
+        "Payload should expose competence multiplier above 1 when logistics focus increases")
+
+    system._on_competence_reallocated({
+        "allocations": {
+            "logistics": 0.6,
+            "tactics": 1.5,
+            "strategy": 1.5,
+        },
+        "config": {
+            "logistics": {"base_allocation": 2.0, "logistics_penalty_multiplier": 1.2},
+            "tactics": {"base_allocation": 2.0},
+            "strategy": {"base_allocation": 2.0},
+        },
+    })
+
+    var reduced_payload := system.get_last_payload()
+    asserts.is_true(float(reduced_payload.get("flow_multiplier", 1.0)) < float(boosted_payload.get("flow_multiplier", 1.0)),
+        "Reducing logistics competence should shrink the resulting flow multiplier")
+    asserts.is_true(float(reduced_payload.get("competence_multiplier", 1.0)) < float(boosted_payload.get("competence_multiplier", 1.0)),
+        "Competence multiplier should decrease when allocations drop below baseline")
+
 func test_convoys_can_be_intercepted() -> void:
     var system: LogisticsSystem = LOGISTICS_SYSTEM.new()
     system.set_rng_seed(42)

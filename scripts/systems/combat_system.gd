@@ -38,6 +38,12 @@ var _competence_allocations: Dictionary = {
     "strategy": 0.0,
     "logistics": 0.0,
 }
+var _competence_config: Dictionary = {}
+var _competence_ratios: Dictionary = {
+    "tactics": 1.0,
+    "strategy": 1.0,
+    "logistics": 1.0,
+}
 var _logistics_lookup: Dictionary = {}
 var _logistics_deficits: Dictionary = {}
 var _last_logistics_payload: Dictionary = {}
@@ -362,6 +368,22 @@ func _competence_bonus_for_units(unit_ids: Array) -> Dictionary:
                     totals["position"] = float(totals.get("position", 0.0)) + contribution
     return totals
 
+func _update_competence_ratios() -> void:
+    for category in COMPETENCE_CATEGORIES:
+        _competence_ratios[category] = _compute_competence_ratio(category)
+
+func _compute_competence_ratio(category: String) -> float:
+    var allocation: float = max(float(_competence_allocations.get(category, 0.0)), 0.0)
+    var config: Dictionary = _competence_config.get(category, {}) if _competence_config.has(category) else {}
+    var base_allocation: float = float(config.get("base_allocation", 0.0))
+    if base_allocation <= 0.01:
+        base_allocation = allocation if allocation > 0.0 else 1.0
+    var ratio := allocation / base_allocation
+    return clamp(ratio, 0.2, 3.0)
+
+func _competence_ratio(category: String) -> float:
+    return float(_competence_ratios.get(category, 1.0))
+
 func _terrain_profile(terrain_id: String) -> Dictionary:
     if TERRAIN_PROFILES.has(terrain_id):
         return TERRAIN_PROFILES.get(terrain_id, {})
@@ -450,6 +472,10 @@ func _on_competence_reallocated(payload: Dictionary) -> void:
     var allocations: Dictionary = payload.get("allocations", {})
     for category in COMPETENCE_CATEGORIES:
         _competence_allocations[category] = float(allocations.get(category, 0.0))
+    var config_variant: Variant = payload.get("config", {})
+    if config_variant is Dictionary:
+        _competence_config = (config_variant as Dictionary).duplicate(true)
+    _update_competence_ratios()
 
 func _on_logistics_update(payload: Dictionary) -> void:
     _last_logistics_payload = payload.duplicate(true)
@@ -654,6 +680,7 @@ func _impulse_multiplier(context: Dictionary) -> float:
     var bonus: float = (intel_confidence - 0.5) * 0.5
     bonus += espionage_bonus * 0.35
     bonus += (logistics_factor - 1.0) * 0.4
+    bonus += (_competence_ratio("tactics") - 1.0) * 0.45
     return clamp(1.0 + bonus, 0.5, 1.8)
 
 func _impulse_defender_multiplier(context: Dictionary) -> float:
