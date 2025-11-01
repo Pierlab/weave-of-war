@@ -40,6 +40,10 @@ All notable changes to this project will be documented in this file.
 - Bootstraped the agent-driven workflow: root `AGENTS.md`, refreshed vibe-coding playbook, and mission workspace.
 
 ### Fixed
+- Corrected the combat resolution payload to store unit state dictionaries (attacker/defender blocks) instead of forcing them
+  into an array, restoring Godot's typed parsing and allowing `GameManager` to instantiate `CombatSystem` without compile
+  errors. The HUD feedback audio now primes its `AudioStreamPlayer` before requesting the generator playback to silence the
+  startup `Player is inactive` warning.
 - Restored Godot script loading by typing combat/HUD variables that previously inferred as `Variant`, aligning `CombatSystem`
   and `HUDManager` with the explicit casting pattern so warnings no longer escalate to parse errors during headless runs.
 - Introduced lightweight gdUnit-style tests plus CI runners for lint, build, and test checks.

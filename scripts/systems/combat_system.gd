@@ -246,7 +246,7 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
         var intel_entry: Dictionary = _recent_intel.get(target_hex, {})
         intel_source = str(intel_entry.get("source", "baseline"))
     var pillar_summary: Dictionary = _summarise_pillars(results)
-    var unit_states: Array = _build_unit_states(attacker_unit_ids, defender_unit_ids, victor, pillar_summary, logistics_context)
+    var unit_states: Dictionary = _build_unit_states(attacker_unit_ids, defender_unit_ids, victor, pillar_summary, logistics_context)
 
     var payload: Dictionary = {
         "engagement_id": engagement.get("engagement_id", order_id if order_id != "" else "skirmish"),

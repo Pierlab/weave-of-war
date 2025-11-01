@@ -59,6 +59,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-05 — Stabilised HUD procedural audio: `_play_feedback()` now queues tone requests, defers buffer clears until playback goes inactive, and archives a repeated doctrine/order swap run in [`docs/logs/hud_audio_feedback_2025-11-05.log`](../../docs/logs/hud_audio_feedback_2025-11-05.log).
 
 ### Phase 1 progress
+- 2025-12-07 — HUD feedback audio amorce maintenant son `AudioStreamPlayer` avant de récupérer le playback du générateur,
+  supprimant l'erreur de console "Player is inactive" observée lors des premières interactions doctrine/ordre, notamment en
+  environnement headless.
 - 2025-11-06 — Locked the doctrine dataset to the SDS stances with command profile metadata and aligned logistics synergies (`data/doctrines.json`, `data/logistics.json`).
 - 2025-11-07 — Élargi `data/orders.json` avec les coûts CP, délais de base, exigences doctrinales, ciblage/postures et métadonnées Assistant AI, puis renforcé `DataLoaderAutoload` + `tests/gdunit/test_data_integrity.gd` et documenté le nouveau contrat dans README/CHANGELOG.
 - 2025-11-08 — Documenté dans le README la copie HUD (doctrine/order), les messages de validation, les couleurs de feedback et les bips associés, avec rappel des considérations accessibilité pour la boucle Commandement & Élan.
@@ -101,6 +104,8 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-28 — Corrigé les erreurs Godot 4.6 liées aux inférences `Variant` en typant `LogisticsSystem` (`route_id`) et la mise à jour de cap d'Élan, et dupliqué les définitions `TerrainData` avant merge pour que la carte puisse injecter `data/terrain.json` sans heurter les dictionnaires read-only.
 
 ### Phase 3 progress
+- 2025-12-07 — `CombatSystem` accepte désormais le dictionnaire `{"attacker", "defender"}` renvoyé par `_build_unit_states`,
+  ce qui rétablit la compilation Godot et l'initialisation du `GameManager` sans erreurs après le chargement des scripts.
 - 2025-12-06 — Neutralisé les erreurs `Variant` promues en erreurs bloquantes par Godot 4.6 en typant les variables
   locales du `CombatSystem` et du `HUDManager`, ce qui permet à `GameManager` d'instancier à nouveau le pipeline combat/logistique
   sans échec de compilation.
