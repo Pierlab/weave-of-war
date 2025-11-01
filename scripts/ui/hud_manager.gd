@@ -7,6 +7,7 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 @onready var toggle_logistics_button: Button = $MarginContainer/VBoxContainer/ToggleLogisticsButton
 @onready var doctrine_selector: OptionButton = $MarginContainer/VBoxContainer/DoctrineSelector
 @onready var doctrine_status_label: Label = $MarginContainer/VBoxContainer/DoctrineStatusLabel
+@onready var inertia_label: Label = $MarginContainer/VBoxContainer/InertiaLabel
 @onready var order_selector: OptionButton = $MarginContainer/VBoxContainer/OrderSelector
 @onready var execute_order_button: Button = $MarginContainer/VBoxContainer/ExecuteOrderButton
 @onready var elan_label: Label = $MarginContainer/VBoxContainer/ElanLabel
@@ -30,6 +31,7 @@ var _elan_state: Dictionary = {
     "income": 0.0,
     "upkeep": 0.0,
 }
+var _doctrine_state: Dictionary = {}
 var _feedback_generator: AudioStreamGenerator
 var _pending_feedback_pitches: Array = []
 var _feedback_flush_scheduled := false
@@ -193,8 +195,29 @@ func _on_doctrine_selected(payload: Dictionary) -> void:
     _update_doctrine_selector_state(doctrine_id)
     var name: String = _doctrine_names.get(doctrine_id, payload.get("name", doctrine_id))
     var inertia_remaining: int = int(payload.get("inertia_remaining", 0))
+    var inertia_multiplier: float = float(payload.get("inertia_multiplier", 1.0))
+    var swap_tokens: int = int(payload.get("swap_token_budget", 0))
+    var elan_cap_bonus: float = float(payload.get("elan_cap_bonus", 0.0))
+    _doctrine_state = {
+        "id": doctrine_id,
+        "name": name,
+        "inertia_remaining": inertia_remaining,
+        "inertia_multiplier": inertia_multiplier,
+        "swap_tokens": swap_tokens,
+        "elan_cap_bonus": elan_cap_bonus,
+    }
     if doctrine_status_label:
         doctrine_status_label.text = "Doctrine : %s — Inertie %d tour(s)" % [name, inertia_remaining]
+        doctrine_status_label.tooltip_text = "Tokens de swap restants : %d\nBonus de cap Élan : %.1f" % [swap_tokens, elan_cap_bonus]
+    if inertia_label:
+        inertia_label.text = "Inertie : %d tour(s) · x%.2f" % [
+            max(inertia_remaining, 0),
+            inertia_multiplier,
+        ]
+        inertia_label.tooltip_text = "Les ordres appliquent au minimum %d tour(s) d'inertie.\nMultiplicateur doctrine : x%.2f" % [
+            max(inertia_remaining, 0),
+            inertia_multiplier,
+        ]
     var allowed: Array = payload.get("allowed_orders", [])
     _refresh_order_selector(allowed)
     _set_feedback("Doctrine active : %s" % name, true)
@@ -206,6 +229,9 @@ func _on_elan_updated(payload: Dictionary) -> void:
         "max": float(payload.get("max", 0.0)),
         "income": float(payload.get("income", 0.0)),
         "upkeep": float(payload.get("upkeep", 0.0)),
+        "cap_bonus": float(payload.get("cap_bonus", 0.0)),
+        "rounds_at_cap": int(payload.get("rounds_at_cap", 0)),
+        "decay_amount": float(payload.get("decay_amount", 0.0)),
     }
     if elan_label:
         var income: float = _elan_state.get("income", 0.0)
@@ -216,6 +242,18 @@ func _on_elan_updated(payload: Dictionary) -> void:
             income,
             upkeep,
         ]
+        var base_cap: float = _elan_state.get("max", 0.0) - _elan_state.get("cap_bonus", 0.0)
+        var rounds_at_cap: int = _elan_state.get("rounds_at_cap", 0)
+        var decay_amount: float = _elan_state.get("decay_amount", 0.0)
+        var tooltip_lines: Array[String] = [
+            "Cap de base : %.1f" % max(base_cap, 0.0),
+            "Bonus doctrine : %.1f" % _elan_state.get("cap_bonus", 0.0),
+            "Tours passés au cap : %d" % max(rounds_at_cap, 0),
+            "Décroissance programmée : %.1f" % max(decay_amount, 0.0),
+        ]
+        if rounds_at_cap > 0:
+            tooltip_lines.append("Décay imminent au prochain tour si aucun Élan n'est dépensé.")
+        elan_label.tooltip_text = tooltip_lines.join("\n")
     _refresh_order_button_state()
 
 func _on_order_issued(payload: Dictionary) -> void:

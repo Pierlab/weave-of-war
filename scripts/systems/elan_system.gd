@@ -5,6 +5,7 @@ const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
 @export var max_elan: float = 6.0
+@export var decay_amount: float = 1.0
 
 var event_bus: EventBusAutoload
 var data_loader: DataLoaderAutoload
@@ -15,6 +16,9 @@ var _current_elan: float = 0.0
 var _turn_income: float = 0.0
 var _current_upkeep: float = 0.0
 var _current_doctrine_id: String = ""
+var _base_max_elan: float = 0.0
+var _current_cap_bonus: float = 0.0
+var _rounds_at_cap: int = 0
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -22,6 +26,9 @@ func _ready() -> void:
 func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
+
+    if is_zero_approx(_base_max_elan):
+        _base_max_elan = max(max_elan, 0.0)
 
     if data_loader and data_loader.is_ready():
         configure(data_loader.list_orders(), data_loader.list_units())
@@ -31,6 +38,8 @@ func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload)
             event_bus.data_loader_ready.connect(_on_data_loader_ready)
         if not event_bus.turn_started.is_connected(_on_turn_started):
             event_bus.turn_started.connect(_on_turn_started)
+        if not event_bus.turn_ended.is_connected(_on_turn_ended):
+            event_bus.turn_ended.connect(_on_turn_ended)
         if not event_bus.doctrine_selected.is_connected(_on_doctrine_selected):
             event_bus.doctrine_selected.connect(_on_doctrine_selected)
         if not event_bus.order_execution_requested.is_connected(_on_order_execution_requested):
@@ -54,6 +63,7 @@ func add_elan(amount: float) -> void:
     if !is_equal_approx(new_value, _current_elan):
         _current_elan = new_value
         _emit_state("gain")
+    _update_cap_tracking()
 
 func spend_elan(amount: float) -> bool:
     if amount <= 0.0:
@@ -62,6 +72,7 @@ func spend_elan(amount: float) -> bool:
         return false
     _current_elan = clamp(_current_elan - amount, 0.0, max_elan)
     _emit_state("spend")
+    _update_cap_tracking(true)
     return true
 
 func set_allowed_orders(order_ids: Array) -> void:
@@ -83,6 +94,9 @@ func get_state_payload(reason := "status") -> Dictionary:
         "allowed_order_ids": _allowed_order_ids.duplicate(),
         "reason": reason,
         "doctrine_id": _current_doctrine_id,
+        "rounds_at_cap": _rounds_at_cap,
+        "decay_amount": decay_amount,
+        "cap_bonus": _current_cap_bonus,
     }
 
 func can_issue_order(order_id: String) -> Dictionary:
@@ -127,6 +141,7 @@ func _apply_doctrine_upkeep() -> void:
     if !is_equal_approx(new_value, _current_elan):
         _current_elan = new_value
         _emit_state("upkeep_tick")
+    _update_cap_tracking()
 
 func _emit_state(reason: String) -> void:
     if event_bus == null:
@@ -151,13 +166,22 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
     )
 
 func _on_turn_started(_turn_number: int) -> void:
+    _apply_decay_if_needed()
     _apply_doctrine_upkeep()
     if _turn_income > 0.0:
         add_elan(_turn_income)
 
+func _on_turn_ended(_turn_number: int) -> void:
+    if _is_at_cap():
+        _rounds_at_cap = clamp(_rounds_at_cap + 1, 0, 2)
+    else:
+        _rounds_at_cap = 0
+    _update_cap_tracking()
+
 func _on_doctrine_selected(payload: Dictionary) -> void:
     _current_doctrine_id = payload.get("id", "")
     set_doctrine_upkeep(float(payload.get("elan_upkeep", 0)))
+    _apply_doctrine_cap_bonus(float(payload.get("elan_cap_bonus", 0.0)))
     var allowed_orders_variant: Variant = payload.get("allowed_orders", [])
     var allowed_orders_payload: Array = allowed_orders_variant if allowed_orders_variant is Array else []
     var allowed_ids: Array[String] = []
@@ -188,6 +212,7 @@ func _on_order_execution_requested(order_id: String) -> void:
         "cost": result.get("cost", 0.0),
         "remaining": result.get("remaining", _current_elan),
         "inertia_impact": result.get("inertia_impact", 0),
+        "base_inertia_turns": order.get("inertia_impact", result.get("inertia_impact", 0)),
     }
 
     if event_bus:
@@ -197,3 +222,47 @@ func _on_order_execution_requested(order_id: String) -> void:
             "remaining": payload.get("remaining", _current_elan),
         })
         event_bus.emit_order_issued(payload)
+
+func _apply_doctrine_cap_bonus(bonus: float) -> void:
+    _current_cap_bonus = bonus
+    var target_cap := max(_base_max_elan + bonus, 0.0)
+    if is_equal_approx(target_cap, max_elan):
+        return
+    max_elan = target_cap
+    _current_elan = clamp(_current_elan, 0.0, max_elan)
+    _update_cap_tracking()
+    _emit_state("cap_update")
+
+func _update_cap_tracking(spent := false) -> void:
+    if spent and not _is_at_cap():
+        _rounds_at_cap = 0
+        return
+    if not _is_at_cap():
+        _rounds_at_cap = 0
+
+func _apply_decay_if_needed() -> void:
+    if _rounds_at_cap <= 0:
+        return
+    if not _is_at_cap():
+        _rounds_at_cap = 0
+        return
+    if decay_amount <= 0.0 or event_bus == null:
+        return
+    var new_value := max(_current_elan - decay_amount, 0.0)
+    if is_equal_approx(new_value, _current_elan):
+        return
+    _current_elan = new_value
+    event_bus.emit_elan_spent({
+        "order_id": "",
+        "amount": decay_amount,
+        "remaining": _current_elan,
+        "reason": "decay",
+    })
+    _emit_state("decay")
+    if _is_at_cap():
+        _rounds_at_cap = 1
+    else:
+        _rounds_at_cap = 0
+
+func _is_at_cap() -> bool:
+    return _current_elan >= max_elan - 0.001
