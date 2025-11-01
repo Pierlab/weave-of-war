@@ -29,7 +29,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [x] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry). *(2025-11-15 — Acceptation manuelle documentée dans `docs/tests/acceptance_tests.md` pour valider doctrines, ordres et télémétrie.)*
 - [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-22 — Les pénalités météo alimentent désormais le flux logistique et le risque d'interception; restent à brancher la télémétrie météo et la couverture de tests additionnelle.)*
 - [~] Phase 3 — Combat (3 Pillars) resolution pipeline. *(2025-11-30 — CombatSystem instancié côté GameManager et connecté aux flux `order_*`/`logistics_update`.)*
-- [ ] Phase 4 — Espionage systems and fog of war feedback.
+- [~] Phase 4 — Espionage systems and fog of war feedback. *(2025-12-08 — EspionageSystem bootstrapped from GameManager; remaining HUD/telemetry tasks to follow.)*
 - [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
 - [ ] Phase 6 — Unit formations/postures influencing combat outcomes.
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
@@ -124,6 +124,11 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   à consigner lors du prochain run Godot headless.
 - 2025-12-05 — Documenté le déclenchement d'engagements et la lecture du panneau "Dernier engagement" : README détaille le flux
   HUD → CombatSystem → Telemetry, cette note rappelle l'inspection via Remote Debugger et référence l'item 31 de la checklist.
+
+### Phase 4 progress
+- 2025-12-08 — `GameManager` instancie désormais `EspionageSystem`, hydrate le brouillard depuis `data/terrain.json`, et un test
+  gdUnit (`test_game_manager_logistics_bootstrap.gd`) vérifie que les tours diffusés par `EventBus` synchronisent les pings
+  `espionage_ping` avec l'état logistique.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

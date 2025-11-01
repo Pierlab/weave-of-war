@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-08 — `GameManager` instancie désormais `EspionageSystem`, hydrate le brouillard via `data/terrain.json`, et le test
+  gdUnit `test_game_manager_logistics_bootstrap.gd` vérifie que les tours `EventBus` synchronisent les pings `espionage_ping`
+  avec les mises à jour logistiques.
 - 2025-12-07 — Corrigé le typage de `CombatSystem.unit_states` pour accepter le dictionnaire `{"attacker", "defender"}` renvoyé
   par `_build_unit_states`, restaurant la compilation de `GameManager` et le bootstrap du pipeline combat/logistique. Le HUD
   amorce désormais son `AudioStreamPlayer` avant de récupérer le playback du générateur pour supprimer l'erreur Godot

@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T20:23:19Z
+- Generated on: 2025-11-01T21:07:07Z
 - Branch: work
-- Commit when generated: 4c4e75d1ecdf64eea8e16286abc71104740b4931
-- Subject: Merge pull request #73 from Pierlab/codex/fix-gdscript-parse-and-compile-errors-w7c68e
+- Commit when generated: 1d8d4b95120674b89ae26e80c2e3280820554ab4
+- Subject: Merge pull request #74 from Pierlab/codex/fix-script-errors-in-game_manager.gd
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
