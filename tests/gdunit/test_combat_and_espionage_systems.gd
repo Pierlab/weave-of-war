@@ -16,12 +16,23 @@ class StubCombatEventBus:
 class StubIntelEventBus:
     var payloads: Array = []
     var intel_reveals: Array = []
+    var fog_updates: Array = []
 
     func emit_espionage_ping(payload: Dictionary) -> void:
-        payloads.append(payload)
+        payloads.append(payload.duplicate(true))
 
     func emit_intel_intent_revealed(payload: Dictionary) -> void:
-        intel_reveals.append(payload)
+        intel_reveals.append(payload.duplicate(true))
+
+    func emit_fog_of_war_updated(payload: Dictionary) -> void:
+        fog_updates.append(payload.duplicate(true))
+
+func _find_tile(snapshot: Dictionary, tile_id: String) -> Dictionary:
+    var entries: Array = snapshot.get("visibility", [])
+    for entry in entries:
+        if str(entry.get("tile_id", "")) == tile_id:
+            return entry
+    return {}
 
 func test_combat_system_resolves_three_pillars() -> void:
     var system: CombatSystem = COMBAT_SYSTEM.new()
@@ -257,3 +268,77 @@ func test_recon_order_triggers_automatic_ping() -> void:
     asserts.is_equal("recon_probe", ping.get("source", ""), "Ping context should reflect the recon order id.")
     asserts.is_true(ping.has("probe_strength"), "Recon ping payload should record probe strength.")
     asserts.is_true(float(ping.get("detection_bonus", 0.0)) >= 0.04, "Competence spend should translate into a detection bonus.")
+
+func test_fog_updates_emit_snapshots_for_visibility_changes() -> void:
+    var system: EspionageSystem = ESPIONAGE_SYSTEM.new()
+    system.configure([
+        {"id": "clear", "intel_noise": 0.0},
+    ])
+    var stub_bus := StubIntelEventBus.new()
+    system.event_bus = stub_bus
+    system.configure_map({"0,0": {}, "0,1": {}})
+
+    asserts.is_equal(1, stub_bus.fog_updates.size(), "Configuring the map should emit an initial fog snapshot")
+    var initial_snapshot: Dictionary = stub_bus.fog_updates[0]
+    var initial_core := _find_tile(initial_snapshot, "0,0")
+    asserts.is_true(not initial_core.is_empty(), "Initial snapshot should expose each tracked tile")
+    asserts.is_equal(0.1, float(initial_core.get("visibility", 0.0)), "Tiles should start at the default visibility level")
+
+    system.ingest_logistics_payload({
+        "turn": 1,
+        "supply_zones": [
+            {"tile_id": "0,0", "supply_level": "core"},
+            {"tile_id": "0,1", "supply_level": "isolated"},
+        ],
+    })
+
+    asserts.is_equal(2, stub_bus.fog_updates.size(), "Logistics updates should broadcast a refreshed fog snapshot")
+    var boosted_snapshot: Dictionary = stub_bus.fog_updates.back()
+    var boosted_core := _find_tile(boosted_snapshot, "0,0")
+    asserts.is_equal(0.85, float(boosted_core.get("visibility", 0.0)), "Core supply tiles should jump to 0.85 visibility")
+    asserts.is_equal(0.1, float(boosted_core.get("counter_intel", 0.0)), "Logistics boosts should trim counter-intel pressure")
+
+    system._on_turn_started(2)
+
+    asserts.is_equal(3, stub_bus.fog_updates.size(), "Turn ticks should decay fog and emit a new snapshot")
+    var decayed_snapshot: Dictionary = stub_bus.fog_updates.back()
+    var decayed_core := _find_tile(decayed_snapshot, "0,0")
+    asserts.is_true(float(decayed_core.get("visibility", 0.0)) < float(boosted_core.get("visibility", 0.0)), "Visibility should decay after each turn")
+    asserts.is_equal(0.15, float(decayed_core.get("counter_intel", 0.0)), "Counter-intel should regrow by 0.05 each turn")
+
+func test_ping_success_rate_tracks_effective_confidence() -> void:
+    var system: EspionageSystem = ESPIONAGE_SYSTEM.new()
+    system.set_rng_seed(7)
+    system.configure([
+        {"id": "clear", "intel_noise": 0.0},
+    ])
+    system.configure_map({"0,0": {}})
+    var stub_bus := StubIntelEventBus.new()
+    system.event_bus = stub_bus
+
+    var runs := 200
+    var successes := 0
+    for i in range(runs):
+        system._fog_by_tile["0,0"] = {"visibility": 0.2, "counter_intel": 0.0}
+        var payload := system.perform_ping("0,0", 0.4)
+        if payload.get("success", false):
+            successes += 1
+
+    var success_rate := float(successes) / float(runs)
+    var expected := 0.6
+    asserts.is_true(absf(success_rate - expected) <= 0.1, "Ping success rate should approximate the effective confidence (0.60 ± 0.10)")
+
+func test_intel_decay_limits_visibility_floor() -> void:
+    var system: EspionageSystem = ESPIONAGE_SYSTEM.new()
+    system.configure([{"id": "clear", "intel_noise": 0.0}])
+    system.configure_map({"0,0": {}})
+    var stub_bus := StubIntelEventBus.new()
+    system.event_bus = stub_bus
+
+    system._fog_by_tile["0,0"] = {"visibility": 0.12, "counter_intel": 0.9}
+    system._on_turn_started(5)
+
+    var snapshot: Dictionary = stub_bus.fog_updates.back()
+    var tile := _find_tile(snapshot, "0,0")
+    asserts.is_equal(0.1, float(tile.get("visibility", 0.0)), "Visibility should not decay below the global floor")
+    asserts.is_equal(0.95, float(tile.get("counter_intel", 0.0)), "Counter-intel growth should clamp at 1.0")
