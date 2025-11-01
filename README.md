@@ -52,9 +52,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   emitting `order_issued` telemetry.
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
-- The procedural audio generator now stops, confirms the playback instance is inactive, and only then drains its buffer before
-  replaying tones. This guard removes the recurring `AudioStreamGeneratorPlayback.clear_buffer` errors/leaks that previously
-  spammed the console at turn changes and shutdown.
+- The procedural audio generator now queues tone requests, waits for the playback instance to go inactive, then clears and
+  refills the buffer before replaying. This deferred guard removes the recurring `AudioStreamGeneratorPlayback.clear_buffer`
+  warnings/leaks that previously spammed the console during rapid doctrine/order swaps and on shutdown.
 
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads

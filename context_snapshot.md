@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T09:59:46Z
+- Generated on: 2025-11-01T10:24:14Z
 - Branch: work
-- Commit when generated: 580b9dbda4820d6d78c7e245ffe14461da59d06c
-- Subject: Merge pull request #41 from Pierlab/codex/update-checklist.md-vqyf55
+- Commit when generated: 0a3fdcbfdec6411d0923ded7db052751ca5a8516
+- Subject: Merge pull request #42 from Pierlab/codex/add-item-to-checklist.md
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -35,6 +35,7 @@
 - scripts/systems/elan_system.gd
 - scripts/systems/espionage_system.gd
 - scripts/systems/logistics_system.gd
+- scripts/tools/simulate_hud_audio_feedback.py
 - scripts/ui/debug_overlay.gd
 - scripts/ui/hud_manager.gd
 

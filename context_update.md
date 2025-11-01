@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-05 — Stabilised HUD procedural audio by queueing `_play_feedback()` requests, deferring buffer clears until playback is inactive, and generating `docs/logs/hud_audio_feedback_2025-11-05.log` via `scripts/tools/simulate_hud_audio_feedback.py` to verify repeated doctrine/order swaps stay silent.
 - 2025-11-04 — Normalised the autoload names in `project.godot`, extended `tests/gdunit/test_autoload_preparation.gd` to cover configuration/signals, and recorded the startup handshake in `docs/logs/autoload_readiness_2025-11-04.log` to close Checklist Phase 0 item 4.
 - 2025-11-03 — Hardened `DataLoaderAutoload` with schema + enum validation (`validate_collection()`), surfaced load-time issues through `load_all()`, and extended `tests/gdunit/test_data_integrity.gd` with regression coverage for valid/invalid payloads while checking off Checklist Phase 0 item 3.
 - 2025-11-01 — Re-aligned Vertical Slice P0 scope after reviewing `docs/project_spec.md`, mission brief, and `context_snapshot.md`; confirmed no new scope deltas beyond the existing local Godot binary provisioning blocker.

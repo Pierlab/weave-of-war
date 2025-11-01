@@ -13,6 +13,10 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 @onready var feedback_label: Label = $MarginContainer/VBoxContainer/FeedbackLabel
 @onready var feedback_player: AudioStreamPlayer = $FeedbackPlayer
 
+const FEEDBACK_SAMPLE_RATE := 44100.0
+const FEEDBACK_DURATION := 0.12
+const FEEDBACK_VOLUME := 0.2
+
 var event_bus: EventBusAutoload
 var data_loader: DataLoaderAutoload
 
@@ -26,6 +30,9 @@ var _elan_state: Dictionary = {
     "income": 0.0,
     "upkeep": 0.0,
 }
+var _feedback_generator: AudioStreamGenerator
+var _pending_feedback_pitches: Array = []
+var _feedback_flush_scheduled := false
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -261,39 +268,76 @@ func _set_feedback(message: String, positive: bool) -> void:
 func _play_feedback(pitch_hz: float) -> void:
     if feedback_player == null:
         return
-    if feedback_player.stream == null or not (feedback_player.stream is AudioStreamGenerator):
-        var generator: AudioStreamGenerator = AudioStreamGenerator.new()
-        generator.mix_rate = 44100
-        generator.buffer_length = 0.2
-        feedback_player.stream = generator
+    _pending_feedback_pitches.append(pitch_hz)
+    if _feedback_flush_scheduled:
+        return
+    _feedback_flush_scheduled = true
+    call_deferred("_process_feedback_queue")
+
+func _process_feedback_queue() -> void:
+    _feedback_flush_scheduled = false
+    if feedback_player == null:
+        _pending_feedback_pitches.clear()
+        return
+    if _pending_feedback_pitches.is_empty():
+        return
+    var playback := _ensure_feedback_playback()
+    if playback == null:
+        _pending_feedback_pitches.clear()
+        return
+    if feedback_player.playing:
+        feedback_player.stop()
+    if playback.active:
+        playback.stop()
+        if playback.active:
+            _feedback_flush_scheduled = true
+            call_deferred("_process_feedback_queue")
+            return
+    playback.clear_buffer()
+    var pitch: float = _pending_feedback_pitches.pop_front()
+    _synth_feedback_tone(playback, pitch)
+    feedback_player.play()
+    if not _pending_feedback_pitches.is_empty():
+        _feedback_flush_scheduled = true
+        call_deferred("_process_feedback_queue")
+
+func _ensure_feedback_playback() -> AudioStreamGeneratorPlayback:
+    if feedback_player == null:
+        return null
+    if _feedback_generator == null or feedback_player.stream == null or feedback_player.stream != _feedback_generator:
+        _feedback_generator = AudioStreamGenerator.new()
+        _feedback_generator.mix_rate = FEEDBACK_SAMPLE_RATE
+        _feedback_generator.buffer_length = FEEDBACK_DURATION * 2.0
+        feedback_player.stream = _feedback_generator
     var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
-        if feedback_player.playing:
-            feedback_player.stop()
-        if playback.active:
-            playback.stop()
-        if playback.active:
-            return
-        playback.clear_buffer()
-        var generator: AudioStreamGenerator = feedback_player.stream
-        var frame_count: int = int(generator.mix_rate * 0.12)
-        for i in frame_count:
-            var t: float = float(i) / generator.mix_rate
-            var envelope: float = clamp(1.0 - t * 8.0, 0.0, 1.0)
-            var sample: float = sin(TAU * pitch_hz * t) * 0.2 * envelope
-            playback.push_frame(Vector2(sample, sample))
-        feedback_player.play()
-    elif not feedback_player.playing:
-        feedback_player.play()
+        return playback
+    return null
 
-func _exit_tree() -> void:
+func _synth_feedback_tone(playback: AudioStreamGeneratorPlayback, pitch_hz: float) -> void:
+    var generator := _feedback_generator
+    if generator == null:
+        return
+    var mix_rate: float = max(generator.mix_rate, 1.0)
+    var frame_count: int = int(mix_rate * FEEDBACK_DURATION)
+    for i in frame_count:
+        var t: float = float(i) / mix_rate
+        var envelope: float = clamp(1.0 - t * 8.0, 0.0, 1.0)
+        var sample: float = sin(TAU * pitch_hz * t) * FEEDBACK_VOLUME * envelope
+        playback.push_frame(Vector2(sample, sample))
+
+func _stop_feedback_stream() -> void:
+    _pending_feedback_pitches.clear()
+    _feedback_flush_scheduled = false
     if feedback_player == null:
         return
-    feedback_player.stop()
+    if feedback_player.playing:
+        feedback_player.stop()
     var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
-        if playback.active:
-            playback.stop()
-        if playback.active:
-            return
-        playback.clear_buffer()
+        playback.stop()
+        if not playback.active:
+            playback.clear_buffer()
+
+func _exit_tree() -> void:
+    _stop_feedback_stream()
