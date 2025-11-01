@@ -117,4 +117,18 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **And** en augmentant la jauge Tactique au-dessus de sa valeur de base, le prochain engagement affiche une jauge d'Impulsion amplifiée (`combat_resolved.pillars.impulse.attacker`) et l'assistant AI annonce un `competence_alignment` > 1 avec une confiance ajustée supérieure à la valeur de base
 - **And** en réduisant l'allocation Logistique sous son seuil de base, le payload `logistics_update` met à jour `competence_multiplier` et `flow_multiplier` à la baisse, ce qui se reflète dans l'overlay HUD/logistique
 
+### AT-16: Compétence — boucle d'usage documentée
+- **Given** le README décrit la section « Competence slider usage guide »
+- **When** je suis les cinq étapes documentées (sélection, ajustement, inspection télémétrie, vérification combat/assistant/logistique, recentrage)
+- **Then** chaque étape produit les résultats attendus ci-dessous, confirmant que la documentation et l'implémentation restent alignées
+
+**Résultats attendus**
+1. La ligne de statut sous les sliders reflète la sélection active, le budget restant et le delta maximum ; la mise en surbrillance du slider ciblé correspond au raccourci utilisé.
+2. Toute tentative de dépassement affiche la raison (`Inertie restante` ou `Delta max atteint`) dans la tooltip et restaure la valeur précédente sans bruit Godot ; les ajustements valides publient un signal `competence_allocation_requested` visible dans les logs.
+3. `TelemetryAutoload.buffer[-1]` expose un événement `competence_reallocated` avec les blocs `before`/`after`, `remaining_budget` et `modifiers.logistics_penalty` (présent uniquement si une pénalité s'applique) ; le budget HUD adopte la couleur correspondante.
+4. Le prochain engagement met à jour `combat_resolved.pillars.impulse.attacker`, le dernier `assistant_order_packet` affiche `competence_alignment` ajusté, et le prochain `logistics_update` modifie `competence_multiplier`/`flow_multiplier` ; chaque changement est visible dans la debug overlay ou la console.
+5. Réinjecter des points dans Logistique retire la pénalité du budget HUD au tour suivant et supprime `modifiers.logistics_penalty` du dernier événement `competence_reallocated`.
+
+> Si une étape diverge, consigner l'écart dans `context_update.md` et ouvrir un suivi de checklist Phase 5.
+
 All tests must pass without Godot warnings or errors in the console.

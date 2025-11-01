@@ -113,6 +113,7 @@ All notable changes to this project will be documented in this file.
 - Captured autoload readiness instrumentation: renamed the singletons in `project.godot`, extended `tests/gdunit/test_autoload_preparation.gd` to assert configuration/signals, and archived the startup log excerpt under `docs/logs/autoload_readiness_2025-11-04.log` for future audits.
 
 ### Changed
+- Documented the competence slider usage loop: the README now walks through selection, validation, telemetry inspection, and downstream combat/logistics/assistant reactions, and `docs/tests/acceptance_tests.md` adds AT-16 so manual QA mirrors the documented flow.
 - Documented the combat loop workflow: README now explique comment déclencher un engagement depuis la HUD Commandement, lire le panneau "Dernier engagement" et inspecter la télémétrie `combat_resolved`, tandis que le mission brief référence le Remote Debugger pour clôturer l'item 31 de la checklist.
 - Updated HUD docs to cover competence-aware order execution: the selector lists `competence_cost` entries, the execute button blocks when the remaining allocations are insufficient, and feedback copy surfaces the exact shortfalls for recon/spy orders.
 - Decoupled the core autoload script classes (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) from their singleton keys to avoid the Godot 4.6 `class_name_hides_autoload` parse error, refreshed docs/tests to reflect the new typing pattern, and hardened `DataLoader`/`LogisticsSystem` with explicit hints so warnings-as-errors no longer block startup.
