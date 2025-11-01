@@ -126,6 +126,18 @@ func test_combat_system_resolves_three_pillars() -> void:
     asserts.is_equal(0.8, intel.get("confidence", 0.0), "Intel confidence should reflect base plus espionage bonus")
     asserts.is_true(stub_bus.payloads.size() == 1, "Combat system should emit a telemetry payload via the event bus")
 
+    var summary: Dictionary = result.get("pillar_summary", {})
+    asserts.is_true(summary.has("attacker_total"), "Pillar summary should expose attacker total strength")
+    asserts.is_true(summary.has("decisive_pillars"), "Pillar summary should include decisive pillar metadata")
+
+    var units := result.get("units", {})
+    asserts.is_true(units.has("attacker"), "Units payload should list attacking units")
+    asserts.is_true(units.has("defender"), "Units payload should list defending units")
+    asserts.is_true(units.get("attacker", []).size() == 2, "Attacker units payload should map each contributor")
+    asserts.is_true(units.get("defender", []).size() == 1, "Defender units payload should map each contributor")
+    var first_attacker: Dictionary = units.get("attacker", [])[0]
+    asserts.is_true(first_attacker.has("status"), "Each unit state should expose a status label")
+
     system._on_logistics_update({
         "turn": 3,
         "logistics_id": "vs_logistics",

@@ -45,7 +45,7 @@ func _connect_signals() -> void:
     _event_bus.turn_ended.connect(_capture_event.bind("turn_ended"))
     _event_bus.logistics_update.connect(_capture_event.bind("logistics_update"))
     _event_bus.logistics_break.connect(_capture_event.bind("logistics_break"))
-    _event_bus.combat_resolved.connect(_capture_event.bind("combat_resolved"))
+    _event_bus.combat_resolved.connect(_on_combat_resolved)
     _event_bus.espionage_ping.connect(_capture_event.bind("espionage_ping"))
     _event_bus.weather_changed.connect(_on_weather_changed)
     _event_bus.assistant_order_packet.connect(_capture_event.bind("assistant_order_packet"))
@@ -59,6 +59,25 @@ func _capture_event(payload, event_name: StringName) -> void:
         log_event(event_name, payload)
     else:
         log_event(event_name, {"value": payload})
+
+func _on_combat_resolved(payload: Dictionary) -> void:
+    var safe_payload := {
+        "engagement_id": str(payload.get("engagement_id", "")),
+        "order_id": str(payload.get("order_id", "")),
+        "victor": str(payload.get("victor", "stalemate")),
+        "terrain": str(payload.get("terrain", "")),
+        "weather_id": str(payload.get("weather_id", "")),
+        "doctrine_id": str(payload.get("doctrine_id", "")),
+        "reason": str(payload.get("reason", "resolution")),
+        "intel": _coerce_dictionary(payload.get("intel", {})),
+        "logistics": _coerce_dictionary(payload.get("logistics", {})),
+    }
+
+    safe_payload["pillars"] = _serialise_pillars(payload.get("pillars", {}))
+    safe_payload["pillar_summary"] = _serialise_pillar_summary(payload.get("pillar_summary", {}))
+    safe_payload["units"] = _serialise_units(payload.get("units", {}))
+
+    log_event("combat_resolved", safe_payload)
 
 func _on_doctrine_selected(payload: Dictionary) -> void:
     var allowed_variant: Variant = payload.get("allowed_orders", [])
@@ -153,3 +172,82 @@ func _coerce_dictionary(value: Variant) -> Dictionary:
     if value is Dictionary:
         return (value as Dictionary).duplicate(true)
     return {}
+
+func _serialise_pillars(value: Variant) -> Dictionary:
+    var pillars: Dictionary = {}
+    if value is Dictionary:
+        for pillar in (value as Dictionary).keys():
+            var entry_variant: Variant = (value as Dictionary).get(pillar, {})
+            if entry_variant is Dictionary:
+                var entry: Dictionary = entry_variant
+                pillars[pillar] = {
+                    "attacker": float(entry.get("attacker", 0.0)),
+                    "defender": float(entry.get("defender", 0.0)),
+                    "margin": float(entry.get("margin", 0.0)),
+                    "winner": str(entry.get("winner", "stalemate")),
+                }
+    return pillars
+
+func _serialise_pillar_summary(value: Variant) -> Dictionary:
+    if value is Dictionary:
+        var summary: Dictionary = value
+        var decisive: Array = []
+        var decisive_variant: Variant = summary.get("decisive_pillars", [])
+        if decisive_variant is Array:
+            for entry in decisive_variant:
+                if entry is Dictionary:
+                    decisive.append({
+                        "pillar": str(entry.get("pillar", "")),
+                        "winner": str(entry.get("winner", "")),
+                        "margin": float(entry.get("margin", 0.0)),
+                    })
+        return {
+            "attacker_total": float(summary.get("attacker_total", 0.0)),
+            "defender_total": float(summary.get("defender_total", 0.0)),
+            "margin_score": float(summary.get("margin_score", 0.0)),
+            "decisive_pillars": decisive,
+        }
+    return {
+        "attacker_total": 0.0,
+        "defender_total": 0.0,
+        "margin_score": 0.0,
+        "decisive_pillars": [],
+    }
+
+func _serialise_units(value: Variant) -> Dictionary:
+    var units := {
+        "attacker": [],
+        "defender": [],
+    }
+    if not (value is Dictionary):
+        return units
+
+    for side in ["attacker", "defender"]:
+        var side_variant: Variant = (value as Dictionary).get(side, [])
+        var side_entries: Array = []
+        if side_variant is Array:
+            for entry in side_variant:
+                if entry is Dictionary:
+                    var state: Dictionary = entry
+                    side_entries.append({
+                        "unit_id": str(state.get("unit_id", "")),
+                        "name": str(state.get("name", "")),
+                        "side": side,
+                        "formation_id": str(state.get("formation_id", "")),
+                        "formation_name": str(state.get("formation_name", "")),
+                        "status": str(state.get("status", "")),
+                        "casualties": float(state.get("casualties", 0.0)),
+                        "strength_remaining": float(state.get("strength_remaining", 1.0)),
+                        "notes": str(state.get("notes", "")),
+                        "pillar_profile": _serialise_pillar_profile(state.get("pillar_profile", {})),
+                    })
+        units[side] = side_entries
+
+    return units
+
+func _serialise_pillar_profile(value: Variant) -> Dictionary:
+    var result: Dictionary = {}
+    if value is Dictionary:
+        for key in (value as Dictionary).keys():
+            result[str(key)] = float((value as Dictionary).get(key, 0.0))
+    return result

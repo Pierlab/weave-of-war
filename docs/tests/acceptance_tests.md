@@ -85,6 +85,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **When** `CombatSystem` reçoit un engagement avec doctrine active et météo en cours
 - **Then** un payload `combat_resolved` est émis avec les trois piliers (`position`, `impulse`, `information`) et une victoire déterminée par majorité
 - **And** le payload expose un bloc `logistics` (niveau d'approvisionnement, flow, sévérité, tour) pour expliquer l'impact de la supply sur la résolution
+- **And** la section `pillar_summary` détaille les totaux attaquant/défenseur, la marge normalisée et la liste des piliers décisifs, tandis que `units` liste chaque unité avec formation, statut et pertes estimées
 - **And** le panneau HUD "Dernier engagement" affiche les jauges des trois piliers, un résumé logistique (flow, sévérité, mouvement) et les ajustements d'Élan correspondants sans revenir à l'état par défaut.
 
 ### AT-12: Pings d'espionnage et intentions révélées
