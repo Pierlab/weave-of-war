@@ -44,6 +44,14 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 
 ### Phase 0 findings
 - 2025-11-01 — Re-read project spec, mission brief, and latest context snapshot; scope remains aligned with no new risks beyond the known local Godot binary provisioning blocker (tracked in `context_update.md`).
+- 2025-11-02 — Audited `data/*.json` catalogues against the locked SDS packages; remaining gaps:
+  - `data/doctrines.json` only lists `force` and `ruse`. The Command Model SDS requires the full set (Force/Ruse/Patience/Vitesse/Équilibre) plus CP cap deltas, inertia multipliers, and swap token budgets for doctrine gating.
+  - `data/orders.json` lacks explicit `cp_cost` values, `base_delay`/inertia multipliers, targeting scopes, and posture requirements referenced in the Command Model SDS. Assistant AI intent metadata also needs interpreter hints for queue telemetry.
+  - `data/logistics.json` still summarises logistics tiers without depot nodes, graph connectivity, convoy capacity, or hazard profiles expected by the Logistics SDS outline for map-driven validation.
+  - `data/units.json` omits readiness penalties, surge/edge token hooks, and morale thresholds that combat and Élan systems depend on for pillar/decay calculations in the SDS specs.
+  - `data/formations.json` is missing eligible unit class lists, Élan/posture switch costs, and recovery timings required to align with the formations + competence interplay described in the SDS outlines.
+  - `data/weather.json` does not yet expose visibility modifiers, forecast sequencing metadata, or telemetry IDs needed for `weather_changed` payloads in the Logistics/Terrain SDS outline.
+  - No competence slider dataset exists under `data/`; create `competence_sliders.json` (or equivalent) capturing slider caps, inertia limits, unlock effects, and telemetry keys demanded by the competence slider SDS outline.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

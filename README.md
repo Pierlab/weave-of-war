@@ -148,8 +148,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   (`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`, etc.) enregistrent les décisions structurantes à prendre en compte
   lors de toute extension de ces contrats. The new autoloads mirror this architecture so future Checklist C work can focus on
   behaviour, not plumbing.
-- Review the canonical JSON schemas in `data/` for doctrines, orders, units, formations, weather, and logistics to keep inertia locks, Élan
-  costs, and supply interactions aligned with gameplay scripts.
+- Review the canonical JSON schemas in `data/` for doctrines, orders, units, formations, weather, and logistics to keep inertia locks, Élan costs, and supply interactions aligned with gameplay scripts.
+- Track outstanding data gaps documented under Phase 0 in [`docs/agents/missions/vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md#phase-0-findings) before extending any dataset so SDS expectations stay visible.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
   fantasy, pillars, loops, and risks for the vertical slice.
 - Maintain shared vocabulary in the living glossary ([`docs/glossary.md`](docs/glossary.md)) so mission briefs, telemetry,
