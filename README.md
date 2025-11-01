@@ -80,6 +80,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - **Feedback label** — Success messages adopt a cool blue tint (`Color(0.7, 0.9, 1.0)`) and include copy such as `Doctrine active : {Nom}` or `Ordre '{Nom}' exécuté (X.X Élan restant)`. Validation errors reuse warm amber (`Color(1.0, 0.65, 0.5)`) with explicit guidance: `Doctrine verrouillée par l'inertie`, `Élan insuffisant : X.X requis, X.X disponible`, or `Choisissez un ordre à exécuter.`
 - **Audio cues** — Positive actions (doctrine swap, order execution) trigger short sine tones at 660 Hz and 520 Hz, while validation warnings play 200 Hz or 220 Hz cues. All tones last 0.12 s at volume 0.2, share a 44.1 kHz sample rate, and fade with a fast attack envelope to avoid harsh peaks.
 - **Logistics toggle** — The logistics overlay button swaps between `Show Logistics` and `Hide Logistics`, keeping the action verb front-loaded for screen-reader clarity and future localisation keys.
+- **Weather panel** — A compact colour-coded icon sits next to the logistics toggle, updating whenever `WeatherSystem` broadcasts
+  a `weather_changed` payload. The label lists the current weather name and remaining turns while the tooltip summarises movement,
+  logistics flow, intel noise, and Élan regeneration modifiers for fast reference.
 - **Accessibility notes** — Élan totals show both absolute (`Élan : X.X / Y.Y`) and trend indicators (`↗` income, `↘` upkeep). A context-rich tooltip on the Élan label lists base cap, active doctrine bonus, turns spent at cap, and the decay scheduled for the next round so keyboard and screen-reader users receive the same warnings surfaced by colour shifts. All feedback strings avoid colour-only messaging by embedding the validation reason in text, while the paired positive/negative hues exceed WCAG contrast guidelines against the HUD's neutral background.
 
 ## Logistics backbone & terrain feedback (Semaine 2–3)
@@ -93,10 +96,15 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   immediately drive supply payloads, with gdUnit coverage guarding the bootstrap path.
 - Logistics disruptions now raise a dedicated `logistics_break` event for analytics, capturing the disrupted tile/route, Élan and
   competence penalties, and current weather/logistics contexts for downstream dashboards.
-- Weather definitions (`sunny`, `rain`, `mist`) rotate automatically and apply movement/logistics multipliers sourced from
-  `data/weather.json`, enabling future systems to subscribe to `weather_changed` signals without bespoke plumbing.
+- `WeatherSystem` now orchestrates the rotation of `sunny`/`rain`/`mist` states using the `duration_turns` ranges in
+  [`data/weather.json`](data/weather.json), emitting deterministic `weather_changed` payloads with modifiers and remaining
+  turns so logistics, combat, espionage, and UI consumers stay in sync without bespoke plumbing.
+- Terrain layout and biome definitions now live in [`data/terrain.json`](data/terrain.json); the hex map consumes those entries to
+  display Plains/Forest/Hill names directly on tiles while HUD and debug overlay tooltips summarise movement costs and tile
+  counts for quick reference.
 - Terrain defaults derived from `TerrainData` are combined with supply-center distance calculations to label tiles as `core`,
-  `fringe`, or `isolated`, ensuring movement costs and convoy interception odds reflect both geography and climate.
+  `fringe`, or `isolated`, ensuring movement costs and convoy interception odds reflect both geography and climate, even before
+  bespoke terrain layouts are provided.
 
 ## Combat pillars & espionage intelligence (Semaine 4–5)
 - `CombatSystem` now resolves Manoeuvre/Feu/Moral contests by combining unit combat profiles, doctrine bonuses, terrain and

@@ -10,6 +10,7 @@ const DATA_FILES := {
     "weather": "res://data/weather.json",
     "logistics": "res://data/logistics.json",
     "formations": "res://data/formations.json",
+    "terrain": "res://data/terrain.json",
 }
 
 const COMBAT_PILLARS := ["position", "impulse", "information"]
@@ -20,6 +21,7 @@ const LOGISTICS_ROUTE_TYPES := ["ring", "road", "convoy", "river", "airlift"]
 const SUPPLY_STATES := ["stable", "flexible", "surged", "strained"]
 const CONVOY_USAGE := ["optional", "required", "forbidden"]
 const FORMATION_POSTURES := ["defensive", "aggressive", "balanced", "fluid", "recon", "ranged", "support"]
+const TERRAIN_ENTRY_TYPES := ["definition", "tile"]
 
 static var _instance: DataLoaderAutoload
 
@@ -108,6 +110,29 @@ func list_formations() -> Array:
 func get_formation(id: String) -> Dictionary:
     return _indexed.get("formations", {}).get(id, {})
 
+func list_terrain_entries() -> Array:
+    return _collections.get("terrain", [])
+
+func list_terrain_definitions() -> Array:
+    return list_terrain_entries().filter(func(entry):
+        return entry is Dictionary and String(entry.get("type", "")) == "definition")
+
+func list_terrain_tiles() -> Array:
+    return list_terrain_entries().filter(func(entry):
+        return entry is Dictionary and String(entry.get("type", "")) == "tile")
+
+func get_terrain_definition(id: String) -> Dictionary:
+    var entry: Dictionary = _indexed.get("terrain", {}).get(id, {})
+    if entry.get("type", "") == "definition":
+        return entry
+    return {}
+
+func get_terrain_tile(id: String) -> Dictionary:
+    var entry: Dictionary = _indexed.get("terrain", {}).get(id, {})
+    if entry.get("type", "") == "tile":
+        return entry
+    return {}
+
 func get_summary() -> Dictionary:
     return {
         "ready": _is_ready,
@@ -118,6 +143,7 @@ func get_summary() -> Dictionary:
             "weather": list_weather_states().size(),
             "logistics": list_logistics_states().size(),
             "formations": list_formations().size(),
+            "terrain": list_terrain_tiles().size(),
         }
     }
 
@@ -132,7 +158,11 @@ func _notify_event_bus(result: Dictionary) -> void:
         for key in collections.keys():
             var value: Variant = collections.get(key)
             if value is Array:
-                counts[key] = value.size()
+                if key == "terrain":
+                    counts[key] = value.filter(func(entry):
+                        return entry is Dictionary and String(entry.get("type", "")) == "tile").size()
+                else:
+                    counts[key] = value.size()
             else:
                 counts[key] = 0
 
@@ -238,6 +268,8 @@ static func _validate_entry(label: String, entry: Dictionary, context: String) -
             return _validate_logistics(entry, context)
         "formations":
             return _validate_formation(entry, context)
+        "terrain":
+            return _validate_terrain(entry, context)
         _:
             return []
 
@@ -757,6 +789,32 @@ static func _validate_formation(entry: Dictionary, context: String) -> Array:
 
     return errors
 
+static func _validate_terrain(entry: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("terrain", entry, ["type"], context)
+    var entry_type := String(entry.get("type", ""))
+    if not TERRAIN_ENTRY_TYPES.has(entry_type):
+        errors.append(_error("terrain", context + ".type", "invalid_enum", entry_type))
+        return errors
+
+    match entry_type:
+        "definition":
+            errors += _require_keys("terrain", entry, ["id", "name", "movement_cost", "description"], context)
+            errors += _ensure_strings("terrain", entry, ["id", "name", "description"], context)
+            errors += _ensure_numeric("terrain", entry, ["movement_cost"], context)
+        "tile":
+            errors += _require_keys("terrain", entry, ["id", "q", "r", "terrain"], context)
+            errors += _ensure_strings("terrain", entry, ["id", "terrain"], context)
+            errors += _ensure_integerish("terrain", entry, ["q", "r"], context)
+            if entry.has("movement_cost"):
+                errors += _ensure_numeric("terrain", entry, ["movement_cost"], context)
+            if entry.has("name"):
+                errors += _ensure_strings("terrain", entry, ["name"], context)
+            if entry.has("description"):
+                errors += _ensure_strings("terrain", entry, ["description"], context)
+
+    return errors
+
 func _validate_cross_references() -> Array:
     var errors: Array = []
     var formation_ids := _collect_ids(_collections.get("formations", []))
@@ -782,6 +840,21 @@ func _validate_cross_references() -> Array:
                     for weather_id in links.get("weather_modifiers").keys():
                         if typeof(weather_id) == TYPE_STRING and not weather_ids.has(weather_id):
                             errors.append(_error("logistics", log_context + ".links.weather_modifiers", "unknown_reference", weather_id))
+
+    var terrain_entries := _collections.get("terrain", [])
+    var terrain_definitions := {}
+    for index in range(terrain_entries.size()):
+        var terrain_entry := terrain_entries[index]
+        if terrain_entry is Dictionary and String(terrain_entry.get("type", "")) == "definition":
+            var def_id := String(terrain_entry.get("id", ""))
+            if def_id != "":
+                terrain_definitions[def_id] = true
+    for index in range(terrain_entries.size()):
+        var terrain_entry := terrain_entries[index]
+        if terrain_entry is Dictionary and String(terrain_entry.get("type", "")) == "tile":
+            var terrain_id := String(terrain_entry.get("terrain", ""))
+            if terrain_id != "" and not terrain_definitions.has(terrain_id):
+                errors.append(_error("terrain", _entry_context("terrain", terrain_entry, index) + ".terrain", "unknown_reference", terrain_id))
 
     return errors
 

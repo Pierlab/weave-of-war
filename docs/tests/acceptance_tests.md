@@ -64,11 +64,13 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Given** la scène principale est en cours d'exécution et `LogisticsSystem` a chargé les données JSON enrichies
 - **When** j'active le bouton "Show Logistics"
 - **Then** la console (ou le debug overlay) affiche un payload `logistics_update` listant anneaux `core/fringe/isolated`, les tuiles atteignables, les déficits de ravitaillement signalés et l'état des convois (progression, interception, livraisons)
+- **And** les boutons "Show Logistics" du HUD et du debug overlay exposent un tooltip récapitulant Plaines/Forêts/Collines avec leur coût de mouvement et le nombre de tuiles couvertes.
 
 ### AT-09: Rotation météo et impacts mouvement/logistique
 - **Given** la partie progresse sur plusieurs tours
 - **When** j'observe les événements `weather_changed`
 - **Then** les états `sunny`, `rain`, puis `mist` se succèdent et les payloads `logistics_update` reflètent les multiplicateurs de mouvement/flux associés
+- **And** le panneau météo de la HUD actualise son icône colorée, le libellé affiche les tours restants, et le tooltip résume les modificateurs de mouvement, flux logistique, bruit intel et bonus d'Élan.
 
 ### AT-10: Interceptions sur routes exposées
 - **Given** un convoi démarre sur la route avant (config "forward_operating")

@@ -27,7 +27,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 (Follow the numbered sequence in [`CHECKLISTS.md`](../../CHECKLISTS.md); each task must be completed in order with evidence linked back here.)
 - [ ] Phase 0 — Alignment, data hygiene, and instrumentation foundations.
 - [x] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry). *(2025-11-15 — Acceptation manuelle documentée dans `docs/tests/acceptance_tests.md` pour valider doctrines, ordres et télémétrie.)*
-- [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-18 — `LogisticsOverlay` anime les anneaux d'approvisionnement et les convois à partir des payloads `logistics_update`; terrain et météo restent à livrer.)*
+- [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-21 — `LogisticsOverlay` animé, terrain data-driven en place, `WeatherSystem` + HUD météo livrés; restent à brancher les modificateurs météo sur la logistique, la télémétrie et les tests additionnels.)*
 - [ ] Phase 3 — Combat (3 Pillars) resolution pipeline.
 - [ ] Phase 4 — Espionage systems and fog of war feedback.
 - [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
@@ -87,6 +87,11 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
     ]
   }
   ```
+- 2025-11-20 — Le dataset [`data/terrain.json`](../../data/terrain.json) alimente désormais les hexagones : chaque tuile affiche le nom du biome et son coût de mouvement, les payloads `logistics_update` exposent `terrain_name` et le HUD/debug overlay proposent un tooltip synthétique listant Plaines/Forêts/Collines et leurs comptes.
+- 2025-11-21 — `WeatherSystem` fait tourner `sunny/rain/mist` via un RNG à seed, diffuse `weather_changed` avec modificateurs et
+  tours restants, `LogisticsSystem` se contente désormais de consommer ces événements (désactivation de sa rotation interne) et
+  la HUD affiche une icône météo colorée avec tooltip détaillé; `tests/gdunit/test_weather_system.gd` verrouille l'ordre et les
+  durées générées.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
