@@ -46,7 +46,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 27. [x] **Implement pillar maths.** Encode Position/Impulse/Information calculations using doctrine, formation, terrain, weather, and intel modifiers exactly as SDS specifies. Annotate formulas in mission notes. *(2025-12-01 — Refactored `CombatSystem` pillar resolver with doctrine focus, logistics severity, movement cost, and intel multipliers; formulas documented in the mission brief.)*
 28. [x] **Build combat UI.** Deliver HUD panels/modals showing gauges, textual summaries, and Élan adjustments; capture UI screenshots. *(2025-12-02 — HUD "Dernier engagement" panel affiche les piliers, le contexte logistique et les deltas d'Élan; capture écran à réaliser hors conteneur headless.)*
 29. [x] **Record telemetry.** Emit `combat_resolved` payloads with per-pillar breakdowns and resulting unit states. *(2025-12-03 — Payload enrichi avec `pillar_summary` et `units`, sérialisé par `TelemetryAutoload`, gdUnit vérifie la structure.)*
-30. [ ] **Automate combat checks.** Write gdUnit scenarios covering deterministic outcomes, tie-breakers, and edge cases. Archive result summaries.
+30. [x] **Automate combat checks.** Write gdUnit scenarios covering deterministic outcomes, tie-breakers, and edge cases. Archive result summaries. *(2025-12-04 — Ajouté `tests/gdunit/test_combat_resolution.gd` couvrant la reproductibilité par seed, les égalités 1-1-1 et l'impact logistique critique sur les pertes.)*
 31. [ ] **Document combat loop.** Update `README.md` and the mission brief with instructions for triggering combat and interpreting results.
 
 ## Phase 4 — Espionage & Fog of War
