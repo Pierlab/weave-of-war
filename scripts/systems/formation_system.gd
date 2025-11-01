@@ -215,13 +215,15 @@ func _on_formation_changed(payload: Dictionary) -> void:
             _unit_inertia[unit_id] = {"turns_remaining": lock_turns}
         else:
             _unit_inertia.erase(unit_id)
+    elif reason == "combat":
+        pass
     else:
         _unit_inertia.erase(unit_id)
 
-    _update_unit_status(unit_id, formation_id, reason)
+    _update_unit_status(unit_id, formation_id, reason, payload)
     _emit_status_update("change")
 
-func _update_unit_status(unit_id: String, formation_id: String, reason: String) -> void:
+func _update_unit_status(unit_id: String, formation_id: String, reason: String, context: Dictionary = {}) -> void:
     var unit_info: Dictionary = _unit_catalog.get(unit_id, {})
     var formation_info: Dictionary = _formation_rules.get(formation_id, {})
     var inertia_state: Dictionary = _unit_inertia.get(unit_id, {})
@@ -241,6 +243,20 @@ func _update_unit_status(unit_id: String, formation_id: String, reason: String) 
         "reason": reason,
         "available_formations": available_formations,
     }
+    if not context.is_empty():
+        var filtered: Dictionary = {}
+        for key in context.keys():
+            if key in ["unit_id", "formation_id", "reason"]:
+                continue
+            var value := context.get(key)
+            if value is Dictionary:
+                filtered[key] = (value as Dictionary).duplicate(true)
+            elif value is Array:
+                filtered[key] = (value as Array).duplicate(true)
+            else:
+                filtered[key] = value
+        if not filtered.is_empty():
+            status["context"] = filtered
     _unit_status[unit_id] = status
 
 func _get_available_formations(unit_id: String) -> Array:

@@ -220,7 +220,9 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
 - `DataLoader` exposes the formations dataset, maps each formation to the archetypes that can field it, and offers helper
   lookups (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `Telemetry` records
   competence and formation events with the enriched before/after snapshots so gdUnit tests and dashboards can assert on the
-  complete Semaine 6 loop without diffing raw payloads.
+  complete Semaine 6 loop without diffing raw payloads. Every `combat_resolved` now republishes the active formation with
+  engagement/order IDs, pillar summary, and per-unit outcomes so telemetry dashboards can correlate posture choices with battle
+  performance without recomputing context.
 
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove

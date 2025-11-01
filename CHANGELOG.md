@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Formation telemetry now tags every `combat_resolved` with posture context: `CombatSystem` re-emits `formation_changed` events
+  carrying engagement/order IDs, pillar summaries, and per-unit outcomes while `FormationSystem` preserves inertia locks and
+  surfaces the combat snapshot in `formation_status_updated`. New gdUnit coverage validates the telemetry payload and lock
+  persistence, closing checklist item 48.
 - Formation posture badges on the tactical map: a new `FormationOverlay` draws colour-coded initials, inertia rings, and swap
   highlight pulses for each unit whenever `formation_status_updated` or `formation_changed` fires, keeping posture shifts visible
   without opening the HUD. Acceptance tests now cover the visual feedback and a gdUnit utility spec verifies the badge

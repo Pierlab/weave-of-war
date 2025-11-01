@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-24 — Relié la télémétrie de formation aux résolutions combat : `CombatSystem` réémet désormais `formation_changed`
+  pour chaque unité avec l'engagement, l'ordre, le résumé de piliers et le `unit_result`, tandis que `FormationSystem`
+  conserve les verrous d'inertie et stocke le contexte dans `formation_status_updated`. README, CHANGELOG, checklist et mission
+  brief détaillent l'item 48, un nouveau test gdUnit verrouille le flux, et les commandes Godot headless restent bloquées tant
+  que l'exécutable n'est pas provisionné dans le conteneur.
 - 2025-12-23 — Ajouté un `FormationOverlay` à la carte tactique : les unités affichent désormais des badges de posture colorés
   (initiales, anneau d'inertie, surbrillance lors d'un swap) synchronisés avec `formation_status_updated`. README, CHANGELOG,
   AT-14 et le mission brief détaillent la nouvelle visibilité, un test gdUnit vérifie les abréviations/couleurs, et la carte se

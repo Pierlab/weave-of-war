@@ -70,7 +70,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 45. [x] **Implement formation controls.** Provide HUD interactions (dropdown/radial) respecting Élan costs and inertia delays. *(2025-12-21 — Panneau HUD « Formations » avec menus déroulants par unité, feedback Élan/inertie en direct, `FormationSystem` gère les coûts, verrous et publie `formation_status_updated` pour synchroniser HUD/tests.)*
 46. [x] **Integrate with combat.** Ensure `CombatSystem` consumes formation data when computing pillar modifiers; verify via logs/tests. *(2025-12-22 — `CombatSystem` now injects formation bonuses/multipliers into pillar resolution, and gdUnit verifies posture swaps shift Position/Impulsion/Information as expected.)*
 47. [x] **Visualise formation changes.** Update map visuals/icons when formations shift; capture assets in mission notes. *(2025-12-23 — `FormationOverlay` affiche badges colorés + halo d'inertie sur la carte; capture map/HUD à prendre lors d'un run non headless.)*
-48. [ ] **Emit formation telemetry.** Publish `formation_changed` events linked to combat outcomes.
+48. [x] **Emit formation telemetry.** Publish `formation_changed` events linked to combat outcomes. *(2025-12-24 — `CombatSystem` republishes active formations after every `combat_resolved`, tagging payloads with engagement/order context so Telemetry, HUD, and the mission status store per-unit combat snapshots without clearing inertia.)*
 49. [ ] **Test formation flows.** Add gdUnit coverage validating transitions, costs, and combat influence; archive results.
 
 ## Phase 7 — Telemetry, Analytics, and Assistant AI Insights

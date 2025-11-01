@@ -157,6 +157,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   que la documentation (README, CHANGELOG, checklist) reflète les nouveaux contrats.
 
 ### Phase 6 progress
+- 2025-12-24 — `CombatSystem` republie chaque formation active après `combat_resolved` avec `reason: "combat"`, en joignant l'id d'engagement, l'ordre et le `unit_result`. `FormationSystem` préserve désormais les verrous d'inertie lors de ces instantanés, stocke le contexte de combat dans `formation_status_updated`, et les tests gdUnit couvrent la télémétrie + la persistance des locks, clôturant l'item 48.
 - 2025-12-23 — La carte hex adopte un `FormationOverlay` qui affiche badges de posture (initiales + couleur), anneau d'inertie et
   halo d'animation lors des swaps. Map `Map` transmet désormais `EventBus`/`DataLoader` à l'overlay pour rester en phase avec
   `formation_status_updated`, AT-14 documente le contrôle visuel et une capture map/HUD reste à produire hors conteneur headless

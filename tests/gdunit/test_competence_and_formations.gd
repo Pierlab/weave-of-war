@@ -420,6 +420,90 @@ func test_combat_system_applies_formation_modifiers_to_pillars() -> void:
     asserts.is_true(shield_impulse < column_impulse, "Shield wall should reduce impulse in exchange for resilience")
     asserts.is_true(shield_information < column_information, "Shield wall should trade information gains for protection")
 
+func test_combat_resolution_emits_formation_telemetry() -> void:
+    var event_bus: EventBus = EVENT_BUS.new()
+    event_bus._ready()
+
+    var system: CombatSystem = COMBAT_SYSTEM.new()
+    system.setup(event_bus, null)
+    system.configure(
+        [
+            {
+                "id": "infantry",
+                "name": "Infantry",
+                "combat_profile": {"position": 1.0, "impulse": 0.8, "information": 0.5},
+                "recon_profile": {"detection": 0.2, "counter_intel": 0.1},
+                "default_formations": ["shield_wall", "advance_column"],
+            }
+        ],
+        [
+            {
+                "id": "advance",
+                "pillar_weights": {"position": 0.35, "impulse": 0.6, "information": 0.25},
+                "intel_profile": {"signal_strength": 0.65, "counter_intel": 0.1},
+            }
+        ],
+        [
+            {
+                "id": "force",
+                "effects": {"combat_bonus": {"position": 0.05, "impulse": 0.1, "information": 0.05}},
+            }
+        ],
+        [
+            {
+                "id": "sunny",
+                "combat_modifiers": {"position": 1.0, "impulse": 1.0, "information": 1.0},
+            }
+        ],
+        [
+            {
+                "id": "shield_wall",
+                "pillar_modifiers": {"position": 0.4, "impulse": -0.2, "information": -0.1},
+                "posture": "defensive",
+                "competence_weight": {"logistics": 0.2},
+            },
+            {
+                "id": "advance_column",
+                "pillar_modifiers": {"position": -0.1, "impulse": 0.3, "information": 0.0},
+                "posture": "aggressive",
+                "competence_weight": {"tactics": 0.1},
+            }
+        ]
+    )
+
+    var telemetry_payloads: Array = []
+    event_bus.formation_changed.connect(func(payload: Dictionary) -> void:
+        telemetry_payloads.append(payload)
+    )
+
+    system.set_unit_formation("infantry", "advance_column")
+    telemetry_payloads.clear()
+
+    var engagement := {
+        "engagement_id": "telemetry_test",
+        "order_id": "advance",
+        "attacker_unit_ids": ["infantry"],
+        "defender_unit_ids": [],
+        "terrain": "plains",
+        "weather_id": "sunny",
+    }
+
+    system.set_rng_seed(9)
+    var resolution := system.resolve_engagement(engagement)
+    asserts.is_false(resolution.is_empty(), "Combat resolution should return a payload")
+    asserts.is_true(telemetry_payloads.size() > 0, "Combat should emit formation telemetry for participating units")
+
+    var combat_payload: Dictionary = telemetry_payloads.back()
+    asserts.is_equal("combat", combat_payload.get("reason", ""), "Formation telemetry payload should tag combat reason")
+    asserts.is_equal("telemetry_test", combat_payload.get("engagement_id", ""), "Engagement id should be echoed for telemetry correlation")
+    asserts.is_equal("advance", combat_payload.get("order_id", ""), "Order id should mirror the resolved engagement")
+
+    var unit_result: Dictionary = combat_payload.get("unit_result", {})
+    asserts.is_equal("infantry", unit_result.get("unit_id", ""), "Unit result should reference the emitting unit")
+
+    var pillar_summary: Dictionary = combat_payload.get("pillar_summary", {})
+    asserts.is_true(pillar_summary.has("decisive_pillars"), "Pillar summary should be included for analytics correlation")
+
 func test_formation_system_enforces_cost_and_inertia() -> void:
     var event_bus: EventBus = EVENT_BUS.new()
     event_bus._ready()
@@ -519,3 +603,35 @@ func test_formation_system_enforces_cost_and_inertia() -> void:
     asserts.is_true(failures.size() > 0, "Insufficient Élan should prevent the formation change")
     failure_payload = failures.back()
     asserts.is_equal("insufficient_elan", failure_payload.get("reason", ""), "Failure reason should cite Élan shortage")
+
+    changes.clear()
+    var combat_engagement := {
+        "engagement_id": "formation_lock_check",
+        "order_id": "advance",
+        "attacker_unit_ids": ["infantry"],
+        "defender_unit_ids": [],
+        "terrain": "plains",
+    }
+    combat_system.set_rng_seed(3)
+    combat_system.resolve_engagement(combat_engagement)
+
+    asserts.is_true(changes.size() > 0, "Combat resolution should emit formation telemetry")
+    var combat_payload: Dictionary = changes.back()
+    asserts.is_equal("combat", combat_payload.get("reason", ""), "Combat telemetry should be tagged as combat")
+    asserts.is_equal("formation_lock_check", combat_payload.get("engagement_id", ""), "Telemetry payload should include engagement id")
+
+    asserts.is_true(status_payloads.size() > 0, "Formation status should update after combat telemetry")
+    var status_variant: Variant = status_payloads.back()
+    var combat_status: Dictionary = {}
+    if status_variant is Dictionary:
+        var units_variant: Variant = (status_variant as Dictionary).get("units", {})
+        if units_variant is Dictionary:
+            var units_dict: Dictionary = units_variant as Dictionary
+            if units_dict.has("infantry"):
+                combat_status = units_dict.get("infantry", {})
+    asserts.is_true(bool(combat_status.get("locked", false)), "Inertia lock should persist after combat telemetry emission")
+    var context: Dictionary = {}
+    var context_variant: Variant = combat_status.get("context", {})
+    if context_variant is Dictionary:
+        context = context_variant as Dictionary
+    asserts.is_equal("formation_lock_check", context.get("engagement_id", ""), "Status context should expose the latest engagement id")
