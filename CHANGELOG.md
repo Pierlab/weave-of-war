@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Enriched `competence_reallocated` telemetry with a `turn_id` and explicit `before`/`after` snapshots (allocations, budget, inertia, modifiers). `TelemetryAutoload` now normalises these fields and documentation/checklists/acceptance tests reflect the new auditing flow.
 - Propagated competence slider allocations into combat impulse multipliers, Assistant AI planning confidence, and logistics flow efficiency. `competence_reallocated` now ships allocation ratios, `LogisticsSystem` scales its `flow_multiplier`/`competence_multiplier`, and new gdUnit coverage locks the behaviour across combat, logistics, and assistant planning tests.
 - Introduced [`data/competence_sliders.json`](data/competence_sliders.json) and extended `TurnManager` to enforce per-category inertia locks, delta caps, and modifier tracking (`logistics_penalty`) so HUD/telemetry consumers can react to competence reallocations and supply disruptions.
 - Added a competence allocation panel to the HUD with dynamic slider rows, new `EventBus` signals for allocation requests/failures, and keyboard/controller shortcuts that snap to each category so players can redistribute Tactics/Strategy/Logistics budgets with immediate feedback on inertia, delta caps, and logistics penalties.
