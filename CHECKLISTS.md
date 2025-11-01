@@ -2,94 +2,89 @@
 
 This checklist replaces the earlier milestone summary and expands every deliverable required to land the Vertical Slice P0 described in `docs/project_spec.md`, the mission brief `docs/agents/missions/vertical_slice_p0.md`, and the SDS/TDD artefacts.
 
-> **Legend**  
+> **How to use this document**
+> 1. Progress strictly from the first numbered task to the last—do not skip ahead unless a dependency explicitly says so.
+> 2. After completing a task, update the linked artefacts (mission brief, docs, tests) before checking it off.
+> 3. Capture validation evidence (logs, screenshots, recordings) in `docs/agents/missions/vertical_slice_p0.md` as you go.
+
+> **Legend**
 > `[ ]` = pending · `[~]` = in progress (replace the space with `~`) · `[x]` = complete with validation evidence linked in mission notes.
 
-## Phase 0 — Alignment, Data Hygiene, and Instrumentation
-- [ ] Re-read `docs/project_spec.md`, `docs/agents/missions/vertical_slice_p0.md`, and the latest `context_snapshot.md` to confirm scope, constraints, and prior work. Record any deltas in `context_update.md`.
-- [ ] Audit `data/*.json` against the SDS requirements (doctrines, orders, units, weather, logistics, formations, competence sliders) and list missing fields or inconsistencies in the mission brief.
-- [ ] Update `DataLoader` schemas/tests so that every JSON file used in P0 validates structure and required enums before gameplay scripts consume them.
-- [ ] Ensure autoload singletons (`EventBusAutoload`, `DataLoaderAutoload`, `TelemetryAutoload`, `AssistantAIAutoload`) are registered in `project.godot` and emit/consume the baseline signals without warnings at startup.
-- [ ] Fix HUD audio feedback: make `_play_feedback()` start the stream, guard playback access, and stop/clear safely so console logs stay clean. Attach a short validation clip/log to the mission brief.
+## Phase 0 — Alignment, Data Hygiene, and Instrumentation Foundations
+1. [ ] **Re-align scope and mission context.** Re-read `docs/project_spec.md`, `docs/agents/missions/vertical_slice_p0.md`, and the latest `context_snapshot.md`. Log any scope delta or open risk in `context_update.md` under a new dated bullet.
+2. [ ] **Catalogue data gaps.** Audit every `data/*.json` file against SDS expectations (doctrines, orders, units, weather, logistics, formations, competence sliders). Record missing fields/inconsistencies in the mission brief under a "Phase 0 findings" heading.
+3. [ ] **Harden DataLoader validation.** Update `DataLoader` schemas and gdUnit tests so that all JSON documents used in P0 validate required enums/keys before consumption. Link passing test output in the mission brief.
+4. [ ] **Verify autoload readiness.** Confirm `EventBusAutoload`, `DataLoaderAutoload`, `TelemetryAutoload`, and `AssistantAIAutoload` are registered in `project.godot`, emit baseline signals during startup, and surface no warnings. Capture an editor/headless log excerpt proving success.
+5. [ ] **Stabilise HUD audio feedback.** Rework `_play_feedback()` and related helpers to start streams, guard playback, and stop/clear safely. Attach a short validation log or clip demonstrating clean console output after repeated doctrine/order swaps.
 
 ## Phase 1 — Command Model & Élan Core Loop
-### Data & Design Contracts
-- [ ] Confirm doctrine list (Force/Ruse/Patience/Vitesse/Équilibre) matches order requirements and update `data/doctrines.json` plus localisation strings accordingly.
-- [ ] Expand `data/orders.json` with costs, doctrine permissions, and AI intent metadata that aligns with the SDS command rules.
-- [ ] Document doctrine/order UX copy and audio cues in the HUD section of `README.md`.
+6. [ ] **Lock doctrine catalogue.** Ensure doctrine names (Force/Ruse/Patience/Vitesse/Équilibre) and metadata in `data/doctrines.json` match SDS rules. Update localisation strings or HUD labels as needed.
+7. [ ] **Enrich orders dataset.** Expand `data/orders.json` with Élan costs, doctrine requirements, and AI intent metadata aligned with the SDS. Document any new fields in the mission brief.
+8. [ ] **Document HUD UX copy.** Capture doctrine/order text, audio cues, and accessibility notes in the HUD section of `README.md`.
+9. [ ] **Wire core systems.** Instantiate `DoctrineSystem` and `ElanSystem` within `GameManager` using typed references. Ensure both wait for `data_loader_ready` before setup logic runs (add assertions/logs as proof).
+10. [ ] **Enforce command rules.** Implement doctrine inertia and Élan caps per SDS, exposing current inertia/Élan totals on the HUD (labels/tooltips). Include screenshots in mission notes.
+11. [ ] **Connect HUD interactions.** Link HUD selectors to `EventBusAutoload` so doctrine swaps/orders raise signals, and present validation errors in-line when rules fail.
+12. [ ] **Propagate orders to Assistant AI.** Confirm `AssistantAIAutoload` receives issued orders and logs interpretations accessible from the debug overlay.
+13. [ ] **Automate verification.** Add gdUnit tests covering doctrine change success/failure, Élan gain/spend limits, and assistant acknowledgements. Store command output hashes/paths in mission notes.
+14. [ ] **Instrument telemetry.** Emit structured payloads for `doctrine_selected`, `order_issued`, `order_rejected`, `elan_spent`, and `elan_gained`. Update telemetry schemas/docs accordingly.
+15. [ ] **Update manual checks.** Extend `docs/tests/acceptance_tests.md` with steps for doctrine selection, order issuance, and telemetry review.
 
-### Implementation & Integration
-- [ ] Instantiate `DoctrineSystem` and `ElanSystem` within `GameManager` with typed references and ensure they listen to `data_loader_ready` before running setup logic.
-- [ ] Enforce doctrine inertia and Élan caps per SDS, exposing current inertia and Élan totals to the HUD (labels/tooltips).
-- [ ] Connect HUD selectors to `EventBusAutoload` to request doctrine swaps/orders and display error messaging when validation fails.
-- [ ] Ensure the assistant AI receives issued orders and logs interpretations for telemetry/debug overlay.
-
-### Validation & Telemetry
-- [ ] Add gdUnit tests covering doctrine change success/failure, Élan gain/spend limits, and assistant AI acknowledgements.
-- [ ] Emit telemetry events: `doctrine_selected`, `order_issued`, `order_rejected`, `elan_spent`, `elan_gained` with structured payloads.
-- [ ] Update `docs/tests/acceptance_tests.md` with manual steps for selecting doctrines, issuing orders, and checking telemetry buffers.
-
-## Phase 2 — Logistics Backbone + Terrain & Weather Layering
-### Logistics Foundations
-- [ ] Implement `LogisticsSystem` instantiation in `GameManager` with hooks to `EventBusAutoload` for turn updates and HUD toggles.
-- [ ] Load logistics rings, nodes, and convoy routes from `data/logistics.json`; validate via gdUnit that supply graphs are connected per scenario definition.
-- [ ] Animate supply flows on the map (rings + moving convoy sprites) with state-dependent colouring.
-- [ ] Publish `logistics_update` signals containing reachable tiles, supply deficits, and convoy statuses each turn.
-
-### Terrain & Weather Coupling
-- [ ] Extend map tiles with terrain metadata (Plains/Forest/Hill) sourced from data; display tooltips in HUD/debug overlay.
-- [ ] Build a Weather controller that cycles through Sunny/Rain/Mist (and optional Snow/Storm hooks) with deterministic seeds for tests.
-- [ ] Ensure weather modifiers affect logistics throughput and convoy vulnerability as defined in the SDS.
-- [ ] Emit `weather_changed` telemetry with modifiers applied; update HUD icons/animations to reflect current weather.
-
-### Validation
-- [ ] Create gdUnit tests verifying logistics reachability, convoy interception hooks, and weather rotation cadence.
-- [ ] Update `docs/tests/acceptance_tests.md` with manual checks for toggling the logistics overlay, viewing terrain tooltips, and observing weather-driven changes.
+## Phase 2 — Logistics Backbone with Terrain & Weather Layering
+16. [ ] **Bootstrap LogisticsSystem.** Instantiate the logistics controller within `GameManager`, wiring turn update hooks and HUD toggles via `EventBusAutoload`.
+17. [ ] **Load logistics data.** Parse rings, nodes, and convoy routes from `data/logistics.json`; create gdUnit assertions that every scenario graph is connected.
+18. [ ] **Animate supply flows.** Render ring pulses and moving convoy sprites with state-dependent colouring (supply OK/at risk/broken). Capture GIF or screenshot evidence.
+19. [ ] **Publish logistics updates.** Emit `logistics_update` signals containing reachable tiles, supply deficits, and convoy statuses each turn. Document payload examples in mission notes.
+20. [ ] **Attach terrain metadata.** Extend map tiles to include Plains/Forest/Hill descriptors sourced from data, and surface tooltips in HUD/debug overlay.
+21. [ ] **Implement weather controller.** Cycle through Sunny/Rain/Mist (plus optional Snow/Storm hooks) using deterministic seeds for tests; expose state on HUD icons.
+22. [ ] **Link weather to logistics.** Apply weather modifiers to logistics throughput/convoy vulnerability as per SDS and log the adjustments for QA.
+23. [ ] **Emit weather telemetry.** Send `weather_changed` events with applied modifiers and record schemas.
+24. [ ] **Extend automated tests.** Add gdUnit coverage for logistics reachability, convoy interception hooks, and weather rotation cadence; commit outputs.
+25. [ ] **Refresh manual tests.** Update `docs/tests/acceptance_tests.md` with logistics overlay toggles, terrain tooltip checks, and weather-driven changes.
 
 ## Phase 3 — Combat (3 Pillars)
-- [ ] Instantiate `CombatSystem` in `GameManager` and subscribe to order execution events plus logistics/weather/espionage signals.
-- [ ] Implement pillar calculations (Position, Impulse, Information) using doctrines, formations, terrain, weather, and intel modifiers per SDS.
-- [ ] Create combat resolution UI (HUD panel or modal) with three gauges, textual summaries, and Élan adjustments.
-- [ ] Log outcomes to telemetry (`combat_resolved`) including per-pillar breakdown and resulting unit states.
-- [ ] Add gdUnit coverage for deterministic combat scenarios, ensuring tie-breaker and edge-case handling.
-- [ ] Document the combat loop in `README.md` and the mission brief, including how to trigger and interpret results.
+26. [ ] **Instantiate CombatSystem.** Wire combat to order execution events plus logistics/weather/espionage signals via `EventBusAutoload`.
+27. [ ] **Implement pillar maths.** Encode Position/Impulse/Information calculations using doctrine, formation, terrain, weather, and intel modifiers exactly as SDS specifies. Annotate formulas in mission notes.
+28. [ ] **Build combat UI.** Deliver HUD panels/modals showing gauges, textual summaries, and Élan adjustments; capture UI screenshots.
+29. [ ] **Record telemetry.** Emit `combat_resolved` payloads with per-pillar breakdowns and resulting unit states.
+30. [ ] **Automate combat checks.** Write gdUnit scenarios covering deterministic outcomes, tie-breakers, and edge cases. Archive result summaries.
+31. [ ] **Document combat loop.** Update `README.md` and the mission brief with instructions for triggering combat and interpreting results.
 
 ## Phase 4 — Espionage & Fog of War
-- [ ] Instantiate `EspionageSystem` alongside combat/logistics systems; ensure turn start hooks update fog states.
-- [ ] Implement fog of war rendering on the map (dim tiles, hide enemy details) while keeping player territories visible.
-- [ ] Design reconnaissance/spy order flows, including Élan or competence costs, and integrate them into the HUD/assistant AI pipeline.
-- [ ] Generate probabilistic intel pings with intent categories and surface them through HUD notifications + debug overlay.
-- [ ] Emit telemetry events `espionage_ping`, `intel_intent_revealed`, and maintain history in telemetry buffer for QA.
-- [ ] Write gdUnit tests for fog toggling, ping probability distribution, and intel decay over turns.
+32. [ ] **Spawn EspionageSystem.** Ensure it initialises alongside combat/logistics systems and updates fog state each turn.
+33. [ ] **Render fog visuals.** Dim hidden tiles, hide enemy intel, and keep player territory visible; document shader/material changes if any.
+34. [ ] **Design recon flows.** Implement reconnaissance/spy orders with Élan/competence costs, integrate them into HUD + assistant pipeline, and log validation rules.
+35. [ ] **Generate intel feedback.** Produce probabilistic pings with intent categories surfaced via HUD notifications and debug overlay timelines.
+36. [ ] **Instrument espionage telemetry.** Emit `espionage_ping` and `intel_intent_revealed` events, preserving history in telemetry buffers.
+37. [ ] **Test espionage systems.** Add gdUnit coverage for fog toggling, ping probability distribution, and intel decay. Attach outputs to mission notes.
 
 ## Phase 5 — Competence Sliders (Tactics / Strategy / Logistics)
-- [ ] Extend `TurnManager` to track competence budget, inertia, and their modifiers per SDS.
-- [ ] Create HUD slider controls with visual feedback and integrate with keyboard/controller shortcuts.
-- [ ] Apply slider values to relevant systems: tactics affects combat impulse, strategy influences assistant AI planning, logistics boosts supply efficiency.
-- [ ] Emit telemetry `competence_reallocated` with before/after values and link to turn IDs.
-- [ ] Cover slider operations with gdUnit tests ensuring inertia constraints and effect propagation to dependent systems.
-- [ ] Document slider usage and impacts in `README.md` and acceptance tests.
+38. [ ] **Extend TurnManager.** Track competence budget, inertia, and modifiers following SDS guidelines; expose state to HUD/telemetry.
+39. [ ] **Ship HUD sliders.** Build slider controls with visual feedback and keyboard/controller shortcuts; capture interaction clips.
+40. [ ] **Propagate slider effects.** Apply slider values to combat impulse, assistant AI planning, and logistics efficiency.
+41. [ ] **Emit competence telemetry.** Publish `competence_reallocated` events with before/after values and turn IDs.
+42. [ ] **Automate slider behaviour.** Cover inertia constraints and downstream effects via gdUnit tests; store logs.
+43. [ ] **Update documentation.** Expand `README.md` and acceptance tests with slider usage guidance and expected outcomes.
 
 ## Phase 6 — Unit Formations & Postures
-- [ ] Load formation definitions from `data/formations.json` and associate them with unit archetypes.
-- [ ] Provide HUD controls (dropdown or radial) to assign formations/postures, respecting Élan costs and inertia delays.
-- [ ] Ensure `CombatSystem` consumes formation data when computing Position/Impulse modifiers.
-- [ ] Update visual representation on the map (icons or overlays) when formations change.
-- [ ] Emit telemetry `formation_changed` and link to combat outcomes for analytics.
-- [ ] Add gdUnit coverage verifying formation transitions, costs, and combat influence.
+44. [ ] **Load formation definitions.** Map `data/formations.json` entries to unit archetypes and document the mapping.
+45. [ ] **Implement formation controls.** Provide HUD interactions (dropdown/radial) respecting Élan costs and inertia delays.
+46. [ ] **Integrate with combat.** Ensure `CombatSystem` consumes formation data when computing pillar modifiers; verify via logs/tests.
+47. [ ] **Visualise formation changes.** Update map visuals/icons when formations shift; capture assets in mission notes.
+48. [ ] **Emit formation telemetry.** Publish `formation_changed` events linked to combat outcomes.
+49. [ ] **Test formation flows.** Add gdUnit coverage validating transitions, costs, and combat influence; archive results.
 
 ## Phase 7 — Telemetry, Analytics, and Assistant AI Insights
-- [ ] Review all emitted telemetry events for schema consistency; update `docs/telemetry/dashboard_plan.md` with dashboards answering mission KPIs.
-- [ ] Ensure `TelemetryAutoload` persists session buffers to disk (or stub) for later ingestion; document storage path in README.
-- [ ] Extend `AssistantAIAutoload` to log reasoning traces for orders, espionage suggestions, and logistics alerts.
-- [ ] Provide tooling (e.g., debug overlay panels) to inspect telemetry buffers and assistant suggestions during playtests.
+50. [ ] **Review telemetry schemas.** Cross-check all emitted events for schema consistency and update `docs/telemetry/dashboard_plan.md` with KPI dashboards.
+51. [ ] **Persist telemetry buffers.** Extend `TelemetryAutoload` to persist session buffers (or stub) and document storage paths in README + mission brief.
+52. [ ] **Enhance Assistant AI logging.** Record reasoning traces for orders, espionage suggestions, and logistics alerts; provide sample logs.
+53. [ ] **Expose inspection tooling.** Add debug overlay panels or tooling to review telemetry buffers and assistant suggestions during playtests; capture screenshots.
 
 ## Phase 8 — Quality Assurance & Delivery Rituals
-- [ ] Run required commands and archive logs in mission notes:
-  - [ ] `godot --headless --path . --script res://scripts/ci/gd_lint_runner.gd`
-  - [ ] `godot --headless --path . --script res://scripts/ci/gd_build_check.gd`
-  - [ ] `godot --headless --path . --script res://scripts/ci/gdunit_runner.gd`
-- [ ] Perform manual smoke tests covering HUD interactions, logistics overlay, combat resolution, espionage pings, slider adjustments, and formation swaps; capture screenshots/GIFs for review.
-- [ ] Refresh `context_update.md`, append CHANGELOG/README updates, and regenerate `context_snapshot.md` after final validation.
-- [ ] Summarise completion status and outstanding risks in `docs/agents/missions/vertical_slice_p0.md` with links to evidence (logs, videos, telemetry dumps).
-- [ ] Prepare PR description following the template in `docs/vibe_coding.md`, referencing this checklist and mission deliverables.
+54. [ ] **Run mandatory headless commands.** Execute the three Godot headless scripts and save logs alongside the mission brief:
+    - [ ] `godot --headless --path . --script res://scripts/ci/gd_lint_runner.gd`
+    - [ ] `godot --headless --path . --script res://scripts/ci/gd_build_check.gd`
+    - [ ] `godot --headless --path . --script res://scripts/ci/gdunit_runner.gd`
+55. [ ] **Complete manual QA sweep.** Perform HUD interactions, logistics overlay toggles, combat resolutions, espionage pings, slider adjustments, and formation swaps; attach screenshots/GIFs.
+56. [ ] **Refresh canonical docs.** Update `context_update.md`, append CHANGELOG/README notes, and regenerate `context_snapshot.md` after validation.
+57. [ ] **Summarise in mission brief.** Document completion status, risks, and evidence links in `docs/agents/missions/vertical_slice_p0.md`.
+58. [ ] **Prepare PR package.** Draft the PR description using the template in `docs/vibe_coding.md`, referencing checklist items and providing test logs.

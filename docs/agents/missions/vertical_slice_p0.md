@@ -24,7 +24,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Update onboarding and mission documentation alongside any behaviour changes.
 
 ## Implementation checklist
-(Use [`CHECKLISTS.md`](../../CHECKLISTS.md) for the detailed sub-tasks and validation artefacts.)
+(Follow the numbered sequence in [`CHECKLISTS.md`](../../CHECKLISTS.md); each task must be completed in order with evidence linked back here.)
 - [ ] Phase 0 — Alignment, data hygiene, and instrumentation foundations.
 - [ ] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry).
 - [ ] Phase 2 — Logistics backbone with terrain & weather integration.
