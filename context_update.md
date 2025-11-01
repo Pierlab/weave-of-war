@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-29 — Documenté dans le README les avertissements Godot au démarrage sous Windows (mappings SDL `misc2`, couches Vulkan
+  Microsoft incomplètes, extensions optionnelles absentes) afin que les agents sachent qu'ils sont bénins et comment les
+  neutraliser localement si nécessaire.
 - 2025-11-28 — Supprimé les nouveaux arrêts Godot 4.6 en annotant `LogisticsSystem` avec des identifiants de route typés, en
   forçant `ElanSystem` à utiliser des cibles de cap flottantes explicites et en dupliquant les définitions `TerrainData` avant
   merge afin que la carte puisse injecter les entrées `data/terrain.json` sans heurter les dictionnaires en lecture seule.
