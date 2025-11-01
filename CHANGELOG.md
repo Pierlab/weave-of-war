@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Refreshed manual acceptance tests (AT-08 à AT-10) pour couvrir la bascule HUD/debug du overlay logistique, les tooltips terrain dynamiques et les impacts météo sur `logistics_update`.
 - Introduced `WeatherSystem` to cycle weather states deterministically from `data/weather.json`, emit rich `weather_changed`
   payloads, and drive the new HUD weather panel. Added gdUnit coverage in `tests/gdunit/test_weather_system.gd` to lock the
   rotation order and seeded duration rolls.

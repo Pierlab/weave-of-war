@@ -213,4 +213,8 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 
 ## Acceptance Checks
 The high-level manual acceptance flow lives in [`docs/tests/acceptance_tests.md`](docs/tests/acceptance_tests.md). Keep it in sync
-with the Godot scenes and systems as they evolve.
+with the Godot scenes and systems as they evolve. Les cas AT-08 à AT-10 ont été mis à jour pour couvrir :
+
+- La double bascule HUD/debug du overlay logistique avec traces `logistics_overlay_toggled`.
+- Les tooltips terrain dynamiques qui reflètent le nombre de tuiles atteignables selon la météo.
+- Les impacts de la rotation `weather_changed` (Sunny/Rain/Mist) sur les payloads `logistics_update` et la télémétrie associée.

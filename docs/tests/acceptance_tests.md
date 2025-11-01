@@ -62,20 +62,23 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 
 ### AT-08: Overlay logistique hybride
 - **Given** la scène principale est en cours d'exécution et `LogisticsSystem` a chargé les données JSON enrichies
-- **When** j'active le bouton "Show Logistics"
-- **Then** la console (ou le debug overlay) affiche un payload `logistics_update` listant anneaux `core/fringe/isolated`, les tuiles atteignables, les déficits de ravitaillement signalés et l'état des convois (progression, interception, livraisons)
-- **And** les boutons "Show Logistics" du HUD et du debug overlay exposent un tooltip récapitulant Plaines/Forêts/Collines avec leur coût de mouvement et le nombre de tuiles couvertes.
+- **When** j'active le bouton "Show Logistics" depuis la HUD **et** le panneau debug
+- **Then** la console (ou le debug overlay) affiche un payload `logistics_update` listant les anneaux `core/fringe/isolated`, les tuiles atteignables et les convois avec leurs `last_event`
+- **And** chaque bascule HUD/debug imprime une trace `logistics_overlay_toggled` confirmant l'état `shown/hidden`
+- **And** les boutons "Show Logistics" exposent un tooltip récapitulant Plaines/Forêts/Collines avec leur coût de mouvement et le nombre de tuiles couvertes.
 
 ### AT-09: Rotation météo et impacts mouvement/logistique
 - **Given** la partie progresse sur plusieurs tours
-- **When** j'observe les événements `weather_changed`
-- **Then** les états `sunny`, `rain`, puis `mist` se succèdent et les payloads `logistics_update` reflètent les multiplicateurs de mouvement/flux associés
+- **When** j'observe successivement trois payloads `weather_changed`
+- **Then** les états `sunny`, `rain`, puis `mist` se succèdent et les payloads `logistics_update` reflètent les multiplicateurs de mouvement/flux et les blocs `weather_adjustments`
 - **And** le panneau météo de la HUD actualise son icône colorée, le libellé affiche les tours restants, et le tooltip résume les modificateurs de mouvement, flux logistique, bruit intel et bonus d'Élan.
+- **And** les tooltips logistics (HUD et debug) mettent à jour le nombre de tuiles atteignables lorsque la météo réduit la portée.
 
 ### AT-10: Interceptions sur routes exposées
 - **Given** un convoi démarre sur la route avant (config "forward_operating")
 - **When** plusieurs tours s'écoulent sous pluie ou brume
 - **Then** au moins un payload `logistics_update` signale `last_event = intercepted`, la télémétrie archive l'événement `logistics_update`, et un événement dédié `logistics_break` est présent dans le buffer
+- **And** l'état du tooltip HUD/debug met à jour le compteur de convois interceptés dans la section résumée.
 
 ### AT-11: Résolution Combat 3 Piliers
 - **Given** la boucle de commandement déclenche un ordre offensif
