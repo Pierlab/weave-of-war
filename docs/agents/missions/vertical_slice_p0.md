@@ -29,7 +29,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - [x] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry). *(2025-11-15 — Acceptation manuelle documentée dans `docs/tests/acceptance_tests.md` pour valider doctrines, ordres et télémétrie.)*
 - [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-22 — Les pénalités météo alimentent désormais le flux logistique et le risque d'interception; restent à brancher la télémétrie météo et la couverture de tests additionnelle.)*
 - [~] Phase 3 — Combat (3 Pillars) resolution pipeline. *(2025-11-30 — CombatSystem instancié côté GameManager et connecté aux flux `order_*`/`logistics_update`.)*
-- [~] Phase 4 — Espionage systems and fog of war feedback. *(2025-12-08 — EspionageSystem bootstrapped from GameManager; remaining HUD/telemetry tasks to follow.)*
+- [x] Phase 4 — Espionage systems and fog of war feedback. *(2025-12-10 — Recon flows added: `recon_probe`/`deep_cover` orders consume competence, auto-trigger `espionage_ping`, and HUD/tooling surface the validation.)*
 - [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
 - [ ] Phase 6 — Unit formations/postures influencing combat outcomes.
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
@@ -132,6 +132,12 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-12-09 — Les tuiles de la carte appliquent maintenant un overlay de brouillard animé par les événements `fog_of_war_updated`
   : visibilité faible assombrit l'hex, masque les infos terrain/tooltip et ne laisse apparaître que les coordonnées, tandis que
   les tuiles ravitaillées conservent leur lisibilité complète.
+- 2025-12-10 — *Recon Probe* et *Deep Cover* vivent dans `data/orders.json`, affichent leurs coûts de compétence/Élan dans la HUD,
+  bloquent le bouton `Exécuter` tant que le budget requis n'est pas disponible, et déclenchent automatiquement un `espionage_ping`
+  ciblant la tuile la plus opaque avec un bonus de détection proportionnel à la compétence dépensée.
+- 2025-12-11 — La HUD accueille un panneau "Renseignements" (résumé coloré, probabilité vs jet) et l'overlay debug une timeline
+  détaillée; `EspionageSystem` enrichit les payloads `espionage_ping` avec roll, bonus de détection, deltas de visibilité et budget
+  de compétence restant pour suivre la qualité des pings.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

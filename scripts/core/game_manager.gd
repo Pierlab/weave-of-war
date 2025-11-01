@@ -49,6 +49,8 @@ func _ready() -> void:
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)
+    if elan_system:
+        elan_system.set_turn_manager(turn_manager)
 
     if event_bus:
         event_bus.next_turn_requested.connect(_on_next_turn_requested)

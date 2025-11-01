@@ -77,9 +77,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 ### HUD UX copy & feedback
 - **Doctrine selector** — Each entry mirrors the doctrine `name` from `data/doctrines.json`. Selecting a doctrine updates the status label with the template `Doctrine : {Nom} — Inertie {N} tour(s)` so players see how many turns remain before the stance can change again, while the tooltip lists remaining swap tokens and the current Élan cap bonus granted by the doctrine. When the selector is locked by inertia, the HUD now restores the previous choice automatically and surfaces the validation message inline instead of silently ignoring the input.
 - **Inertie label** — A dedicated `Inertie : {N} tour(s) · x{M}` line surfaces the doctrine multiplier qui sera appliquée au prochain ordre, avec une infobulle rappelant que toute commande ajoutera au minimum la durée d'inertie affichée.
-- **Order selector** — Orders are rendered as `{Nom} (X.X Élan)` using the `base_elan_cost` from `data/orders.json`. The HUD refreshes the list whenever the doctrine changes so only authorised orders appear.
-- **Execute button** — The primary call-to-action reads `Exécuter l'ordre` when no cost applies and switches to `Exécuter (X.X Élan)` when Élan is required. The button is disabled automatically if the selected order is unaffordable or missing, and its tooltip now explains whether an order must be selected or how much Élan is missing so keyboard users receive the same inline validation as the feedback label.
-- **Feedback label** — Success messages adopt a cool blue tint (`Color(0.7, 0.9, 1.0)`) and include copy such as `Doctrine active : {Nom}` or `Ordre '{Nom}' exécuté (X.X Élan restant)`. Validation errors reuse warm amber (`Color(1.0, 0.65, 0.5)`) with explicit guidance: `Doctrine verrouillée par l'inertie`, `Élan insuffisant : X.X requis, X.X disponible`, or `Choisissez un ordre à exécuter.`
+- **Order selector** — Orders are rendered as `{Nom} (X.X Élan · Tactics 1.0, Strategy 0.5…)` when a `competence_cost` is defined, appending the categories and amounts pulled from `data/orders.json` so reconnaissance/espionnage commands advertise both their Élan drain and required competence budget. The HUD refreshes the list whenever the doctrine changes so only authorised orders appear.
+- **Execute button** — The primary call-to-action reads `Exécuter l'ordre` when no resource cost applies, switches to `Exécuter (X.X Élan)` when Élan is required, and now disables itself when the remaining competence allocations fall short of an order's `competence_cost`. The tooltip explains whether an order must be selected, how much Élan is missing, or which competence buckets (par exemple `Tactics 0.4/1.0`) need to be reallocated so keyboard users receive the same inline validation as the feedback label.
+- **Feedback label** — Success messages adopt a cool blue tint (`Color(0.7, 0.9, 1.0)`) and include copy such as `Doctrine active : {Nom}` ou `Ordre '{Nom}' exécuté (X.X Élan restant)`. Validation errors reuse warm amber (`Color(1.0, 0.65, 0.5)`) with explicit guidance: `Doctrine verrouillée par l'inertie`, `Élan insuffisant : X.X requis, X.X disponible`, `Compétence insuffisante (Tactics 0.4/1.0)` ou `Choisissez un ordre à exécuter.`
 - **Audio cues** — Positive actions (doctrine swap, order execution) trigger short sine tones at 660 Hz and 520 Hz, while validation warnings play 200 Hz or 220 Hz cues. All tones last 0.12 s at volume 0.2, share a 44.1 kHz sample rate, and fade with a fast attack envelope to avoid harsh peaks.
 - **Logistics toggle** — The logistics overlay button swaps between `Show Logistics` and `Hide Logistics`, keeping the action verb front-loaded for screen-reader clarity and future localisation keys.
 - **Weather panel** — A compact colour-coded icon sits next to the logistics toggle, updating whenever `WeatherSystem` broadcasts
@@ -152,8 +152,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 
 ### Déclencher et lire une résolution de combat
 1. **Préparez le tour côté HUD Commandement.** Choisissez la doctrine active depuis le sélecteur principal puis sélectionnez un
-   ordre offensif (par exemple *Advance* ou *Harass*) dans la liste déroulante. Lorsque l'ordre exige une cible, utilisez la
-   liste déroulante de cibles générée par l'Assistant AI pour pointer l'hex souhaité.
+   ordre offensif ou de reconnaissance (par exemple *Advance*, *Recon Probe* ou *Deep Cover*) dans la liste déroulante. Lorsque
+   l'ordre exige une cible, utilisez la liste déroulante de cibles générée par l'Assistant AI pour pointer l'hex souhaité ; les
+   ordres d'espionnage rappellent également dans leur infobulle le budget de compétence requis.
 2. **Validez l'engagement.** Appuyez sur le bouton `Exécuter (X.X Élan)` : l'ordre traverse l'Élan System, déclenche
    `order_execution_requested` puis `order_issued`, et `CombatSystem` récupère automatiquement les modificateurs actifs
    (doctrine, météo, logistique, espionnage, formation/compétence).
@@ -168,6 +169,14 @@ Startup instrumentation now prints readiness logs for all four services; the lat
    - `pillar_summary` avec les totaux bruts, la marge normalisée et le(s) pilier(s) décisif(s).
    - `units.attacker[]` / `units.defender[]` détaillant formation active, pertes estimées, moral/logistique et remarques.
    - `logistics` pour suivre l'état de supply transmis depuis `LogisticsSystem`.
+
+Les ordres *Recon Probe* et *Deep Cover* consomment à la fois de l'Élan et des points de compétence (`tactics`/`strategy`/`logistics`).
+Si le budget restant est insuffisant, la HUD désactive le bouton `Exécuter` et affiche une infobulle détaillant les catégories manquantes.
+Lorsqu'ils aboutissent, `EspionageSystem` déclenche automatiquement un ping ciblant la tuile la moins renseignée et publie un événement
+`espionage_ping` enrichi pour suivre le gain de visibilité. La HUD affiche désormais un panneau **Renseignements** listant les derniers pings
+avec le statut (succès/échec), l'intention révélée, la probabilité calculée vs le jet RNG et les bonus de détection apportés par la
+compétence. L'overlay debug complète cette vue avec une timeline détaillée (tour, ordre source, cible, roll, bruit/détection, visibilité
+avant/après) pour valider rapidement les tirages pendant les sessions QA.
 
 ## Competence sliders & formations (Semaine 6)
 - `TurnManager` now maintains a per-turn competence budget across the `tactics`, `strategy`, and `logistics` sliders. Manual

@@ -13,6 +13,7 @@ class StubCommandEventBus:
     var orders_issued: Array = []
     var orders_rejected: Array = []
     var assistant_packets: Array = []
+    var competence_spent_events: Array = []
 
     func emit_doctrine_selected(payload: Dictionary) -> void:
         doctrine_payloads.append(payload)
@@ -38,6 +39,9 @@ class StubCommandEventBus:
     func emit_assistant_order_packet(payload: Dictionary) -> void:
         assistant_packets.append(payload)
 
+    func emit_competence_spent(payload: Dictionary) -> void:
+        competence_spent_events.append(payload)
+
 class StubDataLoader:
     var orders: Dictionary = {}
 
@@ -46,6 +50,29 @@ class StubDataLoader:
 
     func get_order(order_id: String) -> Dictionary:
         return orders.get(order_id, {})
+
+class StubTurnManager:
+    var success := true
+    var remaining: Dictionary = {}
+    var last_request: Dictionary = {}
+
+    func request_competence_cost(costs: Dictionary, context: Dictionary = {}) -> Dictionary:
+        last_request = {
+            "costs": costs.duplicate(true),
+            "context": context.duplicate(true),
+        }
+        if success:
+            return {
+                "success": true,
+                "costs": costs.duplicate(true),
+                "remaining": remaining.duplicate(true),
+            }
+        return {
+            "success": false,
+            "reason": "insufficient_competence",
+            "required": costs.duplicate(true),
+            "available": remaining.duplicate(true),
+        }
 
 func test_doctrine_selection_respects_inertia() -> void:
     var doctrine_system: DoctrineSystem = DOCTRINE_SYSTEM.new()
@@ -309,6 +336,63 @@ func test_elan_system_emits_updates_and_blocks_invalid_orders() -> void:
     asserts.is_equal(3.0, insufficient_payload.get("required", 0.0), "Payload should expose the required Élan amount.")
     asserts.is_equal(2, event_bus.orders_rejected.size(), "Each blocked order should emit a telemetry rejection payload.")
 
+func test_elan_system_blocks_orders_without_competence() -> void:
+    var event_bus := StubCommandEventBus.new()
+    var turn_manager := StubTurnManager.new()
+    turn_manager.success = false
+    turn_manager.remaining = {"tactics": 0.5}
+
+    var elan_system: ElanSystem = ELAN_SYSTEM.new()
+    elan_system.event_bus = event_bus
+    elan_system.turn_manager = turn_manager
+    elan_system.configure([
+        {
+            "id": "recon_probe",
+            "name": "Recon Probe",
+            "base_elan_cost": 1,
+            "inertia_impact": 1,
+            "competence_cost": {"tactics": 1.0},
+        }
+    ], [])
+    elan_system.add_elan(2.0)
+    elan_system.set_allowed_orders(["recon_probe"])
+
+    elan_system._on_order_execution_requested("recon_probe")
+
+    asserts.is_equal(1, event_bus.orders_rejected.size(), "Order should be rejected when competence budget is insufficient.")
+    var rejection := event_bus.orders_rejected.back()
+    asserts.is_equal("insufficient_competence", rejection.get("reason", ""), "Rejection should cite competence shortfall.")
+    asserts.is_equal(0, event_bus.orders_issued.size(), "Order should not be issued when competence fails.")
+
+func test_elan_system_includes_competence_metadata_on_success() -> void:
+    var event_bus := StubCommandEventBus.new()
+    var turn_manager := StubTurnManager.new()
+    turn_manager.success = true
+    turn_manager.remaining = {"tactics": 0.5}
+
+    var elan_system: ElanSystem = ELAN_SYSTEM.new()
+    elan_system.event_bus = event_bus
+    elan_system.turn_manager = turn_manager
+    elan_system.configure([
+        {
+            "id": "recon_probe",
+            "name": "Recon Probe",
+            "base_elan_cost": 1,
+            "inertia_impact": 1,
+            "competence_cost": {"tactics": 1.0},
+        }
+    ], [])
+    elan_system.add_elan(2.0)
+    elan_system.set_allowed_orders(["recon_probe"])
+
+    elan_system._on_order_execution_requested("recon_probe")
+
+    asserts.is_equal(1, event_bus.orders_issued.size(), "Successful execution should emit an issued payload.")
+    var issued := event_bus.orders_issued.back()
+    var metadata: Dictionary = issued.get("metadata", {})
+    asserts.is_true(metadata.has("competence_cost"), "Metadata should include the competence cost spent.")
+    asserts.is_equal(1.0, metadata.get("competence_cost", {}).get("tactics", 0.0), "Competence cost should mirror order data.")
+    asserts.is_true(metadata.has("competence_remaining"), "Metadata should include remaining competence snapshot.")
 func test_assistant_ai_acknowledges_order_packets() -> void:
     var event_bus := StubCommandEventBus.new()
     var data_loader := StubDataLoader.new()

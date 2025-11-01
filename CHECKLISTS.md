@@ -52,8 +52,8 @@ This checklist replaces the earlier milestone summary and expands every delivera
 ## Phase 4 — Espionage & Fog of War
 32. [x] **Spawn EspionageSystem.** Ensure it initialises alongside combat/logistics systems and updates fog state each turn. *(2025-12-08 — GameManager instantiates EspionageSystem, seeds fog from terrain data, and a gdUnit regression confirms turn-syncing telemetry.)*
 33. [x] **Render fog visuals.** Dim hidden tiles, hide enemy intel, and keep player territory visible; document shader/material changes if any. *(2025-12-09 — Added a fog overlay polygon to each hex tile, driven by `fog_of_war_updated` events emitted by `EspionageSystem`. Labels/tooltip copy now redact intel when visibility drops below 35%.)*
-34. [ ] **Design recon flows.** Implement reconnaissance/spy orders with Élan/competence costs, integrate them into HUD + assistant pipeline, and log validation rules.
-35. [ ] **Generate intel feedback.** Produce probabilistic pings with intent categories surfaced via HUD notifications and debug overlay timelines.
+34. [x] **Design recon flows.** Implement reconnaissance/spy orders with Élan/competence costs, integrate them into HUD + assistant pipeline, and log validation rules. *(2025-12-10 — Added `recon_probe`/`deep_cover` orders with competence budgets, HUD tooltips, automatic `espionage_ping`, and validation in DataLoader/tests.)*
+35. [x] **Generate intel feedback.** Produce probabilistic pings with intent categories surfaced via HUD notifications and debug overlay timelines. *(2025-12-11 — HUD "Renseignements" + timeline debug exposent roll/probabilité, intention révélée et deltas de visibilité pour chaque ping.)*
 36. [ ] **Instrument espionage telemetry.** Emit `espionage_ping` and `intel_intent_revealed` events, preserving history in telemetry buffers.
 37. [ ] **Test espionage systems.** Add gdUnit coverage for fog toggling, ping probability distribution, and intel decay. Attach outputs to mission notes.
 

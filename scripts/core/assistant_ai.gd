@@ -43,6 +43,9 @@ func _on_order_issued(payload: Dictionary) -> void:
     enriched_order["order_id"] = order_id
     enriched_order["intention"] = intention
     enriched_order["pillar_weights"] = order_data.get("pillar_weights", {})
+    var competence_variant: Variant = order_data.get("competence_cost", {})
+    if competence_variant is Dictionary:
+        enriched_order["competence_cost"] = (competence_variant as Dictionary).duplicate(true)
     if not enriched_order.has("target") and not enriched_order.has("target_hex"):
         enriched_order["target"] = "frontline"
 

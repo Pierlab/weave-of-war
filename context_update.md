@@ -1,6 +1,12 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-11 — Le panneau HUD "Renseignements" affiche maintenant chaque ping `espionage_ping` (succès/échec, intention, probabilité vs jet),
+  la timeline debug consigne les tirages détaillés, et `EspionageSystem` enrichit ses payloads avec roll, bonus de détection,
+  deltas de visibilité et budget de compétence restant.
+- 2025-12-10 — Ajouté les ordres *Recon Probe*/*Deep Cover* avec coûts combinés Élan/compétence : la HUD affiche désormais ces budgets,
+  bloque l'exécution tant que la compétence manque, `EspionageSystem` déclenche automatiquement un ping ciblant l'hex le moins visible,
+  et `DataLoader`/tests couvrent la validation `competence_cost`.
 - 2025-12-09 — La carte rend désormais le brouillard de guerre : `EspionageSystem` émet des événements `fog_of_war_updated`
   consommés par `Map`, chaque `HexTile` affiche un overlay assombri proportionnel à la visibilité et masque les infos terrain
   quand l'intel est faible, ce qui clôt l'item 33 de la checklist Phase 4.

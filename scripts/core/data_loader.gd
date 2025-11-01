@@ -14,7 +14,7 @@ const DATA_FILES := {
 }
 
 const COMBAT_PILLARS := ["position", "impulse", "information"]
-const ORDER_INTENTIONS := ["offense", "defense", "deception", "support"]
+const ORDER_INTENTIONS := ["offense", "defense", "deception", "support", "intel"]
 const ORDER_TARGET_SCOPES := ["frontline", "flank", "rear", "logistics", "global", "support"]
 const ORDER_RISK_LEVELS := ["low", "moderate", "high", "critical"]
 const LOGISTICS_ROUTE_TYPES := ["ring", "road", "convoy", "river", "airlift"]
@@ -22,6 +22,7 @@ const SUPPLY_STATES := ["stable", "flexible", "surged", "strained"]
 const CONVOY_USAGE := ["optional", "required", "forbidden"]
 const FORMATION_POSTURES := ["defensive", "aggressive", "balanced", "fluid", "recon", "ranged", "support"]
 const TERRAIN_ENTRY_TYPES := ["definition", "tile"]
+const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]
 
 static var _instance: DataLoader
 
@@ -424,6 +425,12 @@ static func _validate_order(entry: Dictionary, context: String) -> Array:
         errors += _validate_pillar_distribution("orders", entry.get("pillar_weights"), context + ".pillar_weights")
     if entry.has("intel_profile") and entry.get("intel_profile") is Dictionary:
         errors += _validate_intel_profile(entry.get("intel_profile"), context + ".intel_profile")
+    if entry.has("competence_cost"):
+        var cost_variant: Variant = entry.get("competence_cost")
+        if cost_variant is Dictionary:
+            errors += _validate_competence_cost(cost_variant, context + ".competence_cost")
+        else:
+            errors.append(_error("orders", context + ".competence_cost", "invalid_type", "dictionary"))
     if entry.has("assistant_metadata") and entry.get("assistant_metadata") is Dictionary:
         errors += _validate_assistant_metadata(entry.get("assistant_metadata"), context + ".assistant_metadata")
 
@@ -555,6 +562,18 @@ static func _validate_intel_profile(data: Dictionary, context: String) -> Array:
         errors += _ensure_numeric_value("orders", data.get("signal_strength"), context + ".signal_strength")
     if data.has("counter_intel"):
         errors += _ensure_numeric_value("orders", data.get("counter_intel"), context + ".counter_intel")
+    return errors
+
+static func _validate_competence_cost(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    for key in data.keys():
+        var category := str(key)
+        if not COMPETENCE_CATEGORIES.has(category):
+            errors.append(_error("orders", context, "invalid_enum", category))
+            continue
+        errors += _ensure_numeric_value("orders", data.get(category), context + "." + category)
+        if float(data.get(category, 0.0)) < 0.0:
+            errors.append(_error("orders", context + "." + category, "invalid_range", "value_must_be_non_negative"))
     return errors
 
 static func _validate_recon_profile(data: Dictionary, context: String) -> Array:

@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 - Added a fog-of-war rendering pipeline: `EspionageSystem` now emits `fog_of_war_updated` snapshots and the hex map applies a
   dark overlay/tooltip redaction when visibility falls below scout confidence, keeping player-controlled supply rings readable
   while concealing enemy intel.
+- Added reconnaissance and deep cover orders to `data/orders.json`: these consume Élan plus competence points, surface their
+  combined costs in the HUD, and trigger automatic `espionage_ping` payloads that prioritise the least visible tiles when
+  issued.
+- Added an intelligence feedback layer: `espionage_ping` payloads now expose roll/visibility deltas, competence bonuses, and
+  intent confidence while the HUD "Renseignements" panel and debug overlay timeline surface coloured summaries for each ping
+  (success vs countered, intention revealed, probability vs RNG roll).
 - Added a HUD "Dernier engagement" panel driven by `combat_resolved` that renders pillar gauges, logistics flow/severity, and
   Élan adjustments so players can review battle context without relying on the debug overlay.
 - Extended `combat_resolved` payloads with pillar summaries and per-unit outcomes (formation, casualties, logistics notes) and
@@ -101,6 +107,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Documented the combat loop workflow: README now explique comment déclencher un engagement depuis la HUD Commandement, lire le panneau "Dernier engagement" et inspecter la télémétrie `combat_resolved`, tandis que le mission brief référence le Remote Debugger pour clôturer l'item 31 de la checklist.
+- Updated HUD docs to cover competence-aware order execution: the selector lists `competence_cost` entries, the execute button blocks when the remaining allocations are insufficient, and feedback copy surfaces the exact shortfalls for recon/spy orders.
 - Decoupled the core autoload script classes (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) from their singleton keys to avoid the Godot 4.6 `class_name_hides_autoload` parse error, refreshed docs/tests to reflect the new typing pattern, and hardened `DataLoader`/`LogisticsSystem` with explicit hints so warnings-as-errors no longer block startup.
 - Deferred `GameManager` core system initialisation until `data_loader_ready`, logging collection counts and starting the turn loop only after Doctrine/Élan setup succeeds.
 - Documented the expected Windows startup warnings (SDL controller mappings, Vulkan loader layer manifests, optional Vulkan extensions) in the README so agents know the logs are benign and how to silence them locally if desired.
