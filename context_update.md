@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- Re-sequenced `CHECKLISTS.md` into a numbered, evidence-driven execution script and updated the mission brief/README to call out the strict sequential flow.
 - Reordered every `class_name` declaration ahead of its `extends` clause across autoloads, systems, and tests so older editor builds stop aborting with `Unexpected "class_name" here` parse errors.
 - Replaced the vertical slice planning checklist with a detailed 2025 execution plan, archived the previous milestone summary, and aligned the mission brief/README/CHANGELOG with the new structure.
 - Established agent onboarding artefacts (`AGENTS.md`, refreshed vibe-coding playbook, mission workspace).
