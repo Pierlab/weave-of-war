@@ -244,7 +244,7 @@ func _on_order_execution_requested(order_id: String) -> void:
 
 func _apply_doctrine_cap_bonus(bonus: float) -> void:
     _current_cap_bonus = bonus
-    var target_cap := max(_base_max_elan + bonus, 0.0)
+    var target_cap: float = max(_base_max_elan + bonus, 0.0)
     if is_equal_approx(target_cap, max_elan):
         return
     max_elan = target_cap

@@ -92,6 +92,8 @@ All notable changes to this project will be documented in this file.
 - HUD doctrine and order controls now raise EventBus requests directly, restore the previous doctrine when inertia blocks a swap, and surface Élan shortfall tooltips so validation feedback stays visible without leaving the HUD.
 
 ### Fixed
+- Stopped Godot 4.6 from aborting on Variant inference by explicitly typing logistics route IDs and clamping Élan cap updates,
+  and ensured terrain definitions are duplicated before merge so the map no longer mutates read-only dictionaries at runtime.
 - Stabilised the HUD's procedural audio feedback by queueing tone requests and clearing the generator buffer only after the
   playback instance reports inactive, eliminating `AudioStreamGeneratorPlayback.clear_buffer` warnings during doctrine/order
   swaps and shutdown.

@@ -764,7 +764,7 @@ func _reset_convoy_states_for_routes() -> void:
     for route in _routes:
         if not (route is Dictionary):
             continue
-        var route_id := route.get("id", "")
+        var route_id: String = str(route.get("id", ""))
         if route_id.is_empty():
             continue
         next_states[route_id] = _convoys_by_route.get(route_id, _new_convoy_state())

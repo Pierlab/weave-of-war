@@ -22,4 +22,4 @@ const TERRAIN_TYPES := {
 }
 
 static func get_default() -> Dictionary:
-    return TERRAIN_TYPES
+    return TERRAIN_TYPES.duplicate(true)
