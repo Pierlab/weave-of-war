@@ -107,8 +107,14 @@ func test_weather_updates_movement_and_flow() -> void:
     system.set_weather_state("rain")
     var rain_payload := system.get_last_payload()
     var rain_zone := rain_payload.get("supply_zones", [])[0]
-    asserts.is_equal(0.8, rain_payload.get("flow_multiplier"), "Rain should reduce global logistics flow")
+    asserts.is_equal(0.7, rain_payload.get("flow_multiplier"), "Rain should reduce global logistics flow")
     asserts.is_true(rain_zone.get("movement_cost") <= 1.6, "Movement cost should reflect weather penalties")
+
+    var rain_adjustments := rain_payload.get("weather_adjustments", {})
+    asserts.is_true(rain_adjustments is Dictionary and not rain_adjustments.is_empty(), "Weather adjustments should be surfaced")
+    asserts.is_equal(0.7, rain_adjustments.get("final_flow_multiplier"), "Weather adjustments should capture the final flow multiplier")
+    asserts.is_equal(0.3, rain_adjustments.get("flow_penalty"), "Flow penalty should reflect throughput loss compared to clear weather")
+    asserts.is_true(String(rain_adjustments.get("notes", "")).length() > 0, "Weather adjustments should provide QA notes")
 
     system.set_weather_state("sunny")
     var sunny_payload := system.get_last_payload()
@@ -132,6 +138,10 @@ func test_convoys_can_be_intercepted() -> void:
     asserts.is_true(convoy_statuses.size() >= routes.size(), "Convoy status summary should mirror listed routes")
     var intercepted_statuses := convoy_statuses.filter(func(status): return status.get("last_event") == "intercepted")
     asserts.is_true(intercepted_statuses.size() > 0, "Convoy statuses should surface interception state")
+    for route in routes:
+        var risk := route.get("intercept_risk", {})
+        asserts.is_true(risk is Dictionary and risk.has("effective"), "Route payload should expose intercept risk breakdown")
+        asserts.is_true(float(risk.get("effective", 0.0)) >= float(risk.get("base", 0.0)), "Effective intercept chance should include weather penalties")
     var breaks := payload.get("breaks", [])
     var intercept_breaks := breaks.filter(func(entry): return entry.get("type", "") == "convoy_intercept")
     asserts.is_true(intercept_breaks.size() > 0, "Intercepted convoys should emit break telemetry")
