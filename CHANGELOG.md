@@ -46,6 +46,7 @@ All notable changes to this project will be documented in this file.
 - Logged the EventBus/Telemetry autoload synchronisation strategy in [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](docs/ADR_0002_event_bus_and_telemetry_autoloads.md) and wired the mission/checklist updates that close the ADR action item.
 - Authored a living terminology glossary in [`docs/glossary.md`](docs/glossary.md) and linked it across docs to close the
   remaining Checklist D documentation task.
+- Captured autoload readiness instrumentation: renamed the singletons in `project.godot`, extended `tests/gdunit/test_autoload_preparation.gd` to assert configuration/signals, and archived the startup log excerpt under `docs/logs/autoload_readiness_2025-11-04.log` for future audits.
 
 ### Changed
 - Hardened `DataLoaderAutoload` to validate schema keys, enums, and numeric fields at load time and exposed `validate_collection()` so tests and tooling can reuse the checks.

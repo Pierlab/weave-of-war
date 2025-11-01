@@ -14,6 +14,7 @@ func _ready() -> void:
     _event_bus = EVENT_BUS.get_instance()
     _data_loader = DATA_LOADER.get_instance()
     _connect_signals()
+    print("[Autoload] AssistantAIAutoload ready (awaiting data_loader_ready)")
 
 static func get_instance() -> AssistantAIAutoload:
     return _instance
@@ -76,5 +77,7 @@ func _on_competence_reallocated(_payload: Dictionary) -> void:
     pass
 
 func _on_data_ready(_payload: Dictionary) -> void:
-    # Data is now confirmed; upcoming Checklist C work can assume loader caches are populated.
-    pass
+    if _data_loader == null:
+        _data_loader = DATA_LOADER.get_instance()
+    var cache_ready := _data_loader != null and _data_loader.is_ready()
+    print("[Autoload] AssistantAIAutoload observed data_loader_ready (cache_ready: %s)" % ("true" if cache_ready else "false"))

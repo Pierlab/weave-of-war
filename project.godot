@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.5")
 
 [autoload]
 
-EventBus="*res://scripts/core/event_bus.gd"
-DataLoader="*res://scripts/core/data_loader.gd"
-Telemetry="*res://scripts/core/telemetry.gd"
-AssistantAI="*res://scripts/core/assistant_ai.gd"
+EventBusAutoload="*res://scripts/core/event_bus.gd"
+DataLoaderAutoload="*res://scripts/core/data_loader.gd"
+TelemetryAutoload="*res://scripts/core/telemetry.gd"
+AssistantAIAutoload="*res://scripts/core/assistant_ai.gd"

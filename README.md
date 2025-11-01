@@ -33,13 +33,17 @@ The logs above are mirrored in `errors.log` at the repository root to help futur
 
 | Autoload | Script | Responsibilities |
 | --- | --- | --- |
-| `EventBus` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
-| `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
-| `Telemetry` | `scripts/core/telemetry.gd` | Records emitted gameplay events for debugging and gdUnit assertions. Provides `log_event`, `get_buffer`, and `clear` helpers so tests can verify new Checklist C flows. |
-| `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
+| `EventBusAutoload` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
+| `DataLoaderAutoload` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
+| `TelemetryAutoload` | `scripts/core/telemetry.gd` | Records emitted gameplay events for debugging and gdUnit assertions. Provides `log_event`, `get_buffer`, and `clear` helpers so tests can verify new Checklist C flows. |
+| `AssistantAIAutoload` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
 
 The autoloads initialise automatically when the project starts (and during headless test runs). Systems being developed for
 Checklist C should request dependencies from these singletons instead of reading JSON files or crafting their own signal buses.
+Startup instrumentation now prints readiness logs for all four services; the latest excerpt lives in
+[`docs/logs/autoload_readiness_2025-11-04.log`](docs/logs/autoload_readiness_2025-11-04.log) and is locked by
+`tests/gdunit/test_autoload_preparation.gd`, which also validates that the project registers the renamed singletons in
+`project.godot`.
 
 ## Command & Élan loop (Semaine 0–1)
 - The HUD now exposes a doctrine selector tied to the `DoctrineSystem`, displays inertia locks, and lists the orders authorised

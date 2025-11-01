@@ -20,6 +20,27 @@ func after_each() -> void:
     TelemetryAutoload._instance = null
     AssistantAIAutoload._instance = null
 
+func test_project_autoload_configuration() -> void:
+    var config := ConfigFile.new()
+    var error := config.load("res://project.godot")
+    asserts.is_equal(error, OK, "project.godot should load so autoload entries can be inspected")
+    if error != OK:
+        return
+
+    var expected := {
+        "EventBusAutoload": "*res://scripts/core/event_bus.gd",
+        "DataLoaderAutoload": "*res://scripts/core/data_loader.gd",
+        "TelemetryAutoload": "*res://scripts/core/telemetry.gd",
+        "AssistantAIAutoload": "*res://scripts/core/assistant_ai.gd",
+    }
+
+    for name in expected.keys():
+        var value := str(config.get_value("autoload", name, ""))
+        asserts.is_equal(value, expected[name], "Autoload %s should point to %s" % [name, expected[name]])
+
+    var autoload_keys := config.get_section_keys("autoload")
+    for key in autoload_keys:
+        asserts.is_true(str(key).ends_with("Autoload"), "Autoload %s should follow the *Autoload naming pattern" % key)
 func test_autoloads_emit_data_loader_ready_captured_by_telemetry() -> void:
     var tree := Engine.get_main_loop()
     asserts.is_true(tree is SceneTree, "Tests require a SceneTree main loop")
@@ -42,7 +63,15 @@ func test_autoloads_emit_data_loader_ready_captured_by_telemetry() -> void:
     await tree.process_frame
     await tree.process_frame
 
+    asserts.is_true(data_loader.is_ready(), "DataLoader should report ready after autoload initialisation")
+
     var buffer := telemetry.get_buffer()
+    var error_events: Array = []
+    for entry in buffer:
+        if entry.get("name") == StringName("data_loader_error"):
+            error_events.append(entry)
+    asserts.is_true(error_events.is_empty(), "Telemetry should not record data_loader_error during startup")
+
     var ready_events: Array = []
     for entry in buffer:
         if entry.get("name") == StringName("data_loader_ready"):

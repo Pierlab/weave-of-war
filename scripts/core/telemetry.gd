@@ -12,6 +12,8 @@ func _ready() -> void:
     _instance = self
     _event_bus = EVENT_BUS.get_instance()
     _connect_signals()
+    var connected := _event_bus != null
+    print("[Autoload] TelemetryAutoload ready (event_bus_connected: %s)" % ("true" if connected else "false"))
 
 static func get_instance() -> TelemetryAutoload:
     return _instance

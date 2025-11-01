@@ -30,6 +30,11 @@ var _logistics_visible: bool = false
 func _ready() -> void:
     _instance = self
     add_to_group("event_bus")
+    var signal_count := 0
+    for info in get_signal_list():
+        if info is Dictionary and info.get("class_name", "") == "EventBusAutoload":
+            signal_count += 1
+    print("[Autoload] EventBusAutoload ready (signals registered: %d)" % signal_count)
 
 static func get_instance() -> EventBusAutoload:
     return _instance
