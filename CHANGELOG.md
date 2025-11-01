@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added gdUnit regression tests covering doctrine swap gating, Élan spend failures, and Assistant AI acknowledgements to secure the command loop behaviour.
 - Expanded `data/orders.json` with CP costs, base delay turns, doctrine requirements, targeting scopes, posture gates, and assistant intent metadata, updating the DataLoader schema and gdUnit data integrity coverage accordingly.
 - Locked the doctrine catalogue to the five SDS-defined stances with command profile metadata (CP caps, swap tokens, inertia multipliers) for downstream systems.
 - Added gdUnit data integrity tests to load and validate the JSON data assets before gameplay systems consume them.
