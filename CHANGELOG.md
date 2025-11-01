@@ -43,6 +43,8 @@ All notable changes to this project will be documented in this file.
   and data integrity checks for [`data/formations.json`](data/formations.json).
 - Documented a fallback JSON validation snippet in the README so agents can verify data integrity while provisioning a local
   Godot binary.
+- Documented HUD doctrine/order copy, audio cues, and accessibility notes in the README to lock the checklist item for the
+  Command & Élan loop.
 - Added a dedicated `logistics_break` telemetry signal with gdUnit coverage, README/TDD documentation, and a KPI dashboard
   starter in `docs/telemetry/dashboard_plan.md` to complete Checklist D instrumentation.
 - Logged the EventBus/Telemetry autoload synchronisation strategy in [`docs/ADR_0002_event_bus_and_telemetry_autoloads.md`](docs/ADR_0002_event_bus_and_telemetry_autoloads.md) and wired the mission/checklist updates that close the ADR action item.
