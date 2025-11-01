@@ -71,7 +71,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 46. [x] **Integrate with combat.** Ensure `CombatSystem` consumes formation data when computing pillar modifiers; verify via logs/tests. *(2025-12-22 — `CombatSystem` now injects formation bonuses/multipliers into pillar resolution, and gdUnit verifies posture swaps shift Position/Impulsion/Information as expected.)*
 47. [x] **Visualise formation changes.** Update map visuals/icons when formations shift; capture assets in mission notes. *(2025-12-23 — `FormationOverlay` affiche badges colorés + halo d'inertie sur la carte; capture map/HUD à prendre lors d'un run non headless.)*
 48. [x] **Emit formation telemetry.** Publish `formation_changed` events linked to combat outcomes. *(2025-12-24 — `CombatSystem` republishes active formations after every `combat_resolved`, tagging payloads with engagement/order context so Telemetry, HUD, and the mission status store per-unit combat snapshots without clearing inertia.)*
-49. [ ] **Test formation flows.** Add gdUnit coverage validating transitions, costs, and combat influence; archive results.
+49. [x] **Test formation flows.** Add gdUnit coverage validating transitions, costs, and combat influence; archive results. *(2025-12-26 — Extended `tests/gdunit/test_competence_and_formations.gd` with a dataset-driven swap scenario that asserts Élan spend, inertia locks, and pillar deltas after manual formation changes; mission brief + docs updated.)*
 
 ## Phase 7 — Telemetry, Analytics, and Assistant AI Insights
 50. [ ] **Review telemetry schemas.** Cross-check all emitted events for schema consistency and update `docs/telemetry/dashboard_plan.md` with KPI dashboards.

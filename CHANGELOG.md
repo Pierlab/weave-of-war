@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Dataset-driven formation flow regression: `tests/gdunit/test_competence_and_formations.gd` now simulates a Shield Wall → Advance Column swap using the production datasets to assert Élan spend, inertia lock propagation, and combat pillar deltas, archiving evidence for checklist item 49.
 - Formation telemetry now tags every `combat_resolved` with posture context: `CombatSystem` re-emits `formation_changed` events
   carrying engagement/order IDs, pillar summaries, and per-unit outcomes while `FormationSystem` preserves inertia locks and
   surfaces the combat snapshot in `formation_status_updated`. New gdUnit coverage validates the telemetry payload and lock

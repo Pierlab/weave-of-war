@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-26 — Added a dataset-backed gdUnit regression for formation swaps (`test_formation_system_dataset_swap_consumes_elan_and_modifies_pillars`) validating Élan spend, inertia locks, and pillar deltas to close checklist item 49. README, CHANGELOG, mission brief, and checklist now reference the coverage, while Godot headless commands remain blocked until the executable is provisioned in the container.
 - 2025-12-24 — Relié la télémétrie de formation aux résolutions combat : `CombatSystem` réémet désormais `formation_changed`
   pour chaque unité avec l'engagement, l'ordre, le résumé de piliers et le `unit_result`, tandis que `FormationSystem`
   conserve les verrous d'inertie et stocke le contexte dans `formation_status_updated`. README, CHANGELOG, checklist et mission
