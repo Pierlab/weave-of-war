@@ -618,13 +618,14 @@ static func _validate_logistics(entry: Dictionary, context: String) -> Array:
         "elan_penalty_on_break",
         "recovery_per_turn",
         "links",
+        "map",
     ], context)
     errors += _ensure_strings("logistics", entry, ["id", "description"], context)
     errors += _ensure_integerish("logistics", entry, ["supply_radius", "convoy_spawn_threshold", "elan_penalty_on_break", "recovery_per_turn"], context)
     if entry.has("intercept_chance"):
         errors += _ensure_numeric_value("logistics", entry.get("intercept_chance"), context + ".intercept_chance")
     errors += _ensure_array_of_strings("logistics", entry, "route_types", context)
-    errors += _ensure_dictionaries("logistics", entry, ["links"], context)
+    errors += _ensure_dictionaries("logistics", entry, ["links", "map"], context)
 
     if entry.has("route_types"):
         for route in entry.get("route_types"):
@@ -633,6 +634,8 @@ static func _validate_logistics(entry: Dictionary, context: String) -> Array:
 
     if entry.has("links") and entry.get("links") is Dictionary:
         errors += _validate_logistics_links(entry.get("links"), context + ".links")
+    if entry.has("map") and entry.get("map") is Dictionary:
+        errors += _validate_logistics_map(entry.get("map"), context + ".map")
     return errors
 
 static func _validate_logistics_links(data: Dictionary, context: String) -> Array:
@@ -650,6 +653,83 @@ static func _validate_logistics_links(data: Dictionary, context: String) -> Arra
                     errors.append(_error("logistics", context + ".weather_modifiers", "invalid_type", "string"))
                     continue
                 errors += _ensure_numeric_value("logistics", modifiers.get(weather_id), context + ".weather_modifiers." + weather_id)
+    return errors
+
+static func _validate_logistics_map(data: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    if data.has("columns") or data.has("rows"):
+        errors += _ensure_integerish("logistics", data, ["columns", "rows"], context)
+
+    if not data.has("supply_centers"):
+        errors.append(_error("logistics", context, "missing_key", "supply_centers"))
+    elif typeof(data.get("supply_centers")) != TYPE_ARRAY:
+        errors.append(_error("logistics", context + ".supply_centers", "invalid_type", "array"))
+    else:
+        var centers: Array = data.get("supply_centers")
+        if centers.is_empty():
+            errors.append(_error("logistics", context + ".supply_centers", "missing_value", "at least one supply center"))
+        for index in range(centers.size()):
+            var entry := centers[index]
+            if typeof(entry) != TYPE_DICTIONARY:
+                errors.append(_error("logistics", "%s.supply_centers[%d]" % [context, index], "invalid_type", "dictionary"))
+                continue
+            var entry_context := "%s.supply_centers[%s]" % [context, entry.get("id", String(index))]
+            if not entry.has("id"):
+                errors.append(_error("logistics", entry_context, "missing_key", "id"))
+            if not entry.has("type"):
+                errors.append(_error("logistics", entry_context, "missing_key", "type"))
+            if not entry.has("q") or not entry.has("r"):
+                errors.append(_error("logistics", entry_context, "missing_key", "q/r"))
+            errors += _ensure_strings("logistics", entry, ["id", "type"], entry_context)
+            errors += _ensure_integerish("logistics", entry, ["q", "r"], entry_context)
+            if str(entry.get("id", "")).is_empty():
+                errors.append(_error("logistics", entry_context + ".id", "missing_value", "non-empty"))
+
+    if not data.has("routes"):
+        errors.append(_error("logistics", context, "missing_key", "routes"))
+        return errors
+    if typeof(data.get("routes")) != TYPE_ARRAY:
+        errors.append(_error("logistics", context + ".routes", "invalid_type", "array"))
+        return errors
+
+    var routes: Array = data.get("routes")
+    if routes.is_empty():
+        errors.append(_error("logistics", context + ".routes", "missing_value", "at least one route"))
+    for index in range(routes.size()):
+        var route := routes[index]
+        if typeof(route) != TYPE_DICTIONARY:
+            errors.append(_error("logistics", "%s.routes[%d]" % [context, index], "invalid_type", "dictionary"))
+            continue
+        var route_context := "%s.routes[%s]" % [context, route.get("id", String(index))]
+        if not route.has("id"):
+            errors.append(_error("logistics", route_context, "missing_key", "id"))
+        if not route.has("type"):
+            errors.append(_error("logistics", route_context, "missing_key", "type"))
+        errors += _ensure_strings("logistics", route, ["id", "type"], route_context)
+        if route.has("type"):
+            var route_type := route.get("type")
+            if typeof(route_type) == TYPE_STRING and not LOGISTICS_ROUTE_TYPES.has(route_type):
+                errors.append(_error("logistics", route_context + ".type", "invalid_enum", String(route_type)))
+        if route.has("origin"):
+            errors += _ensure_strings("logistics", route, ["origin"], route_context)
+        if route.has("destination"):
+            errors += _ensure_strings("logistics", route, ["destination"], route_context)
+        if not route.has("path"):
+            errors.append(_error("logistics", route_context, "missing_key", "path"))
+            continue
+        var path := route.get("path")
+        if typeof(path) != TYPE_ARRAY:
+            errors.append(_error("logistics", route_context + ".path", "invalid_type", "array"))
+            continue
+        if path.size() < 2:
+            errors.append(_error("logistics", route_context + ".path", "missing_value", "at least two nodes"))
+        for node_index in range(path.size()):
+            var node := path[node_index]
+            if typeof(node) != TYPE_DICTIONARY:
+                errors.append(_error("logistics", "%s.path[%d]" % [route_context, node_index], "invalid_type", "dictionary"))
+                continue
+            var node_context := "%s.path[%d]" % [route_context, node_index]
+            errors += _ensure_integerish("logistics", node, ["q", "r"], node_context)
     return errors
 
 static func _validate_formation(entry: Dictionary, context: String) -> Array:
