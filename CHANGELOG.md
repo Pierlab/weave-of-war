@@ -53,6 +53,7 @@ All notable changes to this project will be documented in this file.
 - Captured autoload readiness instrumentation: renamed the singletons in `project.godot`, extended `tests/gdunit/test_autoload_preparation.gd` to assert configuration/signals, and archived the startup log excerpt under `docs/logs/autoload_readiness_2025-11-04.log` for future audits.
 
 ### Changed
+- Deferred `GameManager` core system initialisation until `data_loader_ready`, logging collection counts and starting the turn loop only after Doctrine/Élan setup succeeds.
 - Hardened `DataLoaderAutoload` to validate schema keys, enums, and numeric fields at load time and exposed `validate_collection()` so tests and tooling can reuse the checks.
 - Re-sequenced the Vertical Slice P0 checklist into a numbered execution script with detailed validations and cross-doc updates referenced from the mission brief and README.
 - Documented the Phase 0 data gap audit in the vertical slice mission brief and README so upcoming schema work stays aligned with the locked SDS expectations.

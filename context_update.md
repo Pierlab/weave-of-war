@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-09 — `GameManager` attend désormais le signal `data_loader_ready` avant de configurer `DoctrineSystem`/`ElanSystem`, en journalisant les comptes et en ne démarrant le tour 1 qu'après l'initialisation garantie.
 - 2025-11-08 — Documenté la copie HUD (doctrines, ordres, messages de feedback, tonalités audio) et les notes d'accessibilité dans le README pour boucler l'item 8 de la checklist.
 - 2025-11-07 — Enrichi `data/orders.json` avec les coûts de CP, délais de base, exigences doctrinales, ciblage, postures et métadonnées Assistant AI, puis renforcé `DataLoaderAutoload`/`tests/gdunit/test_data_integrity.gd` et la documentation (README/CHANGELOG) pour refléter le nouveau contrat.
 - 2025-11-06 — Locked the doctrine catalogue to SDS specs with command profiles and updated logistics synergies so downstream systems consume the full Force/Ruse/Patience/Vitesse/Équilibre dataset.
