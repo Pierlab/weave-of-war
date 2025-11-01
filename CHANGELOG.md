@@ -38,6 +38,10 @@ All notable changes to this project will be documented in this file.
 - Locked the doctrine catalogue to the five SDS-defined stances with command profile metadata (CP caps, swap tokens, inertia multipliers) for downstream systems.
 - Added gdUnit data integrity tests to load and validate the JSON data assets before gameplay systems consume them.
 - Bootstraped the agent-driven workflow: root `AGENTS.md`, refreshed vibe-coding playbook, and mission workspace.
+
+### Fixed
+- Restored Godot script loading by typing combat/HUD variables that previously inferred as `Variant`, aligning `CombatSystem`
+  and `HUDManager` with the explicit casting pattern so warnings no longer escalate to parse errors during headless runs.
 - Introduced lightweight gdUnit-style tests plus CI runners for lint, build, and test checks.
 - Added automatic context snapshot generator and documentation for maintaining context updates.
 - Created GitHub Actions pipeline to execute headless lint/build/test commands and enforce snapshot freshness.
