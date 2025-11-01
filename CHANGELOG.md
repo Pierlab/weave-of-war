@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
   Élan adjustments so players can review battle context without relying on the debug overlay.
 - Extended `combat_resolved` payloads with pillar summaries and per-unit outcomes (formation, casualties, logistics notes) and
   normalised the Telemetry buffer so analytics/HUD consumers can reference combat state without recomputing strengths.
+- Added gdUnit combat regression scenarios (`tests/gdunit/test_combat_resolution.gd`) validating seed reproducibility, contested
+  tie-breakers, and critical logistics penalties so pillar maths stay trustworthy as the SDS evolves.
 - Refined `CombatSystem` pillar resolution with doctrine focus, logistics severity (flow + movement cost), terrain/weather
   multipliers, and intel profiles so Position/Impulse/Information follow the documented SDS formulas. Mission brief and README
   now outline the equations for future tuning.

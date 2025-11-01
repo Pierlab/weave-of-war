@@ -111,6 +111,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-12-03 — `combat_resolved` inclut désormais un résumé des piliers (totaux, marge normalisée, piliers décisifs) et un état
   par unité (formation, pertes estimées, remarques supply). `TelemetryAutoload` sérialise ces champs pour les dashboards et un
   test gdUnit vérifie la présence des blocs `pillar_summary`/`units`.
+- 2025-12-04 — Batterie gdUnit `tests/gdunit/test_combat_resolution.gd` couvrant la reproductibilité contrôlée par seed, les cas
+  contestés (1 pilier chacun + statu quo) et l'impact des déficits logistiques critiques sur les pertes/cas. Capture des sorties
+  à consigner lors du prochain run Godot headless.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

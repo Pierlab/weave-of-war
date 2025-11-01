@@ -141,6 +141,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `EspionageSystem` maintains fog of war at the tile level, ingests logistics payloads to boost visibility, and fires
   probabilistic pings that can reveal enemy intentions via `espionage_ping`. The dedicated gdUnit coverage in
   `tests/gdunit/test_combat_and_espionage_systems.gd` locks behaviour under sunny vs. misty weather noise.
+- `tests/gdunit/test_combat_resolution.gd` verrouille la reproductibilité contrôlée par seed, les cas contestés (une victoire
+  chacun + stalemate) et l'impact des déficits logistiques critiques sur les pertes pour clore la checklist Phase 3 item 30.
 
 ## Competence sliders & formations (Semaine 6)
 - `TurnManager` now maintains a per-turn competence budget across the `tactics`, `strategy`, and `logistics` sliders. Manual

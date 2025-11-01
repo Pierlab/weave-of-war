@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T18:51:38Z
+- Generated on: 2025-11-01T19:00:05Z
 - Branch: work
-- Commit when generated: 7c2448d077209c009af52ca7b80ce0915d56b684
-- Subject: Merge pull request #69 from Pierlab/codex/add-item-to-checklist.md-esq44n
+- Commit when generated: 557cc59776b59dbc27a7da88836aa0a19e1cf943
+- Subject: Merge pull request #70 from Pierlab/codex/complete-item-in-checklist.md
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -51,6 +51,7 @@
 - tests/gdunit/test_autoload_preparation.gd
 - tests/gdunit/test_case.gd
 - tests/gdunit/test_combat_and_espionage_systems.gd
+- tests/gdunit/test_combat_resolution.gd
 - tests/gdunit/test_command_elan_loop.gd
 - tests/gdunit/test_competence_and_formations.gd
 - tests/gdunit/test_data_integrity.gd
