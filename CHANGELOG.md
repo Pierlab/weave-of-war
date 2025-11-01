@@ -78,6 +78,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Decoupled the core autoload script classes (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) from their singleton keys to avoid the Godot 4.6 `class_name_hides_autoload` parse error, refreshed docs/tests to reflect the new typing pattern, and hardened `DataLoader`/`LogisticsSystem` with explicit hints so warnings-as-errors no longer block startup.
 - Deferred `GameManager` core system initialisation until `data_loader_ready`, logging collection counts and starting the turn loop only after Doctrine/Élan setup succeeds.
+- Documented the expected Windows startup warnings (SDL controller mappings, Vulkan loader layer manifests, optional Vulkan extensions) in the README so agents know the logs are benign and how to silence them locally if desired.
 - Hardened `DataLoaderAutoload` to validate schema keys, enums, and numeric fields at load time and exposed `validate_collection()` so tests and tooling can reuse the checks.
 - Re-sequenced the Vertical Slice P0 checklist into a numbered execution script with detailed validations and cross-doc updates referenced from the mission brief and README.
 - Documented the Phase 0 data gap audit in the vertical slice mission brief and README so upcoming schema work stays aligned with the locked SDS expectations.

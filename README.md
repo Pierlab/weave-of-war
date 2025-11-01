@@ -185,6 +185,20 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   `scripts/core/data_loader.gd`, `scripts/systems/elan_system.gd`, and `scripts/ui/hud_manager.gd` for the preferred explicit
   typing pattern, including casting results from helpers such as `clamp()`.
 
+### Expected Windows startup warnings
+- **SDL controller mappings** — Godot surfaces `Unrecognized output string "misc2" in mapping` when newer Nintendo/Hori Switch
+  pads are connected. The SDL mapping database ships with extra button aliases (`misc2`, `paddleX`) that the Godot 4.5 input
+  stack ignores; the warning does not impact gameplay, and no project-side changes are required. To silence it locally, edit
+  `%APPDATA%\Godot\godot.controller.db` and remove the `misc2` fields, but doing so is optional and not tracked in version
+  control.
+- **Vulkan loader noise** — Windows Store copies of *Microsoft D3D Mapping Layers* currently ship JSON manifests without a
+  `layer` entry. The Vulkan loader prints warnings such as `loader_add_layer_properties: Can not find 'layer' object in manifest`
+  and `windows_read_data_files_in_registry: Registry lookup failed to get layer manifest files.` when starting Godot. These
+  diagnostics only affect optional debugging layers and are safe to ignore. Installing the optional **Graphics Tools** feature or
+  removing the broken `Microsoft.D3DMappingLayers_*` package from `winget` will stop the warning if desired.
+- **Optional extensions not found** — Lines reporting missing extensions (for example `VK_EXT_fragment_density_map`) simply mean
+  your GPU/driver does not expose those optional capabilities. Godot already falls back to supported rendering paths.
+
 ## Maintaining context for agents
 - After each iteration, run `python scripts/generate_context_snapshot.py` to refresh [`context_snapshot.md`](context_snapshot.md).
 - Document branch-level progress in [`context_update.md`](context_update.md) so the next agent can resume smoothly.
