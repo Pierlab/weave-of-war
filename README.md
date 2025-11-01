@@ -35,7 +35,7 @@ The logs above are mirrored in `errors.log` at the repository root to help futur
 | --- | --- | --- |
 | `EventBusAutoload` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
 | `DataLoaderAutoload` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
-| `TelemetryAutoload` | `scripts/core/telemetry.gd` | Records emitted gameplay events for debugging and gdUnit assertions. Provides `log_event`, `get_buffer`, and `clear` helpers so tests can verify new Checklist C flows. |
+| `TelemetryAutoload` | `scripts/core/telemetry.gd` | Records gameplay telemetry with normalised payloads for doctrine selection, order issuance/rejection, Élan spend/gain, logistics, combat, and espionage signals. Exposes `log_event`, `get_buffer`, and `clear` helpers so tests can assert Checklist C flows. |
 | `AssistantAIAutoload` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
 
 The autoloads initialise automatically when the project starts (and during headless test runs). Systems being developed for
@@ -62,6 +62,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `ElanSystem` clamps the pool to the configured cap, applies doctrine-driven cap bonuses, and schedules automatic decay when
   the gauge stays maxed for consecutive rounds. Decay emits `elan_spent` events with a `reason="decay"` flag so telemetry can
   distinguish voluntary spends.
+- `EventBusAutoload` et `TelemetryAutoload` consignent désormais des payloads normalisés `doctrine_selected`, `order_issued`,
+  `order_rejected`, `elan_spent` et `elan_gained`, donnant aux dashboards/tests une vision fidèle des décisions de commandement
+  et du flux d'Élan.
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
 - `GameManager` now waits for the deferred `data_loader_ready` signal before wiring `DoctrineSystem`/`ElanSystem` and kicking off the first turn, printing the collection counts to confirm the handshake.

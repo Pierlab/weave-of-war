@@ -10,8 +10,10 @@ signal data_loader_ready(payload: Dictionary)
 signal data_loader_error(context: Dictionary)
 signal doctrine_selected(payload: Dictionary)
 signal order_issued(payload: Dictionary)
+signal order_rejected(payload: Dictionary)
 signal assistant_order_packet(payload: Dictionary)
 signal elan_spent(payload: Dictionary)
+signal elan_gained(payload: Dictionary)
 signal elan_updated(payload: Dictionary)
 signal logistics_update(payload: Dictionary)
 signal logistics_break(payload: Dictionary)
@@ -51,11 +53,17 @@ func emit_doctrine_selected(payload: Dictionary) -> void:
 func emit_order_issued(payload: Dictionary) -> void:
     order_issued.emit(payload)
 
+func emit_order_rejected(payload: Dictionary) -> void:
+    order_rejected.emit(payload)
+
 func emit_assistant_order_packet(payload: Dictionary) -> void:
     assistant_order_packet.emit(payload)
 
 func emit_elan_spent(payload: Dictionary) -> void:
     elan_spent.emit(payload)
+
+func emit_elan_gained(payload: Dictionary) -> void:
+    elan_gained.emit(payload)
 
 func emit_elan_updated(payload: Dictionary) -> void:
     elan_updated.emit(payload)
