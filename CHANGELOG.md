@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Introduced [`data/competence_sliders.json`](data/competence_sliders.json) and extended `TurnManager` to enforce per-category inertia locks, delta caps, and modifier tracking (`logistics_penalty`) so HUD/telemetry consumers can react to competence reallocations and supply disruptions.
+- Added a competence allocation panel to the HUD with dynamic slider rows, new `EventBus` signals for allocation requests/failures, and keyboard/controller shortcuts that snap to each category so players can redistribute Tactics/Strategy/Logistics budgets with immediate feedback on inertia, delta caps, and logistics penalties.
 - Added espionage-focused gdUnit coverage (`tests/gdunit/test_combat_and_espionage_systems.gd`) validating fog snapshot emissions, probabilistic ping success rates, and counter-intel decay to close checklist item 37.
 - Instrumented espionage telemetry with a dedicated `intel_intent_revealed` event, normalised payloads in `TelemetryAutoload`, and preserved per-event history so analytics dashboards can compare ping confidence against revealed intentions.
 - Added a fog-of-war rendering pipeline: `EspionageSystem` now emits `fog_of_war_updated` snapshots and the hex map applies a

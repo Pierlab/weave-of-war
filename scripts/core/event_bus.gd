@@ -23,6 +23,8 @@ signal intel_intent_revealed(payload: Dictionary)
 signal fog_of_war_updated(payload: Dictionary)
 signal weather_changed(payload: Dictionary)
 signal competence_reallocated(payload: Dictionary)
+signal competence_allocation_requested(allocations: Dictionary)
+signal competence_allocation_failed(payload: Dictionary)
 signal formation_changed(payload: Dictionary)
 signal competence_spent(payload: Dictionary)
 signal doctrine_change_requested(doctrine_id: String)
@@ -94,6 +96,12 @@ func emit_weather_changed(payload: Dictionary) -> void:
 
 func emit_competence_reallocated(payload: Dictionary) -> void:
     competence_reallocated.emit(payload)
+
+func request_competence_allocation(allocations: Dictionary) -> void:
+    competence_allocation_requested.emit(allocations)
+
+func emit_competence_allocation_failed(payload: Dictionary) -> void:
+    competence_allocation_failed.emit(payload)
 
 func emit_competence_spent(payload: Dictionary) -> void:
     competence_spent.emit(payload)

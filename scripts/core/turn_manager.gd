@@ -48,6 +48,8 @@ func setup(event_bus_ref: EventBus) -> void:
     event_bus = event_bus_ref
     if event_bus and not event_bus.logistics_update.is_connected(_on_logistics_update):
         event_bus.logistics_update.connect(_on_logistics_update)
+    if event_bus and not event_bus.competence_allocation_requested.is_connected(_on_competence_allocation_requested):
+        event_bus.competence_allocation_requested.connect(_on_competence_allocation_requested)
 
     _initialise_competence_state("initial")
 
@@ -494,3 +496,12 @@ func _get_slider_config(category: String) -> Dictionary:
     fallback["base_allocation"] = DEFAULT_SLIDER_BASE.get(category, fallback.get("base_allocation", 0.0))
     fallback["telemetry_tags"] = []
     return fallback
+
+func _on_competence_allocation_requested(allocations: Dictionary) -> void:
+    if allocations.is_empty():
+        return
+    var result := set_competence_allocations(allocations)
+    if not result.get("success", false) and event_bus:
+        var payload := result.duplicate(true)
+        payload["requested"] = allocations.duplicate(true)
+        event_bus.emit_competence_allocation_failed(payload)

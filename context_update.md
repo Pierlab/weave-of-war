@@ -1,6 +1,8 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-15 — Livré le panneau HUD « Compétence » avec sliders dynamiques (Tactique/Stratégie/Logistique), signaux `EventBus` dédiés aux demandes/échecs (`competence_allocation_requested`/`competence_allocation_failed`), et des raccourcis clavier/manette pour piloter les allocations en surface les verrous d'inertie, les deltas maximum et les pénalités logistiques en temps réel.
+  README, CHANGELOG, mission brief et checklist mis à jour en conséquence.
 - 2025-12-14 — Étendu `TurnManager` pour charger [`data/competence_sliders.json`](data/competence_sliders.json), appliquer des
   caps de réallocation par tour/inertie et publier l'état des modificateurs (`logistics_penalty`, deltas restants) dans
   `competence_reallocated`. Ajouté le dataset, la validation `DataLoader`, des tests gdUnit ciblant l'inertie et mis à jour les

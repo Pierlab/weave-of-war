@@ -121,6 +121,35 @@ autowrap_mode = 2
 scroll_active = true
 selection_enabled = true
 
+[node name="CompetencePanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 180)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CompetencePanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="CompetenceTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Compétence"
+theme_override_font_sizes/font_size = 16
+
+[node name="CompetenceAvailableLabel" type="Label" parent="MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Budget : —"
+
+[node name="CompetenceRows" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
 [node name="CombatPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
