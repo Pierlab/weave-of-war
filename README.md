@@ -119,6 +119,16 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `CombatSystem` now resolves Manoeuvre/Feu/Moral contests by combining unit combat profiles, doctrine bonuses, terrain and
   weather multipliers, and the latest espionage confidence. Each resolution emits a `combat_resolved` payload for telemetry and
   upcoming HUD combat panels.
+- Pillar calculations follow the SDS outline and blend additive profiles with multiplicative context:
+  - **Position** multiplies the summed unit/formation/doctrine/order bonuses by terrain, weather, doctrine focus, logistics flow,
+    movement-cost penalties, and espionage edge (+5%). Supply warnings reduce the total to 90%; critical deficits clamp at 75%.
+  - **Impulse** applies terrain, weather, doctrine focus, and logistics flow, then scales by `[1 + 0.5*(intel_confidence-0.5) +
+    0.35*espionage_bonus + 0.4*(logistics_factor-1)]`.
+  - **Information** scales the additive profile by terrain, weather, doctrine focus, logistics, and `[0.6 + intel_confidence +
+    espionage_bonus + signal_strength + 0.4*(detection-counter_intel)]`.
+  - Defenders receive posture bonuses before multipliers plus bespoke dampeners: supply warnings/critical (×0.95/×0.8), intel
+    clamp for Position, `[1 + 0.6*posture_impulse + 0.2*counter_intel - 0.2*espionage_bonus]` for Impulse, and `[0.9 +
+    counter_intel + order.counter_intel - 0.4*espionage_bonus]` for Information.
 - `GameManager` now instantiates `CombatSystem` with the other core loops and routes live `logistics_update` data into combat
   resolutions. Engagement telemetry embeds a `logistics` block (flow, supply level, deficit severity) so HUD panels and
   dashboards can explain how supply health shifted pillar results.
