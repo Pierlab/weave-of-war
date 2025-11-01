@@ -145,6 +145,12 @@ func test_orders_json_schema() -> void:
             _assert_string(assistant_metadata.get("risk_level"), context + ".assistant_metadata", "risk_level")
             _assert_array_of_strings(assistant_metadata.get("recommended_followups"), context + ".assistant_metadata", "recommended_followups")
             _assert_array_of_strings(assistant_metadata.get("telemetry_tags"), context + ".assistant_metadata", "telemetry_tags")
+        if entry.has("competence_cost"):
+            var competence_cost := entry.get("competence_cost")
+            _assert_dictionary(competence_cost, context, "competence_cost")
+            if competence_cost is Dictionary:
+                for key in competence_cost.keys():
+                    _assert_number(competence_cost.get(key), context + ".competence_cost", key)
 
 func test_units_json_schema() -> void:
     var units := _load_json_array("res://data/units.json", "units")

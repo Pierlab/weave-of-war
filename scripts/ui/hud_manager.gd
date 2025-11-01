@@ -22,6 +22,23 @@ const PILLAR_WINNER_COLORS := {
 }
 const PILLAR_NEUTRAL_COLOR := Color(0.55, 0.6, 0.7, 1.0)
 const PILLAR_BACKGROUND_COLOR := Color(0.18, 0.2, 0.24, 0.9)
+const INTEL_INTENTION_NAMES := {
+    "offense": "Offensive",
+    "defense": "Défensive",
+    "deception": "Dissimulation",
+    "support": "Soutien",
+    "intel": "Renseignement",
+    "unknown": "Inconnue",
+}
+const INTEL_INTENTION_COLORS := {
+    "offense": Color(0.86, 0.46, 0.46, 1.0),
+    "defense": Color(0.37, 0.75, 0.56, 1.0),
+    "deception": Color(0.82, 0.72, 0.45, 1.0),
+    "support": Color(0.55, 0.6, 0.7, 1.0),
+    "intel": Color(0.45, 0.62, 0.88, 1.0),
+    "unknown": Color(0.7, 0.7, 0.7, 1.0),
+}
+const MAX_INTEL_EVENTS := 6
 
 @onready var next_turn_button: Button = $MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $MarginContainer/VBoxContainer/ToggleLogisticsButton
@@ -35,6 +52,9 @@ const PILLAR_BACKGROUND_COLOR := Color(0.18, 0.2, 0.24, 0.9)
 @onready var elan_label: Label = $MarginContainer/VBoxContainer/ElanLabel
 @onready var feedback_label: Label = $MarginContainer/VBoxContainer/FeedbackLabel
 @onready var feedback_player: AudioStreamPlayer = $FeedbackPlayer
+@onready var intel_panel: PanelContainer = $MarginContainer/VBoxContainer/IntelPanel
+@onready var intel_summary_label: Label = $MarginContainer/VBoxContainer/IntelPanel/VBoxContainer/IntelSummaryLabel
+@onready var intel_log: RichTextLabel = $MarginContainer/VBoxContainer/IntelPanel/VBoxContainer/IntelLog
 @onready var combat_panel: PanelContainer = $MarginContainer/VBoxContainer/CombatPanel
 @onready var combat_summary_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/CombatSummaryLabel
 @onready var combat_logistics_label: Label = $MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/CombatLogisticsLabel
@@ -81,6 +101,8 @@ var _pillar_rows: Dictionary = {}
 var _elan_adjustments: Dictionary = {}
 var _last_elan_gain: Dictionary = {}
 var _last_elan_event: Dictionary = {}
+var _competence_state: Dictionary = {}
+var _intel_events: Array[Dictionary] = []
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -98,6 +120,7 @@ func _ready() -> void:
     _populate_from_data_loader()
     _initialise_combat_panel()
     _set_feedback("", true)
+    _update_intel_panel()
 
 func _wire_ui() -> void:
     if next_turn_button:
@@ -135,6 +158,10 @@ func _connect_event_bus() -> void:
         event_bus.elan_spent.connect(_on_elan_spent)
     if not event_bus.elan_gained.is_connected(_on_elan_gained):
         event_bus.elan_gained.connect(_on_elan_gained)
+    if not event_bus.competence_reallocated.is_connected(_on_competence_reallocated):
+        event_bus.competence_reallocated.connect(_on_competence_reallocated)
+    if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
+        event_bus.espionage_ping.connect(_on_espionage_ping)
 
 func _populate_from_data_loader() -> void:
     if data_loader == null or not data_loader.is_ready():
@@ -195,7 +222,12 @@ func _refresh_order_selector(allowed_entries: Array) -> void:
             var name: String = str(entry.get("name", id))
             var cost: float = float(entry.get("base_elan_cost", _order_costs.get(id, 0.0)))
             _order_costs[id] = cost
-            order_selector.add_item("%s (%.1f Élan)" % [name, cost])
+            var competence_variant: Variant = entry.get("competence_cost", {})
+            var competence_label := _format_competence_cost(competence_variant)
+            var item_label := "%s (%.1f Élan)" % [name, cost]
+            if not competence_label.is_empty():
+                item_label = "%s (%.1f Élan · %s)" % [name, cost, competence_label]
+            order_selector.add_item(item_label)
             order_selector.set_item_metadata(index, id)
             index += 1
     if index == 0:
@@ -294,7 +326,8 @@ func _refresh_order_button_state() -> void:
         return
     var order_id: String = _get_selected_order_id()
     var cost: float = float(_order_costs.get(order_id, 0.0))
-    var can_execute: bool = not order_id.is_empty() and _elan_state.get("current", 0.0) >= cost and cost >= 0.0
+    var competence_ready := _has_competence_for_order(order_id)
+    var can_execute: bool = not order_id.is_empty() and _elan_state.get("current", 0.0) >= cost and cost >= 0.0 and competence_ready
     execute_order_button.disabled = not can_execute
     var label_text := "Exécuter l'ordre"
     if cost > 0.0:
@@ -305,6 +338,8 @@ func _refresh_order_button_state() -> void:
         tooltip_text = "Sélectionnez un ordre à exécuter."
     elif cost > _elan_state.get("current", 0.0):
         tooltip_text = "Élan insuffisant : %.1f requis, %.1f disponible." % [cost, _elan_state.get("current", 0.0)]
+    elif not competence_ready:
+        tooltip_text = _competence_shortfall_tooltip(order_id)
     execute_order_button.tooltip_text = tooltip_text
 
 func _on_execute_order_pressed() -> void:
@@ -409,6 +444,11 @@ func _on_order_execution_failed(payload: Dictionary) -> void:
             var needed: float = float(payload.get("required", 0.0))
             var available: float = float(payload.get("available", 0.0))
             _set_feedback("Élan insuffisant : %.1f requis, %.1f disponible." % [needed, available], false)
+        "insufficient_competence":
+            var message := _competence_shortfall_tooltip(str(payload.get("order_id", "")))
+            if message.is_empty():
+                message = "Compétence insuffisante pour cet ordre."
+            _set_feedback(message, false)
         _:
             _set_feedback("Ordre indisponible.", false)
     _play_feedback(220.0)
@@ -416,6 +456,17 @@ func _on_order_execution_failed(payload: Dictionary) -> void:
 func _on_combat_resolved(payload: Dictionary) -> void:
     _last_combat_payload = payload.duplicate(true)
     _update_combat_panel()
+
+func _on_espionage_ping(payload: Dictionary) -> void:
+    if payload.is_empty():
+        return
+    var entry: Dictionary = payload.duplicate(true)
+    _intel_events.append(entry)
+    while _intel_events.size() > MAX_INTEL_EVENTS:
+        _intel_events.remove_at(0)
+    _update_intel_panel()
+    var positive := bool(entry.get("success", false))
+    _play_feedback(520.0 if positive else 180.0)
 
 func _on_elan_spent(payload: Dictionary) -> void:
     var amount: float = -abs(float(payload.get("amount", 0.0)))
@@ -440,6 +491,10 @@ func _on_elan_gained(payload: Dictionary) -> void:
         "metadata": payload.get("metadata", {}).duplicate(true) if payload.has("metadata") and payload.get("metadata") is Dictionary else {},
     }
     _update_combat_panel()
+
+func _on_competence_reallocated(payload: Dictionary) -> void:
+    _competence_state = payload.duplicate(true)
+    _refresh_order_button_state()
 
 func _update_doctrine_selector_state(selected_id := "") -> void:
     if doctrine_selector == null:
@@ -469,6 +524,96 @@ func _set_feedback(message: String, positive: bool) -> void:
     feedback_label.text = message
     var color: Color = Color(0.7, 0.9, 1.0) if positive else Color(1.0, 0.65, 0.5)
     feedback_label.add_theme_color_override("font_color", color)
+
+func _update_intel_panel() -> void:
+    if intel_summary_label == null or intel_log == null:
+        return
+    if _intel_events.is_empty():
+        intel_summary_label.text = "Aucun ping renseignement disponible."
+        intel_summary_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 1.0))
+        intel_log.clear()
+        return
+
+    var latest: Dictionary = _intel_events.back()
+    var intention_code := str(latest.get("intent_category", latest.get("intention", "unknown")))
+    var summary := _format_intel_summary(latest)
+    intel_summary_label.text = summary
+    intel_summary_label.add_theme_color_override("font_color", _intention_color(intention_code))
+
+    intel_log.clear()
+    for entry in _intel_events:
+        var line := _format_intel_log_entry(entry)
+        if line.is_empty():
+            continue
+        intel_log.append_text("%s\n" % line)
+    var line_count := intel_log.get_line_count()
+    if line_count > 0:
+        intel_log.scroll_to_line(line_count - 1)
+
+func _format_intel_summary(entry: Dictionary) -> String:
+    var order_id := str(entry.get("source", entry.get("order_id", "")))
+    var order_name := _lookup_order_name(order_id)
+    var target := _format_target(str(entry.get("target", "")))
+    var success := bool(entry.get("success", false))
+    var intention_code := str(entry.get("intent_category", entry.get("intention", "unknown")))
+    var intention_label := _intention_label(intention_code)
+    var confidence_percent := _format_percent(float(entry.get("confidence", 0.0)))
+    var roll_percent := _format_percent(float(entry.get("roll", 0.0)))
+    var headline := order_name if order_name != "" else "Ping"
+    if success:
+        return "%s : %s révélé sur %s (p=%s | jet=%s)" % [headline, intention_label, target, confidence_percent, roll_percent]
+    return "%s : contre-mesures sur %s (p=%s | jet=%s)" % [headline, target, confidence_percent, roll_percent]
+
+func _format_intel_log_entry(entry: Dictionary) -> String:
+    var turn_number := int(entry.get("turn", 0))
+    var target := _format_target(str(entry.get("target", "")))
+    var success := bool(entry.get("success", false))
+    var intention_code := str(entry.get("intent_category", entry.get("intention", "unknown")))
+    var intention_label := _intention_label(intention_code)
+    var confidence_display := _format_percent(float(entry.get("confidence", 0.0)))
+    var intention_confidence := _format_percent(float(entry.get("intention_confidence", entry.get("confidence", 0.0))))
+    var visibility_before := _format_percent(float(entry.get("visibility_before", 0.0)))
+    var visibility_after := _format_percent(float(entry.get("visibility_after", entry.get("visibility_before", 0.0))))
+    var noise_percent := _format_percent(float(entry.get("noise", 0.0)))
+    var detection_bonus := _format_percent(float(entry.get("detection_bonus", 0.0)))
+    var roll_display := _format_percent(float(entry.get("roll", 0.0)))
+    var parts := []
+    parts.append("T%02d" % turn_number)
+    parts.append(target)
+    parts.append("%s" % ("Succès" if success else "Échec"))
+    if success:
+        parts.append(intention_label)
+    parts.append("Conf %s" % confidence_display)
+    parts.append("Int %s" % intention_confidence)
+    parts.append("Jet %s" % roll_display)
+    parts.append("Vis %s→%s" % [visibility_before, visibility_after])
+    parts.append("Bruit %s" % noise_percent)
+    if detection_bonus != "0%":
+        parts.append("Bonus %s" % detection_bonus)
+    return " | ".join(parts)
+
+func _lookup_order_name(order_id: String) -> String:
+    if order_id.is_empty():
+        return ""
+    if _order_lookup.has(order_id):
+        var entry: Dictionary = _order_lookup.get(order_id)
+        return str(entry.get("name", order_id))
+    return order_id
+
+func _format_target(target: String) -> String:
+    return target if not target.is_empty() else "hex inconnu"
+
+func _format_percent(value: float) -> String:
+    var percent := clamp(roundi(value * 100.0), -999, 999)
+    return "%d%%" % percent
+
+func _intention_label(code: String) -> String:
+    var key := code if INTEL_INTENTION_NAMES.has(code) else "unknown"
+    return str(INTEL_INTENTION_NAMES.get(key, "Inconnue"))
+
+func _intention_color(code: String) -> Color:
+    var key := code if INTEL_INTENTION_COLORS.has(code) else "unknown"
+    return INTEL_INTENTION_COLORS.get(key, INTEL_INTENTION_COLORS.get("unknown"))
 
 func _play_feedback(pitch_hz: float) -> void:
     if feedback_player == null:
@@ -806,6 +951,68 @@ func _localize_reason(reason: String) -> String:
             return "ajustement manuel"
         _:
             return reason if not reason.is_empty() else "non spécifié"
+
+func _has_competence_for_order(order_id: String) -> bool:
+    if order_id.is_empty():
+        return true
+    var order: Dictionary = _order_lookup.get(order_id, {})
+    var cost_variant: Variant = order.get("competence_cost", {})
+    if not (cost_variant is Dictionary):
+        return true
+    var costs: Dictionary = cost_variant as Dictionary
+    if costs.is_empty():
+        return true
+    var allocations_variant: Variant = _competence_state.get("allocations", {})
+    var allocations: Dictionary = allocations_variant if allocations_variant is Dictionary else {}
+    for category in costs.keys():
+        var required: float = float(costs.get(category, 0.0))
+        if required <= 0.0:
+            continue
+        var available: float = float(allocations.get(category, 0.0))
+        if required > available + 0.001:
+            return false
+    return true
+
+func _competence_shortfall_tooltip(order_id: String) -> String:
+    if order_id.is_empty():
+        return ""
+    var order: Dictionary = _order_lookup.get(order_id, {})
+    var cost_variant: Variant = order.get("competence_cost", {})
+    if not (cost_variant is Dictionary):
+        return ""
+    var costs: Dictionary = cost_variant as Dictionary
+    if costs.is_empty():
+        return ""
+    var allocations_variant: Variant = _competence_state.get("allocations", {})
+    var allocations: Dictionary = allocations_variant if allocations_variant is Dictionary else {}
+    if allocations.is_empty():
+        return "Compétence indisponible : budget non alloué."
+    var shortfalls: Array[String] = []
+    for category in costs.keys():
+        var required: float = float(costs.get(category, 0.0))
+        if required <= 0.0:
+            continue
+        var available: float = float(allocations.get(category, 0.0))
+        if required > available + 0.001:
+            shortfalls.append("%s %.1f/%.1f" % [String(category).capitalize(), available, required])
+    if shortfalls.is_empty():
+        var summary := _format_competence_cost(costs)
+        return "Budget compétence requis : %s" % summary if not summary.is_empty() else "Budget compétence requis."
+    return "Compétence insuffisante (%s)." % ", ".join(shortfalls)
+
+func _format_competence_cost(cost_variant: Variant) -> String:
+    if not (cost_variant is Dictionary):
+        return ""
+    var costs: Dictionary = cost_variant as Dictionary
+    if costs.is_empty():
+        return ""
+    var parts: Array[String] = []
+    for category in costs.keys():
+        var amount: float = float(costs.get(category, 0.0))
+        if amount <= 0.0:
+            continue
+        parts.append("%s %.1f" % [String(category).capitalize(), amount])
+    return ", ".join(parts)
 
 func _stop_feedback_stream() -> void:
     _pending_feedback_pitches.clear()

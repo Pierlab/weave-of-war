@@ -52,6 +52,7 @@ func _connect_signals() -> void:
     _event_bus.data_loader_ready.connect(_capture_event.bind("data_loader_ready"))
     _event_bus.data_loader_error.connect(_capture_event.bind("data_loader_error"))
     _event_bus.competence_reallocated.connect(_capture_event.bind("competence_reallocated"))
+    _event_bus.competence_spent.connect(_capture_event.bind("competence_spent"))
     _event_bus.formation_changed.connect(_capture_event.bind("formation_changed"))
 
 func _capture_event(payload, event_name: StringName) -> void:

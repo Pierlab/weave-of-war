@@ -58,3 +58,21 @@ custom_minimum_size = Vector2(0, 180)
 autowrap_mode = 2
 scroll_active = true
 selection_enabled = true
+
+[node name="IntelSection" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="IntelLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/IntelSection"]
+layout_mode = 2
+text = "Chronologie Renseignement"
+
+[node name="IntelLog" type="RichTextLabel" parent="PanelContainer/MarginContainer/VBoxContainer/IntelSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 140)
+autowrap_mode = 2
+scroll_active = true
+selection_enabled = true

@@ -47,6 +47,8 @@ func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
             event_bus.turn_started.connect(_on_turn_started)
         if not event_bus.data_loader_ready.is_connected(_on_data_loader_ready):
             event_bus.data_loader_ready.connect(_on_data_loader_ready)
+        if not event_bus.order_issued.is_connected(_on_order_issued):
+            event_bus.order_issued.connect(_on_order_issued)
 
 func configure(weather_entries: Array) -> void:
     _weather_by_id = {}
@@ -110,16 +112,35 @@ func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadat
     tile_state["counter_intel"] = clamp(counter_intel + (COUNTER_INTEL_GROWTH if not success else COUNTER_INTEL_GROWTH * 0.25), 0.0, 1.0)
     _fog_by_tile[target] = tile_state
 
+    var visibility_after := float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY))
+    var counter_intel_after := float(tile_state.get("counter_intel", 0.0))
+    var intention_confidence := 0.0
+    if not intention_context.is_empty():
+        intention_confidence = float(intention_context.get("confidence", intention_confidence))
+
     var payload := {
         "target": target,
         "success": success,
         "confidence": snapped(effective_confidence, 0.01),
         "noise": snapped(weather_noise + counter_intel, 0.01),
         "intention": revealed_intention,
+        "intent_category": revealed_intention,
+        "intention_confidence": snapped(intention_confidence, 0.01),
         "turn": _turn_counter,
         "source": metadata.get("source", "probe"),
+        "order_id": metadata.get("order_id", metadata.get("source", "")),
+        "roll": snapped(roll, 0.01),
+        "probe_strength": snapped(probe_strength, 0.01),
+        "detection_bonus": snapped(detection_bonus, 0.01),
+        "visibility_before": snapped(base_visibility, 0.01),
+        "visibility_after": snapped(visibility_after, 0.01),
+        "counter_intel_before": snapped(counter_intel, 0.01),
+        "counter_intel_after": snapped(counter_intel_after, 0.01),
         "visibility_map": _build_visibility_snapshot(),
     }
+
+    if metadata.has("competence_remaining") and metadata.get("competence_remaining") is Dictionary:
+        payload["competence_remaining"] = (metadata.get("competence_remaining") as Dictionary).duplicate(true)
 
     _last_ping = payload.duplicate(true)
     if event_bus:
@@ -193,6 +214,32 @@ func _on_assistant_order_packet(packet: Dictionary) -> void:
         if target_hex != "" and _intentions_by_target.has(order_id):
             _intentions_by_target[target_hex] = _intentions_by_target.get(order_id)
 
+func _on_order_issued(payload: Dictionary) -> void:
+    var order_id := str(payload.get("order_id", ""))
+    if order_id == "":
+        return
+    if order_id != "recon_probe" and order_id != "deep_cover":
+        return
+    var metadata_variant: Variant = payload.get("metadata", {})
+    var metadata: Dictionary = metadata_variant if metadata_variant is Dictionary else {}
+    var target := _select_recon_target(order_id, metadata)
+    if target.is_empty():
+        return
+    var intel_profile_variant: Variant = metadata.get("intel_profile", {})
+    var intel_profile: Dictionary = intel_profile_variant if intel_profile_variant is Dictionary else {}
+    var probe_strength := float(intel_profile.get("signal_strength", BASE_PROBE_STRENGTH))
+    var detection_bonus := _competence_detection_bonus(metadata.get("competence_cost", {}))
+    var context := {
+        "source": order_id,
+        "order_id": order_id,
+        "target_hex": target,
+        "detection_bonus": detection_bonus,
+    }
+    var remaining_variant: Variant = metadata.get("competence_remaining", {})
+    if remaining_variant is Dictionary:
+        context["competence_remaining"] = (remaining_variant as Dictionary).duplicate(true)
+    perform_ping(target, probe_strength, context)
+
 func _on_turn_started(turn_number: int) -> void:
     _turn_counter = turn_number
     for tile_id in _fog_by_tile.keys():
@@ -213,3 +260,31 @@ func _emit_fog_update() -> void:
 func _on_data_loader_ready(payload: Dictionary) -> void:
     var collections: Dictionary = payload.get("collections", {})
     configure(collections.get("weather", []))
+
+func _select_recon_target(order_id: String, metadata: Dictionary) -> String:
+    var explicit_target := str(metadata.get("target_hex", metadata.get("target", "")))
+    if not explicit_target.is_empty():
+        return explicit_target
+    if _fog_by_tile.is_empty():
+        return ""
+    var selected := ""
+    var best_score := INF
+    for tile_id in _fog_by_tile.keys():
+        var tile_state: Dictionary = _fog_by_tile.get(tile_id, _new_tile_state())
+        var visibility := float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY))
+        var counter_intel := float(tile_state.get("counter_intel", 0.0))
+        var score := visibility - counter_intel * 0.5
+        if order_id == "deep_cover":
+            score = (1.0 - visibility) + counter_intel
+        if selected == "" or score < best_score:
+            best_score = score
+            selected = tile_id
+    return selected
+
+func _competence_detection_bonus(cost_variant: Variant) -> float:
+    if not (cost_variant is Dictionary):
+        return 0.0
+    var total: float = 0.0
+    for value in (cost_variant as Dictionary).values():
+        total += max(float(value), 0.0)
+    return clamp(total * 0.05, 0.0, 0.3)

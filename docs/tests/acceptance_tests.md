@@ -92,8 +92,17 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Given** la carte dispose d'un brouillard initial et de niveaux de logistique hétérogènes
 - **When** `EspionageSystem` exécute un ping sous météo claire puis brumeuse
 - **Then** la télémétrie `espionage_ping` reflète la confiance, le bruit météo, et révèle les intentions connues lorsque le ping réussit
+- **And** la HUD met à jour le panneau "Renseignements" avec un résumé coloré (succès/échec, intention révélée, probabilité vs jet) et déroule la chronologie des derniers pings
+- **And** l'overlay debug consigne une timeline détaillée (tour, ordre source, cible, roll, bruit/détection) pour inspection rapide
 
-### AT-13: Compétences et formations actives
+### AT-13: Ordres de reconnaissance et de couverture profonde
+- **Given** la HUD affiche les ordres *Recon Probe* et *Deep Cover* avec leurs coûts d'Élan et de compétence
+- **When** je sélectionne un ordre sans disposer des points de compétence requis
+- **Then** le bouton `Exécuter` reste désactivé avec une infobulle listant les catégories manquantes (`Tactics`, `Strategy`, etc.)
+- **And** lorsque je réalloue suffisamment de compétence et exécute l'ordre, un événement `espionage_ping` est automatiquement émis ciblant la tuile la moins visible
+- **And** la télémétrie `order_issued` inclut un bloc `metadata.competence_cost` et `metadata.competence_remaining` pour tracer l'impact sur le budget
+
+### AT-14: Compétences et formations actives
 - **Given** la scène principale est en cours d'exécution avec les curseurs de compétences visibles et les unités dotées de formations par défaut
 - **When** je redistribue les points (`competence_reallocated`) puis déclenche une rupture logistique qui intercepte un convoi
 - **Then** la télémétrie enregistre la baisse de budget compétence, un événement `formation_changed` apparaît lorsque je sélectionne une nouvelle posture, et la résolution de combat suivante reflète les bonus/malus de la formation choisie

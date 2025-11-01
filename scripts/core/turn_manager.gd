@@ -14,6 +14,7 @@ var _competence_budget: float = 0.0
 var _available_competence: float = 0.0
 var _processed_break_ids: Dictionary = {}
 var _competence_revision: int = 0
+var _last_competence_event: Dictionary = {}
 
 func _ready() -> void:
     var bus := EVENT_BUS.get_instance()
@@ -54,6 +55,36 @@ func set_competence_allocations(allocations: Dictionary) -> Dictionary:
         "available": _available_competence,
     }
 
+func request_competence_cost(costs: Dictionary, context: Dictionary = {}) -> Dictionary:
+    var sanitised := _sanitize_competence_cost(costs)
+    if not sanitised.get("success", false):
+        return sanitised
+
+    var filtered: Dictionary = sanitised.get("costs", {})
+    if filtered.is_empty():
+        return {
+            "success": true,
+            "costs": {},
+            "remaining": _competence_allocations.duplicate(true),
+        }
+
+    var deficits := _competence_deficits(filtered)
+    if not deficits.is_empty():
+        return {
+            "success": false,
+            "reason": "insufficient_competence",
+            "required": filtered.duplicate(true),
+            "available": _competence_allocations.duplicate(true),
+            "deficits": deficits,
+        }
+
+    _apply_competence_spend(filtered, context)
+    return {
+        "success": true,
+        "costs": filtered.duplicate(true),
+        "remaining": _competence_allocations.duplicate(true),
+    }
+
 func get_competence_payload(reason := "status") -> Dictionary:
     return {
         "turn": current_turn,
@@ -62,6 +93,7 @@ func get_competence_payload(reason := "status") -> Dictionary:
         "budget": _competence_budget,
         "reason": reason,
         "revision": _competence_revision,
+        "last_event": _last_competence_event.duplicate(true),
     }
 
 func _emit_turn_started() -> void:
@@ -96,6 +128,7 @@ func _initialise_competence_state(reason: String) -> void:
     _competence_allocations = validated.get("allocations", {})
     _available_competence = max(_competence_budget - _sum_allocations(), 0.0)
     _processed_break_ids.clear()
+    _last_competence_event = {}
     _emit_competence(reason)
 
 func _validate_allocations(raw_allocations: Dictionary) -> Dictionary:
@@ -132,6 +165,66 @@ func _emit_competence(reason: String) -> void:
     if event_bus:
         event_bus.emit_competence_reallocated(get_competence_payload(reason))
 
+func _sanitize_competence_cost(raw: Dictionary) -> Dictionary:
+    var cleaned: Dictionary = {}
+    var invalid: Array[String] = []
+    for key in raw.keys():
+        var category := str(key)
+        if not COMPETENCE_CATEGORIES.has(category):
+            invalid.append(category)
+            continue
+        var value: float = max(float(raw.get(key, 0.0)), 0.0)
+        if value <= 0.0:
+            continue
+        cleaned[category] = snapped(value, 0.01)
+    if not invalid.is_empty():
+        return {
+            "success": false,
+            "reason": "invalid_competence_category",
+            "invalid": invalid,
+        }
+    return {
+        "success": true,
+        "costs": cleaned,
+    }
+
+func _competence_deficits(costs: Dictionary) -> Dictionary:
+    var deficits: Dictionary = {}
+    for category in costs.keys():
+        var required: float = float(costs.get(category, 0.0))
+        var available: float = float(_competence_allocations.get(category, 0.0))
+        if required > available + 0.001:
+            deficits[category] = {
+                "required": required,
+                "available": available,
+            }
+    return deficits
+
+func _apply_competence_spend(costs: Dictionary, context: Dictionary) -> void:
+    var total: float = 0.0
+    for category in costs.keys():
+        var value: float = max(float(costs.get(category, 0.0)), 0.0)
+        if value <= 0.0:
+            continue
+        total += value
+        _competence_allocations[category] = snapped(max(float(_competence_allocations.get(category, 0.0)) - value, 0.0), 0.01)
+    if total > 0.0:
+        _competence_budget = max(_competence_budget - total, 0.0)
+    _available_competence = max(_competence_budget - _sum_allocations(), 0.0)
+    _last_competence_event = {
+        "reason": context.get("reason", "order_cost"),
+        "costs": costs.duplicate(true),
+        "source": context.duplicate(true),
+    }
+    _emit_competence(context.get("reason", "order_cost"))
+    if event_bus:
+        event_bus.emit_competence_spent({
+            "costs": costs.duplicate(true),
+            "remaining": _competence_allocations.duplicate(true),
+            "reason": context.get("reason", "order_cost"),
+            "source": context.duplicate(true),
+        })
+
 func _apply_competence_penalty(amount: float, source: Dictionary) -> void:
     if amount <= 0.0:
         return
@@ -143,7 +236,19 @@ func _apply_competence_penalty(amount: float, source: Dictionary) -> void:
             var value: float = float(_competence_allocations.get(category, 0.0)) * scale
             _competence_allocations[category] = snapped(value, 0.01)
     _available_competence = max(_competence_budget - _sum_allocations(), 0.0)
+    _last_competence_event = {
+        "reason": source.get("reason", "logistics_break"),
+        "amount": amount,
+        "source": source.duplicate(true),
+    }
     _emit_competence(source.get("reason", "logistics_break"))
+    if event_bus:
+        event_bus.emit_competence_spent({
+            "amount": amount,
+            "remaining": _competence_allocations.duplicate(true),
+            "reason": source.get("reason", "logistics_break"),
+            "source": source.duplicate(true),
+        })
 
 func _on_logistics_update(payload: Dictionary) -> void:
     var breaks_variant: Variant = payload.get("breaks", [])

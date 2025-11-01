@@ -9,6 +9,7 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
 var event_bus: EventBus
 var data_loader: DataLoader
+var turn_manager: TurnManager
 
 var _orders_by_id: Dictionary = {}
 var _allowed_order_ids: Array[String] = []
@@ -46,6 +47,9 @@ func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
             event_bus.order_execution_requested.connect(_on_order_execution_requested)
 
     _emit_state("ready")
+
+func set_turn_manager(turn_manager_ref: TurnManager) -> void:
+    turn_manager = turn_manager_ref
 
 func configure(order_entries: Array, unit_entries: Array) -> void:
     _orders_by_id.clear()
@@ -158,6 +162,44 @@ func _emit_state(reason: String) -> void:
         return
     event_bus.emit_elan_updated(get_state_payload(reason))
 
+func _spend_competence_for_order(order_id: String, order: Dictionary) -> Dictionary:
+    var response: Dictionary = {
+        "success": true,
+        "costs": {},
+        "remaining": {},
+    }
+    var cost_variant: Variant = order.get("competence_cost", {})
+    if not (cost_variant is Dictionary):
+        return response
+    var raw_costs: Dictionary = cost_variant as Dictionary
+    var filtered: Dictionary = {}
+    for key in raw_costs.keys():
+        var value: float = max(float(raw_costs.get(key, 0.0)), 0.0)
+        if value <= 0.0:
+            continue
+        filtered[str(key)] = snapped(value, 0.01)
+    if filtered.is_empty():
+        return response
+    if turn_manager == null:
+        push_warning("[ElanSystem] Order %s requires competence but no TurnManager is registered." % order_id)
+        response["costs"] = filtered.duplicate(true)
+        return response
+
+    var context := {
+        "reason": "order_cost",
+        "order_id": order_id,
+        "order_name": str(order.get("name", order_id)),
+    }
+    var spend_result := turn_manager.request_competence_cost(filtered, context)
+    if not spend_result.get("success", false):
+        spend_result["required"] = filtered.duplicate(true)
+        return spend_result
+
+    response["costs"] = spend_result.get("costs", filtered).duplicate(true)
+    response["remaining"] = spend_result.get("remaining", {}).duplicate(true)
+    response["success"] = true
+    return response
+
 func _calculate_turn_income(unit_entries: Array) -> float:
     var total: float = 0.0
     for entry in unit_entries:
@@ -204,26 +246,72 @@ func _on_doctrine_selected(payload: Dictionary) -> void:
 func _on_order_execution_requested(order_id: String) -> void:
     if order_id.is_empty():
         return
+    var validation: Dictionary = can_issue_order(order_id)
+    if not validation.get("success", false):
+        if event_bus:
+            event_bus.emit_order_execution_failed({
+                "reason": validation.get("reason", "unknown"),
+                "order_id": order_id,
+                "required": validation.get("required", 0.0),
+                "available": validation.get("available", _current_elan),
+            })
+            event_bus.emit_order_rejected({
+                "reason": validation.get("reason", "unknown"),
+                "order_id": order_id,
+                "required": validation.get("required", 0.0),
+                "available": validation.get("available", _current_elan),
+                "doctrine_id": _current_doctrine_id,
+                "allowed": _allowed_order_ids.has(order_id),
+            })
+        return
+
+    var order: Dictionary = validation.get("order", {})
+    var competence_result := _spend_competence_for_order(order_id, order)
+    if not competence_result.get("success", true):
+        if event_bus:
+            event_bus.emit_order_execution_failed({
+                "reason": competence_result.get("reason", "insufficient_competence"),
+                "order_id": order_id,
+                "required": validation.get("cost", 0.0),
+                "available": validation.get("available", _current_elan),
+                "competence_required": competence_result.get("required", {}),
+                "competence_available": competence_result.get("available", {}),
+            })
+            event_bus.emit_order_rejected({
+                "reason": competence_result.get("reason", "insufficient_competence"),
+                "order_id": order_id,
+                "required": validation.get("cost", 0.0),
+                "available": validation.get("available", _current_elan),
+                "doctrine_id": _current_doctrine_id,
+                "allowed": _allowed_order_ids.has(order_id),
+                "competence_required": competence_result.get("required", {}),
+                "competence_available": competence_result.get("available", {}),
+            })
+        return
+
     var result: Dictionary = issue_order(order_id)
     if not result.get("success", false):
         if event_bus:
             event_bus.emit_order_execution_failed({
                 "reason": result.get("reason", "unknown"),
                 "order_id": order_id,
-                "required": result.get("required", 0.0),
+                "required": result.get("required", validation.get("cost", 0.0)),
                 "available": result.get("available", _current_elan),
+                "competence_required": competence_result.get("costs", {}),
+                "competence_available": competence_result.get("available", {}),
             })
             event_bus.emit_order_rejected({
                 "reason": result.get("reason", "unknown"),
                 "order_id": order_id,
-                "required": result.get("required", 0.0),
+                "required": result.get("required", validation.get("cost", 0.0)),
                 "available": result.get("available", _current_elan),
                 "doctrine_id": _current_doctrine_id,
                 "allowed": _allowed_order_ids.has(order_id),
+                "competence_required": competence_result.get("costs", {}),
+                "competence_available": competence_result.get("available", {}),
             })
         return
 
-    var order: Dictionary = result.get("order", {})
     var payload: Dictionary = {
         "order_id": order_id,
         "order_name": order.get("name", order_id),
@@ -232,6 +320,23 @@ func _on_order_execution_requested(order_id: String) -> void:
         "inertia_impact": result.get("inertia_impact", 0),
         "base_inertia_turns": order.get("inertia_impact", result.get("inertia_impact", 0)),
     }
+
+    var metadata: Dictionary = {}
+    var intel_profile_variant: Variant = order.get("intel_profile", {})
+    if intel_profile_variant is Dictionary:
+        metadata["intel_profile"] = (intel_profile_variant as Dictionary).duplicate(true)
+    var tags_variant: Variant = order.get("tags", [])
+    if tags_variant is Array:
+        metadata["tags"] = (tags_variant as Array).duplicate()
+    metadata["intention"] = str(order.get("intention", ""))
+    var competence_cost: Dictionary = competence_result.get("costs", {}) if competence_result.has("costs") else {}
+    if not competence_cost.is_empty():
+        metadata["competence_cost"] = competence_cost.duplicate(true)
+    var competence_remaining: Dictionary = competence_result.get("remaining", {}) if competence_result.has("remaining") else {}
+    if not competence_remaining.is_empty():
+        metadata["competence_remaining"] = competence_remaining.duplicate(true)
+    if not metadata.is_empty():
+        payload["metadata"] = metadata
 
     if event_bus:
         event_bus.emit_elan_spent({

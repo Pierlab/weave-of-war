@@ -200,6 +200,12 @@ func test_espionage_ping_reflects_visibility_and_noise() -> void:
     asserts.is_true(sunny_ping.get("success", false), "High visibility ping should usually succeed")
     asserts.is_equal("offense", sunny_ping.get("intention", ""), "Successful ping should reveal stored intention")
     asserts.is_true(stub_bus.payloads.size() == 1, "Ping should emit telemetry")
+    asserts.is_equal("offense", sunny_ping.get("intent_category", ""), "Intention category should mirror revealed intention")
+    asserts.is_true(sunny_ping.has("roll"), "Ping should record the RNG roll")
+    asserts.is_true(sunny_ping.has("visibility_before"), "Ping should expose visibility deltas")
+    asserts.is_true(float(sunny_ping.get("visibility_after", 0.0)) >= float(sunny_ping.get("visibility_before", 0.0)), "Recon success should not reduce visibility")
+    asserts.is_equal("test", sunny_ping.get("order_id", ""), "Source metadata should propagate to the payload")
+    asserts.is_equal(0.7, float(sunny_ping.get("intention_confidence", 0.0)), "Stored intention confidence should be surfaced")
 
     system._on_weather_changed({"weather_id": "mist"})
     system.ingest_logistics_payload({
@@ -213,3 +219,35 @@ func test_espionage_ping_reflects_visibility_and_noise() -> void:
     asserts.is_true(mist_ping.get("confidence", 1.0) < sunny_ping.get("confidence", 0.0), "Mist should reduce confidence")
     var snapshot := system.get_fog_snapshot()
     asserts.is_true(snapshot.size() > 0, "Fog snapshot should expose tracked tiles")
+    asserts.is_true(mist_ping.has("visibility_before"), "Fog pings should expose before visibility")
+    asserts.is_true(float(mist_ping.get("visibility_after", 0.0)) >= float(mist_ping.get("visibility_before", 0.0)), "Visibility should not drop below tracked baseline")
+    asserts.is_true(mist_ping.has("roll"), "Fog pings should capture RNG roll even without metadata")
+
+func test_recon_order_triggers_automatic_ping() -> void:
+    var system: EspionageSystem = ESPIONAGE_SYSTEM.new()
+    system.set_rng_seed(3)
+    system.configure_map({"0,0": {}, "1,0": {}})
+    var stub_bus := StubIntelEventBus.new()
+    system.event_bus = stub_bus
+    system.ingest_logistics_payload({
+        "turn": 2,
+        "supply_zones": [
+            {"tile_id": "0,0", "supply_level": "core"},
+            {"tile_id": "1,0", "supply_level": "isolated"},
+        ],
+    })
+
+    system._on_order_issued({
+        "order_id": "recon_probe",
+        "metadata": {
+            "competence_cost": {"tactics": 1.0},
+            "intel_profile": {"signal_strength": 0.6},
+        },
+    })
+
+    asserts.is_equal(1, stub_bus.payloads.size(), "Recon order should emit an espionage ping automatically.")
+    var ping := stub_bus.payloads.back()
+    asserts.is_equal("1,0", ping.get("target", ""), "Ping should target the lowest visibility tile.")
+    asserts.is_equal("recon_probe", ping.get("source", ""), "Ping context should reflect the recon order id.")
+    asserts.is_true(ping.has("probe_strength"), "Recon ping payload should record probe strength.")
+    asserts.is_true(float(ping.get("detection_bonus", 0.0)) >= 0.04, "Competence spend should translate into a detection bonus.")

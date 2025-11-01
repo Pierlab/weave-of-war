@@ -214,5 +214,156 @@
       "recommended_followups": ["advance", "fortify"],
       "telemetry_tags": ["deception", "intel_pull"]
     }
+  },
+  {
+    "id": "recon_probe",
+    "name": "Recon Probe",
+    "tags": ["recon", "scout"],
+    "description": "Deploy forward scouts to refresh intel on contested tiles and expose enemy screens.",
+    "cp_cost": 2,
+    "base_elan_cost": 1,
+    "inertia_impact": 1,
+    "base_delay_turns": 1,
+    "allowed_doctrines": ["ruse", "vitesse", "equilibre"],
+    "doctrine_requirements": {
+      "required_tags": ["recon", "scout"],
+      "minimum_swap_tokens": 0,
+      "command_profile": "screen"
+    },
+    "logistics_demand": {
+      "minimum_supply_state": "flexible",
+      "convoy_usage": "optional"
+    },
+    "inertia_profile": {
+      "doctrine_multipliers": {
+        "ruse": 0.8,
+        "vitesse": 0.85,
+        "equilibre": 1.0
+      },
+      "logistics_state_multipliers": {
+        "stable": 1.0,
+        "flexible": 0.9,
+        "surged": 0.95,
+        "strained": 1.25
+      },
+      "competence_offsets": {
+        "tactics": -0.25,
+        "strategy": -0.1
+      }
+    },
+    "targeting": {
+      "scope": "flank",
+      "requires_line_of_sight": false,
+      "preferred_unit_classes": ["skirmisher", "mobile"],
+      "allowed_postures": ["recon", "fluid"],
+      "max_concurrent": 2
+    },
+    "posture_requirements": {
+      "required_postures": ["recon"],
+      "incompatible_postures": ["defensive"]
+    },
+    "resolution_effects": {
+      "position_bias": -0.05,
+      "intel_reveal": "scouted"
+    },
+    "intention": "intel",
+    "pillar_weights": {
+      "position": 0.1,
+      "impulse": 0.25,
+      "information": 0.65
+    },
+    "intel_profile": {
+      "signal_strength": 0.55,
+      "counter_intel": 0.15
+    },
+    "competence_cost": {
+      "tactics": 1.0
+    },
+    "assistant_metadata": {
+      "intent_profile": {
+        "pressure": 0.2,
+        "tempo": 0.6,
+        "subterfuge": 0.4
+      },
+      "risk_level": "moderate",
+      "recommended_followups": ["deep_cover", "advance"],
+      "telemetry_tags": ["intel_probe", "fog_update"]
+    }
+  },
+  {
+    "id": "deep_cover",
+    "name": "Deep Cover",
+    "tags": ["spy", "logistics"],
+    "description": "Embed agents along hostile supply lines to uncover intent and sabotage convoys.",
+    "cp_cost": 3,
+    "base_elan_cost": 2,
+    "inertia_impact": 2,
+    "base_delay_turns": 2,
+    "allowed_doctrines": ["ruse", "patience", "equilibre"],
+    "doctrine_requirements": {
+      "required_tags": ["spy", "logistics"],
+      "minimum_swap_tokens": 1,
+      "command_profile": "shadow"
+    },
+    "logistics_demand": {
+      "minimum_supply_state": "stable",
+      "convoy_usage": "required"
+    },
+    "inertia_profile": {
+      "doctrine_multipliers": {
+        "ruse": 0.75,
+        "patience": 0.9,
+        "equilibre": 1.05
+      },
+      "logistics_state_multipliers": {
+        "stable": 1.0,
+        "flexible": 1.05,
+        "surged": 0.9,
+        "strained": 1.35
+      },
+      "competence_offsets": {
+        "strategy": -0.3,
+        "logistics": -0.2
+      }
+    },
+    "targeting": {
+      "scope": "logistics",
+      "requires_line_of_sight": false,
+      "preferred_unit_classes": ["skirmisher", "support"],
+      "allowed_postures": ["recon", "balanced"],
+      "max_concurrent": 1
+    },
+    "posture_requirements": {
+      "required_postures": ["recon", "balanced"],
+      "incompatible_postures": ["aggressive"]
+    },
+    "resolution_effects": {
+      "position_bias": 0.0,
+      "intel_reveal": "intent"
+    },
+    "intention": "intel",
+    "pillar_weights": {
+      "position": 0.05,
+      "impulse": 0.2,
+      "information": 0.75
+    },
+    "intel_profile": {
+      "signal_strength": 0.7,
+      "counter_intel": 0.4
+    },
+    "competence_cost": {
+      "strategy": 1.5,
+      "logistics": 0.5
+    },
+    "assistant_metadata": {
+      "intent_profile": {
+        "pressure": 0.1,
+        "tempo": 0.3,
+        "subterfuge": 0.95
+      },
+      "risk_level": "high",
+      "recommended_followups": ["fortify", "feint"],
+      "telemetry_tags": ["intel_network", "logistics_infiltration"]
+    }
   }
 ]

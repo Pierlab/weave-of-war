@@ -4,16 +4,19 @@ const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 const UTILS := preload("res://scripts/core/utils.gd")
 const MAX_ASSISTANT_LOG_ENTRIES := 10
+const MAX_INTEL_LOG_ENTRIES := 12
 
 @onready var next_turn_button: Button = $PanelContainer/MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $PanelContainer/MarginContainer/VBoxContainer/ToggleLogisticsButton
 @onready var spawn_unit_button: Button = $PanelContainer/MarginContainer/VBoxContainer/SpawnUnitButton
 @onready var assistant_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/AssistantLog
+@onready var intel_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/IntelSection/IntelLog
 
 var event_bus: EventBus
 var assistant_ai: AssistantAI
 var data_loader: DataLoader
 var _assistant_packets: Array[Dictionary] = []
+var _intel_events: Array[Dictionary] = []
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -51,6 +54,10 @@ func _ready() -> void:
             event_bus.assistant_order_packet.connect(_on_assistant_packet)
         if not event_bus.data_loader_ready.is_connected(_on_data_loader_ready):
             event_bus.data_loader_ready.connect(_on_data_loader_ready)
+        if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
+            event_bus.espionage_ping.connect(_on_espionage_ping)
+
+    _refresh_intel_log()
 
 func _on_next_turn_pressed() -> void:
     if event_bus:
@@ -82,6 +89,15 @@ func _on_assistant_packet(packet: Dictionary) -> void:
     while _assistant_packets.size() > MAX_ASSISTANT_LOG_ENTRIES:
         _assistant_packets.remove_at(0)
     _refresh_assistant_log()
+
+func _on_espionage_ping(payload: Dictionary) -> void:
+    if payload.is_empty():
+        return
+    var entry: Dictionary = payload.duplicate(true)
+    _intel_events.append(entry)
+    while _intel_events.size() > MAX_INTEL_LOG_ENTRIES:
+        _intel_events.remove_at(0)
+    _refresh_intel_log()
 
 func _ingest_assistant_history(entries: Array) -> void:
     _assistant_packets.clear()
@@ -146,6 +162,51 @@ func _format_assistant_packet(packet: Dictionary) -> String:
                 parts.append("Engagement %s" % engagement_id)
             return " | ".join(parts)
     return ""
+
+func _refresh_intel_log() -> void:
+    if intel_log == null:
+        return
+    intel_log.clear()
+    if _intel_events.is_empty():
+        intel_log.append_text("Aucun ping renseignement enregistré.\n")
+        return
+    for entry in _intel_events:
+        var line := _format_intel_entry(entry)
+        if line.is_empty():
+            continue
+        intel_log.append_text("%s\n" % line)
+    var line_count := intel_log.get_line_count()
+    if line_count > 0:
+        intel_log.scroll_to_line(line_count - 1)
+
+func _format_intel_entry(entry: Dictionary) -> String:
+    var turn_number := int(entry.get("turn", 0))
+    var order_id := str(entry.get("source", entry.get("order_id", "")))
+    var target := str(entry.get("target", ""))
+    var success := bool(entry.get("success", false))
+    var intention := str(entry.get("intent_category", entry.get("intention", "unknown")))
+    var confidence := float(entry.get("confidence", 0.0))
+    var roll := float(entry.get("roll", 0.0))
+    var detection_bonus := float(entry.get("detection_bonus", 0.0))
+    var noise := float(entry.get("noise", 0.0))
+    var visibility_before := float(entry.get("visibility_before", 0.0))
+    var visibility_after := float(entry.get("visibility_after", entry.get("visibility_before", 0.0)))
+    var label := "succès" if success else "échec"
+    var intention_label := intention if intention != "" else "unknown"
+    var parts := [
+        "T%02d" % turn_number,
+        order_id if order_id != "" else "n/a",
+        (target if target != "" else "?"),
+        label,
+        "intent=%s" % intention_label,
+        "p=%d%%" % clamp(roundi(confidence * 100.0), -999, 999),
+        "jet=%d%%" % clamp(roundi(roll * 100.0), -999, 999),
+        "vis=%d→%d" % [roundi(visibility_before * 100.0), roundi(visibility_after * 100.0)],
+        "bruit=%d%%" % clamp(roundi(noise * 100.0), -999, 999),
+    ]
+    if detection_bonus > 0.0:
+        parts.append("bonus=%d%%" % clamp(roundi(detection_bonus * 100.0), -999, 999))
+    return " | ".join(parts)
 
 func _refresh_terrain_tooltip(definitions: Array, tiles: Array) -> void:
     if toggle_logistics_button == null:
