@@ -26,6 +26,7 @@ var _units_by_id: Dictionary = {}
 var _doctrines_by_id: Dictionary = {}
 var _weather_by_id: Dictionary = {}
 var _formations_by_id: Dictionary = {}
+var _formation_unit_classes: Dictionary = {}
 var _current_doctrine_id: String = ""
 var _current_weather_id: String = ""
 var _last_resolution: Dictionary = {}
@@ -93,6 +94,7 @@ func configure(unit_entries: Array, order_entries: Array, doctrine_entries: Arra
     _doctrines_by_id = _index_entries(doctrine_entries)
     _weather_by_id = _index_entries(weather_entries)
     _formations_by_id = _index_entries(formation_entries)
+    _refresh_formation_unit_classes()
 
     if _current_doctrine_id.is_empty() and not _doctrines_by_id.is_empty():
         _current_doctrine_id = str(_doctrines_by_id.keys()[0])
@@ -126,8 +128,15 @@ func set_unit_formation(unit_id: String, formation_id: String) -> bool:
         return false
     if formation_id.is_empty() or not _formations_by_id.has(formation_id):
         return false
-    var allowed: Array = _units_by_id.get(unit_id, {}).get("default_formations", [])
-    if allowed.size() > 0 and not allowed.has(formation_id):
+    var unit_entry: Dictionary = _units_by_id.get(unit_id, {})
+    var allowed: Array = unit_entry.get("default_formations", [])
+    var is_allowed: bool = allowed.has(formation_id)
+    if not is_allowed:
+        var unit_class: String = str(unit_entry.get("unit_class", ""))
+        if not unit_class.is_empty():
+            var classes: Array = _formation_unit_classes.get(formation_id, [])
+            is_allowed = classes.has(unit_class)
+    if allowed.size() > 0 and not is_allowed:
         return false
     var previous: String = str(_unit_formations.get(unit_id, ""))
     _unit_formations[unit_id] = formation_id
@@ -397,11 +406,28 @@ func _resolve_default_formation(unit_id: String) -> String:
         if not candidate.is_empty() and _formations_by_id.has(candidate):
             _unit_formations[unit_id] = candidate
             return candidate
+    var unit_class: String = str(unit.get("unit_class", ""))
+    if not unit_class.is_empty() and data_loader:
+        var class_formations: Array = data_loader.list_formations_for_unit_class(unit_class)
+        for formation in class_formations:
+            var fallback_id: String = str(formation.get("id", ""))
+            if fallback_id.is_empty():
+                continue
+            if _formations_by_id.has(fallback_id):
+                _unit_formations[unit_id] = fallback_id
+                return fallback_id
     if not _formations_by_id.is_empty():
         var fallback: String = str(_formations_by_id.keys()[0])
         _unit_formations[unit_id] = fallback
         return fallback
     return ""
+
+func _refresh_formation_unit_classes() -> void:
+    _formation_unit_classes.clear()
+    if data_loader == null:
+        return
+    for formation_id in _formations_by_id.keys():
+        _formation_unit_classes[formation_id] = data_loader.get_unit_classes_for_formation(formation_id)
 
 func _formation_payload(unit_id: String, reason: String) -> Dictionary:
     var formation_id: String = str(_unit_formations.get(unit_id, ""))

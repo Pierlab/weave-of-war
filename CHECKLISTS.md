@@ -66,7 +66,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 43. [x] **Update documentation.** Expand `README.md` and acceptance tests with slider usage guidance and expected outcomes. *(2025-12-19 — Added a "Competence slider usage guide" walkthrough to the README and a paired AT-16 manual test capturing the documented loop.)*
 
 ## Phase 6 — Unit Formations & Postures
-44. [ ] **Load formation definitions.** Map `data/formations.json` entries to unit archetypes and document the mapping.
+44. [x] **Load formation definitions.** Map `data/formations.json` entries to unit archetypes and document the mapping. *(2025-12-20 — `DataLoader` dérive désormais les classes `line/mobile/ranged/support` pour chaque formation, `CombatSystem` s'appuie sur ce mapping pour ses fallbacks et README/mission brief détaillent la répartition.)*
 45. [ ] **Implement formation controls.** Provide HUD interactions (dropdown/radial) respecting Élan costs and inertia delays.
 46. [ ] **Integrate with combat.** Ensure `CombatSystem` consumes formation data when computing pillar modifiers; verify via logs/tests.
 47. [ ] **Visualise formation changes.** Update map visuals/icons when formations shift; capture assets in mission notes.

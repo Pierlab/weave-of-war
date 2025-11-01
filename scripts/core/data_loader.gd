@@ -30,6 +30,8 @@ static var _instance: DataLoader
 var _collections: Dictionary = {}
 var _indexed: Dictionary = {}
 var _is_ready: bool = false
+var _formations_by_unit_class: Dictionary = {}
+var _unit_classes_by_formation: Dictionary = {}
 
 func _ready() -> void:
     _instance = self
@@ -62,6 +64,12 @@ func load_all(emit_signals := false) -> Dictionary:
         var cross_errors: Array = _validate_cross_references()
         if not cross_errors.is_empty():
             errors += cross_errors
+
+    if errors.is_empty():
+        _rebuild_formation_mappings()
+    else:
+        _formations_by_unit_class.clear()
+        _unit_classes_by_formation.clear()
 
     _is_ready = errors.is_empty()
 
@@ -112,6 +120,70 @@ func list_formations() -> Array:
 func get_formation(id: String) -> Dictionary:
     return _indexed.get("formations", {}).get(id, {})
 
+func get_formations_by_unit_class() -> Dictionary:
+    var result: Dictionary = {}
+    for unit_class in _formations_by_unit_class.keys():
+        var formations: Array = []
+        for formation_id in _formations_by_unit_class.get(unit_class, []):
+            var formation: Dictionary = get_formation(str(formation_id))
+            if formation.is_empty():
+                continue
+            formations.append(formation.duplicate(true))
+        formations.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+            return str(a.get("name", "")) < str(b.get("name", ""))
+        )
+        result[unit_class] = formations
+    return result
+
+func list_formations_for_unit_class(unit_class: String) -> Array:
+    var formations: Array = []
+    for formation_id in _formations_by_unit_class.get(unit_class, []):
+        var formation: Dictionary = get_formation(str(formation_id))
+        if formation.is_empty():
+            continue
+        formations.append(formation.duplicate(true))
+    formations.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+        return str(a.get("name", "")) < str(b.get("name", ""))
+    )
+    return formations
+
+func list_formations_for_unit(unit_id: String) -> Array:
+    var unit: Dictionary = get_unit(unit_id)
+    if unit.is_empty():
+        return []
+
+    var seen: Dictionary = {}
+    var formations: Array = []
+    var defaults: Array = unit.get("default_formations", [])
+    for formation_id_variant in defaults:
+        var formation_id: String = str(formation_id_variant)
+        if formation_id.is_empty() or seen.has(formation_id):
+            continue
+        var formation: Dictionary = get_formation(formation_id)
+        if formation.is_empty():
+            continue
+        formations.append(formation.duplicate(true))
+        seen[formation_id] = true
+
+    var unit_class: String = str(unit.get("unit_class", ""))
+    if not unit_class.is_empty():
+        for formation in list_formations_for_unit_class(unit_class):
+            var formation_id: String = str(formation.get("id", ""))
+            if formation_id.is_empty() or seen.has(formation_id):
+                continue
+            formations.append(formation.duplicate(true))
+            seen[formation_id] = true
+
+    formations.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+        return str(a.get("name", "")) < str(b.get("name", ""))
+    )
+    return formations
+
+func get_unit_classes_for_formation(formation_id: String) -> Array:
+    var classes: Array = _unit_classes_by_formation.get(formation_id, []).duplicate()
+    classes.sort()
+    return classes
+
 func list_terrain_entries() -> Array:
     return _collections.get("terrain", [])
 
@@ -155,6 +227,52 @@ func get_summary() -> Dictionary:
             "competence_sliders": list_competence_sliders().size(),
         }
     }
+
+func _rebuild_formation_mappings() -> void:
+    _formations_by_unit_class.clear()
+    _unit_classes_by_formation.clear()
+
+    var formation_index: Dictionary = _indexed.get("formations", {})
+    for formation_id in formation_index.keys():
+        _unit_classes_by_formation[formation_id] = []
+
+    var units: Array = list_units()
+    for unit_entry in units:
+        if unit_entry is not Dictionary:
+            continue
+        var unit_id: String = str(unit_entry.get("id", ""))
+        if unit_id.is_empty():
+            continue
+        var unit_class: String = str(unit_entry.get("unit_class", ""))
+        if unit_class.is_empty():
+            continue
+        var defaults: Variant = unit_entry.get("default_formations", [])
+        if typeof(defaults) != TYPE_ARRAY:
+            continue
+        for formation_id_variant in defaults:
+            var formation_id: String = str(formation_id_variant)
+            if formation_id.is_empty():
+                continue
+            if not _unit_classes_by_formation.has(formation_id):
+                _unit_classes_by_formation[formation_id] = []
+            var classes: Array = _unit_classes_by_formation[formation_id]
+            if not classes.has(unit_class):
+                classes.append(unit_class)
+            if not _formations_by_unit_class.has(unit_class):
+                _formations_by_unit_class[unit_class] = []
+            var formation_ids: Array = _formations_by_unit_class[unit_class]
+            if not formation_ids.has(formation_id):
+                formation_ids.append(formation_id)
+
+    for unit_class in _formations_by_unit_class.keys():
+        var ids: Array = _formations_by_unit_class.get(unit_class, [])
+        ids.sort()
+        _formations_by_unit_class[unit_class] = ids
+
+    for formation_id in _unit_classes_by_formation.keys():
+        var classes: Array = _unit_classes_by_formation.get(formation_id, [])
+        classes.sort()
+        _unit_classes_by_formation[formation_id] = classes
 
 func _notify_event_bus(result: Dictionary) -> void:
     var event_bus: EventBus = EVENT_BUS.get_instance()

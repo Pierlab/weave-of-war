@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-20 — `DataLoader` dérive désormais les archétypes par formation et expose des helpers (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `CombatSystem` s'appuie sur ce mapping pour ses fallbacks, `test_data_integrity.gd` vérifie la cartographie, et README/CHANGELOG/mission/checklist documentent l'achèvement de l'item 44.
 - 2025-12-19 — Documenté le guide d'usage des sliders de compétence : README détaille désormais la boucle complète (sélection, validations HUD, vérifications télémétrie et réactions combat/logistique/assistant) et `docs/tests/acceptance_tests.md` ajoute AT-16 pour refléter le walkthrough. Checklist item 43 clôturée, Godot headless toujours bloqué tant que le binaire n'est pas provisionné.
 - 2025-12-18 — Ajouté des tests gdUnit automatisant les sliders de compétence : les requêtes EventBus valides publient un nouvel événement `competence_reallocated` et les violations de delta/inertie renvoient `competence_allocation_failed` avec les raisons détaillées, clôturant la checklist item 42. Les commandes Godot headless restent en attente tant que le binaire n'est pas provisionné dans cet environnement.
 - 2025-12-17 — `TurnManager` enrichit `competence_reallocated` avec un `turn_id` et des snapshots `before`/`after`, `TelemetryAutoload` sérialise ces deltas pour les dashboards/tests, et les artefacts (README, checklist, mission brief, AT-15) reflètent la clôture de l'item 41.
