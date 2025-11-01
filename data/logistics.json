@@ -15,7 +15,53 @@
         "mist": -0.1
       }
     },
-    "weather_rotation_turns": 3
+    "weather_rotation_turns": 3,
+    "map": {
+      "columns": 6,
+      "rows": 5,
+      "supply_centers": [
+        { "id": "capital", "q": 1, "r": 2, "type": "city" },
+        { "id": "forward_depot", "q": 4, "r": 1, "type": "depot" },
+        { "id": "harbor", "q": 5, "r": 3, "type": "harbor" }
+      ],
+      "routes": [
+        {
+          "id": "capital_ring",
+          "type": "ring",
+          "path": [
+            { "q": 1, "r": 2 },
+            { "q": 1, "r": 1 },
+            { "q": 2, "r": 1 },
+            { "q": 2, "r": 2 },
+            { "q": 1, "r": 3 },
+            { "q": 0, "r": 2 }
+          ]
+        },
+        {
+          "id": "forward_road",
+          "type": "road",
+          "origin": "capital",
+          "destination": "forward_depot",
+          "path": [
+            { "q": 1, "r": 2 },
+            { "q": 2, "r": 2 },
+            { "q": 3, "r": 2 },
+            { "q": 4, "r": 1 }
+          ]
+        },
+        {
+          "id": "harbor_convoy",
+          "type": "convoy",
+          "origin": "forward_depot",
+          "destination": "harbor",
+          "path": [
+            { "q": 4, "r": 1 },
+            { "q": 5, "r": 2 },
+            { "q": 5, "r": 3 }
+          ]
+        }
+      ]
+    }
   },
   {
     "id": "forward_operating",
@@ -33,6 +79,74 @@
         "mist": -0.05
       }
     },
-    "weather_rotation_turns": 2
+    "weather_rotation_turns": 2,
+    "map": {
+      "columns": 6,
+      "rows": 5,
+      "supply_centers": [
+        { "id": "capital", "q": 1, "r": 2, "type": "city" },
+        { "id": "forward_depot", "q": 4, "r": 1, "type": "depot" },
+        { "id": "harbor", "q": 5, "r": 3, "type": "harbor" },
+        { "id": "frontier_outpost", "q": 3, "r": 0, "type": "outpost" }
+      ],
+      "routes": [
+        {
+          "id": "capital_ring",
+          "type": "ring",
+          "path": [
+            { "q": 1, "r": 2 },
+            { "q": 1, "r": 1 },
+            { "q": 2, "r": 1 },
+            { "q": 2, "r": 2 },
+            { "q": 1, "r": 3 },
+            { "q": 0, "r": 2 }
+          ]
+        },
+        {
+          "id": "forward_road",
+          "type": "road",
+          "origin": "capital",
+          "destination": "forward_depot",
+          "path": [
+            { "q": 1, "r": 2 },
+            { "q": 2, "r": 2 },
+            { "q": 3, "r": 2 },
+            { "q": 4, "r": 1 }
+          ]
+        },
+        {
+          "id": "harbor_convoy",
+          "type": "convoy",
+          "origin": "harbor",
+          "destination": "forward_depot",
+          "path": [
+            { "q": 5, "r": 3 },
+            { "q": 5, "r": 2 },
+            { "q": 4, "r": 1 }
+          ]
+        },
+        {
+          "id": "outpost_corridor",
+          "type": "road",
+          "origin": "capital",
+          "destination": "frontier_outpost",
+          "path": [
+            { "q": 1, "r": 2 },
+            { "q": 2, "r": 1 },
+            { "q": 3, "r": 0 }
+          ]
+        },
+        {
+          "id": "outpost_ring",
+          "type": "ring",
+          "path": [
+            { "q": 3, "r": 0 },
+            { "q": 3, "r": 1 },
+            { "q": 2, "r": 1 },
+            { "q": 2, "r": 0 }
+          ]
+        }
+      ]
+    }
   }
 ]

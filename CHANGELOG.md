@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Expanded `data/logistics.json` with explicit supply center and route graphs, taught `LogisticsSystem` to ingest them, and added gdUnit coverage ensuring every logistics scenario map stays connected.
 - Bootstrapped `LogisticsSystem` from `GameManager` so headless turn cycles and HUD toggles immediately emit supply payloads, backed by gdUnit coverage of the integration path.
 - Instrumented the command loop telemetry: `EventBusAutoload` now emits `order_rejected`/`elan_gained`, `TelemetryAutoload` normalises the `doctrine_selected`/`order_issued`/`order_rejected`/`elan_spent`/`elan_gained` payloads, and `tests/gdunit/test_command_elan_loop.gd` locks the new schemas while README + telemetry dashboard docs capture the fields.
 - Added gdUnit regression tests covering doctrine swap gating, Élan spend failures, and Assistant AI acknowledgements to secure the command loop behaviour.

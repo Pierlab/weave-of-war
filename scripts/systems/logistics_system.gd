@@ -39,7 +39,7 @@ func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload)
     _rng.randomize()
 
     _generate_default_map()
-    _configure_default_routes()
+    _configure_default_network()
 
     if data_loader and data_loader.is_ready():
         configure(data_loader.list_logistics_states(), data_loader.list_weather_states())
@@ -74,6 +74,7 @@ func configure(logistics_entries: Array, weather_entries: Array) -> void:
     elif not _logistics_by_id.has(_current_logistics_id) and not _logistics_by_id.is_empty():
         _current_logistics_id = str(_logistics_by_id.keys()[0])
 
+    _apply_logistics_map(_logistics_by_id.get(_current_logistics_id, {}))
     if _current_weather_id.is_empty() and _weather_sequence.size() > 0:
         _current_weather_id = str(_weather_sequence[0])
     elif not _weather_by_id.has(_current_weather_id) and _weather_sequence.size() > 0:
@@ -90,6 +91,7 @@ func set_logistics_state(logistics_id: String) -> void:
     if logistics_id.is_empty() or not _logistics_by_id.has(logistics_id):
         return
     _current_logistics_id = logistics_id
+    _apply_logistics_map(_logistics_by_id.get(_current_logistics_id, {}))
     _update_weather_rotation_turns()
     _ensure_convoy_states()
     _recalculate_state("state_change")
@@ -151,13 +153,13 @@ func _generate_default_map() -> void:
                 "base_movement_cost": movement,
             }
 
+func _configure_default_network() -> void:
     _supply_centers = [
         {"id": "capital", "q": 1, "r": 2, "type": "city"},
         {"id": "forward_depot", "q": 4, "r": 1, "type": "depot"},
         {"id": "harbor", "q": 5, "r": 3, "type": "harbor"},
     ]
 
-func _configure_default_routes() -> void:
     _routes = [
         {
             "id": "capital_ring",
@@ -191,6 +193,78 @@ func _configure_default_routes() -> void:
             ]
         }
     ]
+    _reset_convoy_states_for_routes()
+    _ensure_convoy_states()
+
+func _apply_logistics_map(logistics_config: Dictionary) -> void:
+    if not logistics_config.has("map"):
+        return
+    var map_data := logistics_config.get("map")
+    if not (map_data is Dictionary):
+        return
+
+    var updated := false
+    if map_data.has("columns") or map_data.has("rows"):
+        map_columns = int(map_data.get("columns", map_columns))
+        map_rows = int(map_data.get("rows", map_rows))
+        _generate_default_map()
+        updated = true
+    elif _terrain_lookup.is_empty():
+        _generate_default_map()
+
+    if map_data.has("supply_centers") and map_data.get("supply_centers") is Array:
+        var centers: Array = []
+        for center_data in map_data.get("supply_centers"):
+            if not (center_data is Dictionary):
+                continue
+            var center_id := str(center_data.get("id", ""))
+            if center_id.is_empty():
+                continue
+            centers.append({
+                "id": center_id,
+                "q": int(center_data.get("q", 0)),
+                "r": int(center_data.get("r", 0)),
+                "type": str(center_data.get("type", "depot")),
+            })
+        if centers.size() > 0:
+            _supply_centers = centers
+            updated = true
+
+    if map_data.has("routes") and map_data.get("routes") is Array:
+        var routes: Array = []
+        for route_data in map_data.get("routes"):
+            if not (route_data is Dictionary):
+                continue
+            var route_id := str(route_data.get("id", ""))
+            if route_id.is_empty():
+                continue
+            var path_ids: Array = []
+            if route_data.has("path") and route_data.get("path") is Array:
+                for node in route_data.get("path"):
+                    var tile_id := _tile_id_from_variant(node)
+                    if tile_id.is_empty():
+                        continue
+                    path_ids.append(tile_id)
+            if path_ids.is_empty():
+                continue
+            var route_payload := {
+                "id": route_id,
+                "type": str(route_data.get("type", "road")),
+                "path": path_ids,
+            }
+            if route_data.has("origin"):
+                route_payload["origin"] = str(route_data.get("origin"))
+            if route_data.has("destination"):
+                route_payload["destination"] = str(route_data.get("destination"))
+            routes.append(route_payload)
+        if routes.size() > 0:
+            _routes = routes
+            updated = true
+
+    if updated:
+        _reset_convoy_states_for_routes()
+        _ensure_convoy_states()
+        _previous_supply_levels.clear()
 
 func _ensure_convoy_states() -> void:
     for route in _routes:
@@ -491,4 +565,22 @@ func _update_weather_rotation_turns() -> void:
     var config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
     if config.has("weather_rotation_turns"):
         _weather_rotation_turns = int(config.get("weather_rotation_turns"))
+
+func _reset_convoy_states_for_routes() -> void:
+    var next_states: Dictionary = {}
+    for route in _routes:
+        if not (route is Dictionary):
+            continue
+        var route_id := route.get("id", "")
+        if route_id.is_empty():
+            continue
+        next_states[route_id] = _convoys_by_route.get(route_id, _new_convoy_state())
+    _convoys_by_route = next_states
+
+func _tile_id_from_variant(node: Variant) -> String:
+    if node is Dictionary:
+        return _tile_id(int(node.get("q", 0)), int(node.get("r", 0)))
+    if node is Array and node.size() >= 2:
+        return _tile_id(int(node[0]), int(node[1]))
+    return ""
 

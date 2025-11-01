@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T14:43:12Z
+- Generated on: 2025-11-01T15:00:33Z
 - Branch: work
-- Commit when generated: 2b06dbd8ba261fc92de96561cbed7298755a9d48
-- Subject: Merge pull request #53 from Pierlab/codex/update-checklist.md-spo70i
+- Commit when generated: e84e48ce9bb6e719726caa78e6813c773d9e761d
+- Subject: Merge pull request #54 from Pierlab/codex/add-item-to-checklist.md-mjfxu2
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -53,6 +53,7 @@
 - tests/gdunit/test_competence_and_formations.gd
 - tests/gdunit/test_data_integrity.gd
 - tests/gdunit/test_game_manager_logistics_bootstrap.gd
+- tests/gdunit/test_logistics_data_connectivity.gd
 - tests/gdunit/test_logistics_system.gd
 - tests/gdunit/test_smoke.gd
 

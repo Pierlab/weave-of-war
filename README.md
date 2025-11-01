@@ -181,6 +181,7 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   lors de toute extension de ces contrats. The new autoloads mirror this architecture so future Checklist C work can focus on
   behaviour, not plumbing.
 - Review the canonical JSON schemas in `data/` for doctrines, orders, units, formations, weather, and logistics to keep inertia locks, Élan costs, and supply interactions aligned with gameplay scripts.
+- Logistics scenarios now declare supply centers, rings, and convoy paths inside [`data/logistics.json`](data/logistics.json); keep the graphs connected and documented whenever the map or supply rules evolve.
 - Track outstanding data gaps documented under Phase 0 in [`docs/agents/missions/vertical_slice_p0.md`](docs/agents/missions/vertical_slice_p0.md#phase-0-findings) before extending any dataset so SDS expectations stay visible.
 - Reference the one-page GDD summary in [`docs/gdd_vertical_slice.md`](docs/gdd_vertical_slice.md) when communicating vision,
   fantasy, pillars, loops, and risks for the vertical slice.
