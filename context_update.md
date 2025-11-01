@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-15 — Documenté l'acceptation manuelle de la boucle Commandement & Élan : `docs/tests/acceptance_tests.md` détaille le swap de doctrine, l'émission d'ordres et la vérification du buffer `TelemetryAutoload`, clôturant l'item 15 de la checklist Phase 1.
 - 2025-11-11 — Les contrôles HUD de doctrine/ordre déclenchent désormais les requêtes EventBus, restaurent la doctrine active lorsqu'une inertie bloque un swap et ajoutent des infobulles de bouton détaillant l'Élan manquant pour exposer les validations directement dans l'interface.
 - 2025-11-12 — `AssistantAIAutoload` archive les paquets `order_issued`/`assistant_order_packet` et la debug overlay affiche un journal déroulant (ordre, cible, intention, confiance) validant la propagation des ordres côté assistant.
 - 2025-11-13 — Ajouté une batterie de tests gdUnit verrouillant le refus de changement de doctrine pendant l'inertie, les échecs de dépense d'Élan lorsque le budget est insuffisant et l'acquittement `assistant_order_packet`; en attente d'un run `godot --headless --path . --script res://scripts/ci/gdunit_runner.gd` dès que l'exécutable sera disponible.
