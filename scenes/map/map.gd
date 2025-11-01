@@ -4,6 +4,7 @@ const UTILS := preload("res://scripts/core/utils.gd")
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 const TERRAIN_DATA := preload("res://scenes/map/terrain_data.gd")
+const FORMATION_OVERLAY := preload("res://scenes/map/formation_overlay.gd")
 const HexTileScene := preload("res://scenes/map/hex_tile.tscn")
 const HexTileScript := preload("res://scenes/map/hex_tile.gd")
 
@@ -16,11 +17,13 @@ var data_loader: DataLoader
 var _terrain_definitions: Dictionary = TERRAIN_DATA.get_default()
 var _tiles: Dictionary = {}
 var _default_visibility := 0.2
+var _formation_overlay: FormationOverlay
 
 func _ready() -> void:
     _generate_map()
     _apply_default_terrain()
     _acquire_sources()
+    _configure_overlays()
 
 func _acquire_sources() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -37,10 +40,12 @@ func _acquire_sources() -> void:
         event_bus.fog_of_war_updated.connect(_on_fog_of_war_updated)
     if data_loader and data_loader.is_ready():
         _apply_terrain_from_data_loader()
+    _configure_overlays()
 
 func _on_data_loader_ready(_payload: Dictionary) -> void:
     data_loader = DATA_LOADER.get_instance()
     _apply_terrain_from_data_loader()
+    _configure_overlays()
 
 func _generate_map() -> void:
     for child in get_children():
@@ -157,6 +162,16 @@ func _on_fog_of_war_updated(payload: Dictionary) -> void:
     for tile_id in _tiles.keys():
         if not applied.has(tile_id):
             _set_tile_visibility(tile_id, _default_visibility)
+
+func _configure_overlays() -> void:
+    if _formation_overlay == null:
+        for child in get_children():
+            if child is FORMATION_OVERLAY:
+                _formation_overlay = child
+                break
+    if _formation_overlay:
+        _formation_overlay.set_dimensions(columns, rows)
+        _formation_overlay.set_data_sources(event_bus, data_loader)
 
 func _tile_id(q: int, r: int) -> String:
     return "%d,%d" % [q, r]

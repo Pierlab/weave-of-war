@@ -157,6 +157,10 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   que la documentation (README, CHANGELOG, checklist) reflète les nouveaux contrats.
 
 ### Phase 6 progress
+- 2025-12-23 — La carte hex adopte un `FormationOverlay` qui affiche badges de posture (initiales + couleur), anneau d'inertie et
+  halo d'animation lors des swaps. Map `Map` transmet désormais `EventBus`/`DataLoader` à l'overlay pour rester en phase avec
+  `formation_status_updated`, AT-14 documente le contrôle visuel et une capture map/HUD reste à produire hors conteneur headless
+  pour illustrer les halos.
 - 2025-12-22 — `CombatSystem` applique désormais les bonus/malus de posture directement dans la résolution des piliers : les
   formations ajoutent leurs modificateurs aux forces de base et appliquent un multiplicateur moyen par pilier avant les effets
   terrain/météo/logistique. Un nouveau test gdUnit confirme que passer de « Advance Column » à « Shield Wall » augmente la

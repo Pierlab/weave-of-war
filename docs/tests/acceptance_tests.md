@@ -111,6 +111,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Then** la télémétrie enregistre la baisse de budget compétence, un événement `formation_changed` apparaît avec `reason: manual`, et la résolution de combat suivante reflète les bonus/malus de la formation choisie
 - **And** je compare `combat_resolved.pillars` avant/après : adopter « Shield Wall » augmente `position.attacker` tout en réduisant `impulse.attacker` et `information.attacker` par rapport au tir précédent
 - **And** le sélecteur reste verrouillé pendant la durée d'inertie restante, tandis qu'une tentative sans Élan suffisant affiche un message HUD explicite et publie `formation_change_failed`
+- **And** la carte affiche un badge de posture coloré pour chaque unité ; changer de formation actualise l'icône (initiales + anneau d'inertie) et déclenche une mise en évidence éphémère autour de l'unité concernée
 
 ### AT-15: HUD Compétence — sliders & raccourcis
 - **Given** le panneau HUD « Compétence » affiche les allocations Tactique/Stratégie/Logistique et la HUD indique le budget restant

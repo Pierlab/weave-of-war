@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource path="res://scenes/map/map.gd" type="Script" id="1"]
 [ext_resource path="res://scenes/map/logistics_overlay.tscn" type="PackedScene" id="2"]
+[ext_resource path="res://scenes/map/formation_overlay.tscn" type="PackedScene" id="3"]
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1")
@@ -9,3 +10,5 @@ columns = 10
 rows = 10
 
 [node name="LogisticsOverlay" parent="." instance=ExtResource("2")]
+
+[node name="FormationOverlay" parent="." instance=ExtResource("3")]
