@@ -214,6 +214,9 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
 - The HUD sports a dedicated **Formations** panel: every unit lists its compatible postures with Élan cost, inertia lock and
   descriptive tooltips. Selecting a new posture dispatches `formation_change_requested` via the event bus, and the UI locks the
   selector while inertia cools down or highlights Élan shortfalls so players understand why a swap is unavailable.
+- The hex map renders live formation badges above each unit: posture colours and initials update instantly when
+  `formation_changed` fires, a white inertia ring and remaining-turn counter appear while a unit is locked, and recent swaps emit
+  a brief highlight pulse so formation changes are visible without opening the HUD panel.
 - `DataLoader` exposes the formations dataset, maps each formation to the archetypes that can field it, and offers helper
   lookups (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `Telemetry` records
   competence and formation events with the enriched before/after snapshots so gdUnit tests and dashboards can assert on the

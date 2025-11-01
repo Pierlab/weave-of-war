@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Formation posture badges on the tactical map: a new `FormationOverlay` draws colour-coded initials, inertia rings, and swap
+  highlight pulses for each unit whenever `formation_status_updated` or `formation_changed` fires, keeping posture shifts visible
+  without opening the HUD. Acceptance tests now cover the visual feedback and a gdUnit utility spec verifies the badge
+  abbreviations/colour palette.
 - Formation control panel in the HUD with per-unit dropdowns that surface Élan costs, inertia locks, and formation descriptions.
   The new `FormationSystem` listens to `formation_change_requested`, spends Élan, enforces lock timers, and broadcasts
   `formation_status_updated` so the UI and telemetry stay in sync while preventing illegal or unaffordable posture swaps.

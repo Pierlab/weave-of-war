@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T23:21:43Z
+- Generated on: 2025-11-01T23:33:03Z
 - Branch: work
-- Commit when generated: ccb39dfc6719d2f41221d8ba2ad976da78a4d162
-- Subject: Implement formation controls and FormationSystem
+- Commit when generated: ce7c793ffcec3b9f2d7b3d904207bb5733562571
+- Subject: Merge pull request #87 from Pierlab/codex/update-checklist.md-37dp60
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -13,6 +13,7 @@
 
 ## Godot scenes
 - scenes/main.tscn
+- scenes/map/formation_overlay.tscn
 - scenes/map/hex_tile.tscn
 - scenes/map/logistics_overlay.tscn
 - scenes/map/map.tscn
@@ -56,6 +57,7 @@
 - tests/gdunit/test_command_elan_loop.gd
 - tests/gdunit/test_competence_and_formations.gd
 - tests/gdunit/test_data_integrity.gd
+- tests/gdunit/test_formation_overlay.gd
 - tests/gdunit/test_game_manager_logistics_bootstrap.gd
 - tests/gdunit/test_logistics_data_connectivity.gd
 - tests/gdunit/test_logistics_system.gd

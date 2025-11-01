@@ -69,7 +69,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 44. [x] **Load formation definitions.** Map `data/formations.json` entries to unit archetypes and document the mapping. *(2025-12-20 — `DataLoader` dérive désormais les classes `line/mobile/ranged/support` pour chaque formation, `CombatSystem` s'appuie sur ce mapping pour ses fallbacks et README/mission brief détaillent la répartition.)*
 45. [x] **Implement formation controls.** Provide HUD interactions (dropdown/radial) respecting Élan costs and inertia delays. *(2025-12-21 — Panneau HUD « Formations » avec menus déroulants par unité, feedback Élan/inertie en direct, `FormationSystem` gère les coûts, verrous et publie `formation_status_updated` pour synchroniser HUD/tests.)*
 46. [x] **Integrate with combat.** Ensure `CombatSystem` consumes formation data when computing pillar modifiers; verify via logs/tests. *(2025-12-22 — `CombatSystem` now injects formation bonuses/multipliers into pillar resolution, and gdUnit verifies posture swaps shift Position/Impulsion/Information as expected.)*
-47. [ ] **Visualise formation changes.** Update map visuals/icons when formations shift; capture assets in mission notes.
+47. [x] **Visualise formation changes.** Update map visuals/icons when formations shift; capture assets in mission notes. *(2025-12-23 — `FormationOverlay` affiche badges colorés + halo d'inertie sur la carte; capture map/HUD à prendre lors d'un run non headless.)*
 48. [ ] **Emit formation telemetry.** Publish `formation_changed` events linked to combat outcomes.
 49. [ ] **Test formation flows.** Add gdUnit coverage validating transitions, costs, and combat influence; archive results.
 

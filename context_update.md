@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-23 — Ajouté un `FormationOverlay` à la carte tactique : les unités affichent désormais des badges de posture colorés
+  (initiales, anneau d'inertie, surbrillance lors d'un swap) synchronisés avec `formation_status_updated`. README, CHANGELOG,
+  AT-14 et le mission brief détaillent la nouvelle visibilité, un test gdUnit vérifie les abréviations/couleurs, et la carte se
+  synchronise via `Map.set_data_sources`. Les commandes Godot headless restent en attente faute de binaire provisionné dans le
+  conteneur.
 - 2025-12-22 — Intégré les postures de formation dans la résolution combat : `CombatSystem` ajoute désormais les bonus/malus de
   formation et applique un multiplicateur moyen par pilier avant les facteurs terrain/météo/logistique, ce qui rend visibles les
   échanges Position/Impulsion/Information lors d'un swap. Un test gdUnit compare "Advance Column" vs "Shield Wall" et confirme
