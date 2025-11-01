@@ -624,6 +624,8 @@ static func _validate_logistics(entry: Dictionary, context: String) -> Array:
     errors += _ensure_integerish("logistics", entry, ["supply_radius", "convoy_spawn_threshold", "elan_penalty_on_break", "recovery_per_turn"], context)
     if entry.has("intercept_chance"):
         errors += _ensure_numeric_value("logistics", entry.get("intercept_chance"), context + ".intercept_chance")
+    if entry.has("deficit_flow_threshold"):
+        errors += _ensure_numeric_value("logistics", entry.get("deficit_flow_threshold"), context + ".deficit_flow_threshold")
     errors += _ensure_array_of_strings("logistics", entry, "route_types", context)
     errors += _ensure_dictionaries("logistics", entry, ["links", "map"], context)
 

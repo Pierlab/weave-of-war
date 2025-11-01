@@ -76,7 +76,7 @@ payload keys so affected systems can surface actionable HUD/debug overlay feedba
 | `order_issued` | HUD → `GameManager` | `{ order_id, unit_ids, target_hex, elan_cost }` | `AssistantAI`, `LogisticsSystem`, `CombatSystem` |
 | `assistant_order_packet` | `AssistantAI` | `{ orders: Array, intents: Dictionary, expected_outcomes: Dictionary }` | `CombatSystem`, `LogisticsSystem`, `Telemetry` |
 | `elan_spent` | `ElanSystem` | `{ amount, reason, remaining }` | `Telemetry`, `HUDManager`, `DebugOverlay` |
-| `logistics_update` | `LogisticsSystem` | `{ logistics_id, weather_id, supply_zones, routes, breaks }` | `Telemetry`, `HUDManager`, `EspionageSystem` |
+| `logistics_update` | `LogisticsSystem` | `{ logistics_id, weather_id, supply_zones, reachable_tiles, supply_deficits, routes, convoy_statuses, breaks }` | `Telemetry`, `HUDManager`, `EspionageSystem`, `TurnManager` |
 | `logistics_break` (new) | `LogisticsSystem` | `{ type, tile_id/route_id, elan_penalty, competence_penalty, weather_id, logistics_id }` | `Telemetry`, `TurnManager`, `HUDManager` |
 | `combat_resolved` | `CombatSystem` | `{ engagement_id, pillars, victor, casualties }` | `Telemetry`, `HUDManager`, `TurnManager` |
 | `espionage_ping` | `EspionageSystem` | `{ source_hex, target_hex, confidence, revealed_intent }` | `Telemetry`, `HUDManager` |

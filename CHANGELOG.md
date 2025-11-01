@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Enriched `LogisticsSystem` `logistics_update` payloads with `reachable_tiles`, `supply_deficits`, and `convoy_statuses`, updating datasets, docs, and tests so downstream systems can react to supply health without rehydrating raw tile maps.
 - Rendered the logistics overlay with pulsing supply rings and animated convoy markers that react to convoy interceptions and
   flow strength emitted by `LogisticsSystem`.
 - Expanded `data/logistics.json` with explicit supply center and route graphs, taught `LogisticsSystem` to ingest them, and added gdUnit coverage ensuring every logistics scenario map stays connected.

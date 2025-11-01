@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-19 — `LogisticsSystem` diffuse désormais des payloads `logistics_update` incluant les tuiles atteignables (`reachable_tiles`), les déficits de ravitaillement classés par sévérité et un résumé `convoy_statuses` pour chaque route; documentation (README, tests d'acceptation, mission brief) et données (`data/logistics.json`) reflètent les nouveaux champs.
 - 2025-11-18 — `LogisticsOverlay` affiche désormais des anneaux d'approvisionnement pulsés et des marqueurs de convois animés (verts/ambers/rouges) directement alimentés par `logistics_update`; les interceptions se signalent via des croix rouges, et la capture GIF reste en attente faute de client Godot graphique dans ce conteneur.
 - 2025-11-17 — `data/logistics.json` encode désormais les centres d'approvisionnement/rings/convoys, `LogisticsSystem` consomme ces graphes, et un test gdUnit vérifie que chaque scénario logistique reste connexe.
 - 2025-11-16 — `GameManager` instancie `LogisticsSystem`, partage les autoloads `EventBus`/`DataLoader`, et le test `tests/gdunit/test_game_manager_logistics_bootstrap.gd` verrouille la propagation des signaux `turn_started`/`logistics_toggled` pour lancer la Phase 2.
