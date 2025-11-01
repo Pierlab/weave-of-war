@@ -29,6 +29,7 @@
       "cp_cap_delta": 2,
       "swap_token_budget": 1,
       "inertia_multiplier": 1.25,
+      "elan_cap_bonus": 2,
       "allowed_order_tags": ["assault", "press", "breakthrough"]
     }
   },
@@ -62,6 +63,7 @@
       "cp_cap_delta": -1,
       "swap_token_budget": 2,
       "inertia_multiplier": 0.85,
+      "elan_cap_bonus": 0,
       "allowed_order_tags": ["feint", "probe", "intercept"]
     }
   },
@@ -95,6 +97,7 @@
       "cp_cap_delta": 3,
       "swap_token_budget": 1,
       "inertia_multiplier": 1.4,
+      "elan_cap_bonus": 1,
       "allowed_order_tags": ["fortify", "hold", "reserve"]
     }
   },
@@ -128,6 +131,7 @@
       "cp_cap_delta": -2,
       "swap_token_budget": 2,
       "inertia_multiplier": 0.7,
+      "elan_cap_bonus": 1,
       "allowed_order_tags": ["advance", "feint", "raid"]
     }
   },
@@ -161,6 +165,7 @@
       "cp_cap_delta": 1,
       "swap_token_budget": 2,
       "inertia_multiplier": 1.0,
+      "elan_cap_bonus": 1,
       "allowed_order_tags": ["advance", "fortify", "coordinate"]
     }
   }

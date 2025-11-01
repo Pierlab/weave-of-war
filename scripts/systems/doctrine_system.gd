@@ -12,6 +12,8 @@ var _orders_by_id: Dictionary = {}
 var _active_doctrine_id := ""
 var _inertia_turns_remaining := 0
 var _allowed_order_ids: Array[String] = []
+var _command_profiles_by_id: Dictionary = {}
+var _active_command_profile: Dictionary = {}
 
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
@@ -41,9 +43,13 @@ func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload)
 func configure(doctrine_entries: Array, order_entries: Array) -> void:
     _doctrines_by_id.clear()
     _orders_by_id.clear()
+    _command_profiles_by_id.clear()
     for entry in doctrine_entries:
         if entry is Dictionary and entry.has("id"):
             _doctrines_by_id[entry.get("id")] = entry
+            var profile_variant: Variant = entry.get("command_profile", {})
+            if profile_variant is Dictionary:
+                _command_profiles_by_id[entry.get("id")] = profile_variant
     for entry in order_entries:
         if entry is Dictionary and entry.has("id"):
             _orders_by_id[entry.get("id")] = entry
@@ -64,6 +70,7 @@ func select_doctrine(doctrine_id: String) -> bool:
 
     _active_doctrine_id = doctrine_id
     var doctrine: Dictionary = _doctrines_by_id.get(doctrine_id, {})
+    _active_command_profile = _command_profiles_by_id.get(doctrine_id, {})
     _inertia_turns_remaining = max(doctrine.get("inertia_lock_turns", 0), 0)
     _refresh_allowed_orders()
     _broadcast_status("selected")
@@ -87,20 +94,25 @@ func get_allowed_order_ids() -> Array[String]:
 
 func get_state_payload(reason := "status") -> Dictionary:
     var doctrine: Dictionary = _doctrines_by_id.get(_active_doctrine_id, {})
+    var profile: Dictionary = _active_command_profile if _active_command_profile is Dictionary else {}
     return {
         "id": _active_doctrine_id,
         "name": doctrine.get("name", ""),
         "inertia_remaining": _inertia_turns_remaining,
         "inertia_lock_turns": doctrine.get("inertia_lock_turns", 0),
         "elan_upkeep": doctrine.get("elan_upkeep", 0),
+        "inertia_multiplier": float(profile.get("inertia_multiplier", 1.0)),
+        "elan_cap_bonus": float(profile.get("elan_cap_bonus", 0.0)),
+        "swap_token_budget": int(profile.get("swap_token_budget", 0)),
         "allowed_orders": _build_allowed_order_payload(),
         "reason": reason,
     }
 
-func register_order_inertia(impact_turns: int) -> void:
-    if impact_turns <= 0:
+func register_order_inertia(order_id: String, impact_turns: float) -> void:
+    var computed_turns := _calculate_order_inertia(order_id, impact_turns)
+    if computed_turns <= 0:
         return
-    _inertia_turns_remaining = max(_inertia_turns_remaining, impact_turns)
+    _inertia_turns_remaining = max(_inertia_turns_remaining, computed_turns)
     _broadcast_status("order_inertia")
 
 func advance_turn() -> void:
@@ -127,8 +139,30 @@ func _build_allowed_order_payload() -> Array:
             "name": order.get("name", order_id),
             "base_elan_cost": order.get("base_elan_cost", 0),
             "inertia_impact": order.get("inertia_impact", 0),
+            "inertia_profile": order.get("inertia_profile", {}),
         })
     return payload
+
+func _calculate_order_inertia(order_id: String, base_turns: float) -> int:
+    var order: Dictionary = _orders_by_id.get(order_id, {})
+    var profile: Dictionary = _active_command_profile if _active_command_profile is Dictionary else {}
+
+    var base_value := max(float(base_turns), 0.0)
+    if base_value <= 0.0:
+        return 0
+
+    var multiplier: float = float(profile.get("inertia_multiplier", 1.0))
+    var doctrine_multiplier := 1.0
+    var inertia_profile_variant: Variant = order.get("inertia_profile", {})
+    if inertia_profile_variant is Dictionary:
+        var doctrine_multipliers_variant: Variant = inertia_profile_variant.get("doctrine_multipliers", {})
+        if doctrine_multipliers_variant is Dictionary:
+            doctrine_multiplier = float(doctrine_multipliers_variant.get(_active_doctrine_id, doctrine_multiplier))
+
+    var computed := ceil(base_value * multiplier * doctrine_multiplier)
+    if computed <= 0:
+        return 0
+    return max(computed, 1)
 
 func _broadcast_status(reason: String) -> void:
     if event_bus == null:
@@ -155,6 +189,10 @@ func _on_doctrine_change_requested(doctrine_id: String) -> void:
         })
 
 func _on_order_issued(payload: Dictionary) -> void:
-    var impact := int(payload.get("inertia_impact", 0))
-    if impact > 0:
-        register_order_inertia(impact)
+    var order_id := str(payload.get("order_id", ""))
+    var impact := float(payload.get("base_inertia_turns", payload.get("inertia_impact", 0)))
+    if order_id.is_empty():
+        return
+    if impact <= 0.0:
+        return
+    register_order_inertia(order_id, impact)

@@ -48,10 +48,16 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 ## Command & Élan loop (Semaine 0–1)
 - The doctrine catalogue in [`data/doctrines.json`](data/doctrines.json) now locks the five SDS-approved stances (Force/Ruse/Patience/Vitesse/Équilibre) with command profiles covering CP cap deltas, swap token budgets, and inertia multipliers for downstream systems.
 - The command orders dataset in [`data/orders.json`](data/orders.json) now captures CP costs, base delay turns, doctrine requirements, targeting scopes, posture gates, and assistant intent metadata so Command Model, Élan, and Assistant AI flows consume a single contract aligned with the SDS.
-- The HUD now exposes a doctrine selector tied to the `DoctrineSystem`, displays inertia locks, and lists the orders authorised
-  by the active doctrine.
+- The HUD now exposes a doctrine selector tied to the `DoctrineSystem`, displays inertia locks, surfaces doctrine-specific
+  inertia multipliers, and lists the orders authorised by the active doctrine.
 - Order execution routes through the Élan system, enforcing Élan caps, doctrine-based restrictions, and inertia impacts before
   emitting `order_issued` telemetry.
+- Doctrine swaps and order execution now scale inertia using the SDS multipliers (`command_profile.inertia_multiplier` plus
+  `orders[].inertia_profile.doctrine_multipliers`), guaranteeing at least one full turn of lock when orders are issued while
+  reporting the remaining inertia through HUD tooltips and telemetry payloads.
+- `ElanSystem` clamps the pool to the configured cap, applies doctrine-driven cap bonuses, and schedules automatic decay when
+  the gauge stays maxed for consecutive rounds. Decay emits `elan_spent` events with a `reason="decay"` flag so telemetry can
+  distinguish voluntary spends.
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
 - `GameManager` now waits for the deferred `data_loader_ready` signal before wiring `DoctrineSystem`/`ElanSystem` and kicking off the first turn, printing the collection counts to confirm the handshake.
@@ -60,13 +66,14 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   warnings/leaks that previously spammed the console during rapid doctrine/order swaps and on shutdown.
 
 ### HUD UX copy & feedback
-- **Doctrine selector** — Each entry mirrors the doctrine `name` from `data/doctrines.json`. Selecting a doctrine updates the status label with the template `Doctrine : {Nom} — Inertie {N} tour(s)` so players see how many turns remain before the stance can change again.
+- **Doctrine selector** — Each entry mirrors the doctrine `name` from `data/doctrines.json`. Selecting a doctrine updates the status label with the template `Doctrine : {Nom} — Inertie {N} tour(s)` so players see how many turns remain before the stance can change again, while the tooltip lists remaining swap tokens and the current Élan cap bonus granted by the doctrine.
+- **Inertie label** — A dedicated `Inertie : {N} tour(s) · x{M}` line surfaces the doctrine multiplier qui sera appliquée au prochain ordre, avec une infobulle rappelant que toute commande ajoutera au minimum la durée d'inertie affichée.
 - **Order selector** — Orders are rendered as `{Nom} (X.X Élan)` using the `base_elan_cost` from `data/orders.json`. The HUD refreshes the list whenever the doctrine changes so only authorised orders appear.
 - **Execute button** — The primary call-to-action reads `Exécuter l'ordre` when no cost applies and switches to `Exécuter (X.X Élan)` when Élan is required. The button is disabled automatically if the selected order is unaffordable or missing.
 - **Feedback label** — Success messages adopt a cool blue tint (`Color(0.7, 0.9, 1.0)`) and include copy such as `Doctrine active : {Nom}` or `Ordre '{Nom}' exécuté (X.X Élan restant)`. Validation errors reuse warm amber (`Color(1.0, 0.65, 0.5)`) with explicit guidance: `Doctrine verrouillée par l'inertie`, `Élan insuffisant : X.X requis, X.X disponible`, or `Choisissez un ordre à exécuter.`
 - **Audio cues** — Positive actions (doctrine swap, order execution) trigger short sine tones at 660 Hz and 520 Hz, while validation warnings play 200 Hz or 220 Hz cues. All tones last 0.12 s at volume 0.2, share a 44.1 kHz sample rate, and fade with a fast attack envelope to avoid harsh peaks.
 - **Logistics toggle** — The logistics overlay button swaps between `Show Logistics` and `Hide Logistics`, keeping the action verb front-loaded for screen-reader clarity and future localisation keys.
-- **Accessibility notes** — Élan totals show both absolute (`Élan : X.X / Y.Y`) and trend indicators (`↗` income, `↘` upkeep). All feedback strings avoid colour-only messaging by embedding the validation reason in text, while the paired positive/negative hues exceed WCAG contrast guidelines against the HUD's neutral background.
+- **Accessibility notes** — Élan totals show both absolute (`Élan : X.X / Y.Y`) and trend indicators (`↗` income, `↘` upkeep). A context-rich tooltip on the Élan label lists base cap, active doctrine bonus, turns spent at cap, and the decay scheduled for the next round so keyboard and screen-reader users receive the same warnings surfaced by colour shifts. All feedback strings avoid colour-only messaging by embedding the validation reason in text, while the paired positive/negative hues exceed WCAG contrast guidelines against the HUD's neutral background.
 
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads

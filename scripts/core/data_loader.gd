@@ -253,11 +253,12 @@ static func _validate_doctrine(entry: Dictionary, context: String) -> Array:
         "elan_spend_modifiers",
         "logistics_requirements",
         "effects",
+        "command_profile",
     ], context)
     errors += _ensure_strings("doctrines", entry, ["id", "name", "description"], context)
     errors += _ensure_array_of_strings("doctrines", entry, "tags", context)
     errors += _ensure_integerish("doctrines", entry, ["inertia_lock_turns", "elan_upkeep"], context)
-    errors += _ensure_dictionaries("doctrines", entry, ["elan_spend_modifiers", "logistics_requirements", "effects"], context)
+    errors += _ensure_dictionaries("doctrines", entry, ["elan_spend_modifiers", "logistics_requirements", "effects", "command_profile"], context)
 
     if entry.has("elan_spend_modifiers") and entry.get("elan_spend_modifiers") is Dictionary:
         errors += _ensure_numeric_dictionary("doctrines", entry.get("elan_spend_modifiers"), context + ".elan_spend_modifiers")
@@ -265,6 +266,8 @@ static func _validate_doctrine(entry: Dictionary, context: String) -> Array:
         errors += _validate_doctrine_logistics(entry.get("logistics_requirements"), context + ".logistics_requirements")
     if entry.has("effects") and entry.get("effects") is Dictionary:
         errors += _validate_doctrine_effects(entry.get("effects"), context + ".effects")
+    if entry.has("command_profile") and entry.get("command_profile") is Dictionary:
+        errors += _validate_doctrine_command_profile(entry.get("command_profile"), context + ".command_profile")
 
     return errors
 
@@ -287,6 +290,27 @@ static func _validate_doctrine_effects(effects: Dictionary, context: String) -> 
                     errors.append(_error("doctrines", context + ".combat_bonus", "missing_key", pillar))
                 else:
                     errors += _ensure_numeric_value("doctrines", bonus.get(pillar), context + ".combat_bonus." + pillar)
+    return errors
+
+static func _validate_doctrine_command_profile(profile: Dictionary, context: String) -> Array:
+    var errors: Array = []
+    errors += _require_keys("doctrines", profile, [
+        "cp_cap_delta",
+        "swap_token_budget",
+        "inertia_multiplier",
+        "allowed_order_tags",
+        "elan_cap_bonus",
+    ], context)
+    errors += _ensure_integerish("doctrines", profile, ["cp_cap_delta", "swap_token_budget"], context)
+    if profile.has("swap_token_budget"):
+        var tokens := profile.get("swap_token_budget")
+        if typeof(tokens) in [TYPE_INT, TYPE_FLOAT] and int(tokens) < 0:
+            errors.append(_error("doctrines", context + ".swap_token_budget", "invalid_range", "value_must_be_non_negative"))
+    if profile.has("inertia_multiplier"):
+        errors += _ensure_numeric_value("doctrines", profile.get("inertia_multiplier"), context + ".inertia_multiplier")
+    if profile.has("elan_cap_bonus"):
+        errors += _ensure_numeric_value("doctrines", profile.get("elan_cap_bonus"), context + ".elan_cap_bonus")
+    errors += _ensure_array_of_strings("doctrines", profile, "allowed_order_tags", context)
     return errors
 
 static func _validate_doctrine_logistics(data: Dictionary, context: String) -> Array:

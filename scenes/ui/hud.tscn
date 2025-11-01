@@ -42,6 +42,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Doctrine : —"
 autowrap_mode = 3
+tooltip_text = "Sélectionnez une doctrine pour voir l'inertie restante."
+
+[node name="InertiaLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Inertie : 0 tour"
+autowrap_mode = 3
 
 [node name="OrderSelector" type="OptionButton" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -57,6 +64,7 @@ text = "Exécuter l'ordre"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Élan : 0.0 / 0.0 (↗ 0.0 | ↘ 0.0)"
+tooltip_text = "Suivi du total d'Élan, du plafond et des décays."
 
 [node name="FeedbackLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
