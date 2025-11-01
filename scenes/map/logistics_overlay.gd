@@ -9,11 +9,11 @@ const UTILS := preload("res://scripts/core/utils.gd")
 @export var hex_outline_width := 2.0
 
 var event_bus: EventBusAutoload
-var _hex_points := PackedVector2Array()
+var _hex_points: PackedVector2Array = PackedVector2Array()
 var _supply_tiles: Dictionary = {}
 var _route_tracks: Dictionary = {}
-var _pulse_clock := 0.0
-var _visible_state := false
+var _pulse_clock: float = 0.0
+var _visible_state: bool = false
 
 func _ready() -> void:
     z_index = 25
@@ -33,11 +33,11 @@ func _process(delta: float) -> void:
     _pulse_clock = fmod(_pulse_clock + delta * pulse_speed, TAU)
     for route_id in _route_tracks.keys():
         var track: Dictionary = _route_tracks.get(route_id, {})
-        var duration := max(float(track.get("duration", 0.0)), 0.0001)
-        var timer := min(float(track.get("timer", 0.0)) + delta, duration)
-        var start_value := float(track.get("start", 0.0))
-        var target_value := float(track.get("target", 0.0))
-        var progress_ratio := timer / duration
+        var duration: float = max(float(track.get("duration", 0.0)), 0.0001)
+        var timer: float = min(float(track.get("timer", 0.0)) + delta, duration)
+        var start_value: float = float(track.get("start", 0.0))
+        var target_value: float = float(track.get("target", 0.0))
+        var progress_ratio: float = timer / duration
         track["timer"] = timer
         track["current"] = lerp(start_value, target_value, progress_ratio)
         _route_tracks[route_id] = track
@@ -54,9 +54,9 @@ func _draw_supply_tiles() -> void:
     for tile_id in _supply_tiles.keys():
         var tile: Dictionary = _supply_tiles.get(tile_id, {})
         var center: Vector2 = tile.get("position", Vector2.ZERO)
-        var supply_level := String(tile.get("supply_level", "core"))
-        var flow_strength := clamp(float(tile.get("logistics_flow", 0.0)) / 2.0, 0.0, 1.0)
-        var offset := float(tile.get("pulse_offset", 0.0))
+        var supply_level := str(tile.get("supply_level", "core"))
+        var flow_strength: float = clamp(float(tile.get("logistics_flow", 0.0)) / 2.0, 0.0, 1.0)
+        var offset: float = float(tile.get("pulse_offset", 0.0))
         var wave := 0.6 + 0.4 * sin(_pulse_clock + offset)
         var base_color := _color_for_supply(supply_level, flow_strength, wave)
         var polygon := _translate_hex(center)
@@ -68,7 +68,7 @@ func _draw_supply_tiles() -> void:
 func _draw_routes_and_convoys() -> void:
     for route_id in _route_tracks.keys():
         var track: Dictionary = _route_tracks.get(route_id, {})
-        var route_type := String(track.get("type", "road"))
+        var route_type := str(track.get("type", "road"))
         var points: PackedVector2Array = track.get("points", PackedVector2Array())
         if points.size() < 2:
             continue
@@ -87,7 +87,7 @@ func _draw_routes_and_convoys() -> void:
         draw_polyline(draw_points, path_color, 3.0)
 
         var convoy_state: Dictionary = track.get("state", {})
-        var position := _position_along_route(track)
+        var position: Vector2 = _position_along_route(track)
         var marker_color := route_color
         marker_color.a = 0.9
         var radius := 6.0
@@ -138,12 +138,12 @@ func _refresh_supply_tiles(zones: Array) -> void:
     for zone in zones:
         if not (zone is Dictionary):
             continue
-        var tile_id := String(zone.get("tile_id", ""))
+        var tile_id := str(zone.get("tile_id", ""))
         if tile_id.is_empty():
             continue
-        var coords := _coords_from_id(tile_id)
+        var coords: Vector2i = _coords_from_id(tile_id)
         var position := UTILS.axial_to_pixel(coords.x, coords.y)
-        var pulse_offset := float((coords.x + coords.y) * 0.37) % TAU
+        var pulse_offset: float = fmod(float((coords.x + coords.y) * 0.37), TAU)
         active_tiles[tile_id] = {
             "position": position,
             "supply_level": zone.get("supply_level", "core"),
@@ -157,22 +157,22 @@ func _refresh_routes(routes: Array) -> void:
     for route in routes:
         if not (route is Dictionary):
             continue
-        var route_id := String(route.get("id", ""))
+        var route_id := str(route.get("id", ""))
         if route_id.is_empty():
             continue
         var path: Array = route.get("path", [])
         var points := PackedVector2Array()
         for node in path:
-            var tile_id := String(node)
-            var coords := _coords_from_id(tile_id)
+            var tile_id := str(node)
+            var coords: Vector2i = _coords_from_id(tile_id)
             points.append(UTILS.axial_to_pixel(coords.x, coords.y))
         if points.size() < 2:
             continue
         var convoy: Dictionary = route.get("convoy", {})
         var previous: Dictionary = _route_tracks.get(route_id, {})
-        var current_value := float(previous.get("current", convoy.get("progress", 0.0)))
-        var target_value := float(convoy.get("progress", 0.0))
-        var duration := convoy_lerp_duration if convoy.get("active", false) else 0.35
+        var current_value: float = float(previous.get("current", convoy.get("progress", 0.0)))
+        var target_value: float = float(convoy.get("progress", 0.0))
+        var duration: float = convoy_lerp_duration if convoy.get("active", false) else 0.35
         var track := {
             "points": points,
             "type": route.get("type", "road"),
@@ -192,20 +192,20 @@ func _position_along_route(track: Dictionary) -> Vector2:
         return Vector2.ZERO
     if points.size() == 1:
         return points[0]
-    var max_index := points.size() - 1
-    var route_length := max(float(max_index), 1.0)
-    var progress := clamp(float(track.get("current", 0.0)), 0.0, route_length)
+    var max_index: int = points.size() - 1
+    var route_length: float = max(float(max_index), 1.0)
+    var progress: float = clamp(float(track.get("current", 0.0)), 0.0, route_length)
     var segment := int(clamp(floor(progress), 0, max_index - 1))
-    var local := clamp(progress - float(segment), 0.0, 1.0)
+    var local: float = clamp(progress - float(segment), 0.0, 1.0)
     var start_point := points[segment]
     var end_point := points[segment + 1]
     return start_point.lerp(end_point, local)
 
-func _coords_from_id(tile_id: String) -> Vector2:
-    var parts := tile_id.split(",")
+func _coords_from_id(tile_id: String) -> Vector2i:
+    var parts: PackedStringArray = tile_id.split(",")
     if parts.size() >= 2:
-        return Vector2(parts[0].to_int(), parts[1].to_int())
-    return Vector2.ZERO
+        return Vector2i(int(parts[0]), int(parts[1]))
+    return Vector2i.ZERO
 
 func _build_hex_points() -> PackedVector2Array:
     return PackedVector2Array([

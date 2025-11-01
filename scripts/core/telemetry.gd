@@ -1,3 +1,4 @@
+@warning_ignore("class_name_hides_autoload")
 class_name TelemetryAutoload
 extends Node
 

@@ -94,7 +94,7 @@ func _on_turn_started(turn_number: int) -> void:
 func _advance_weather() -> void:
     if _weather_sequence.is_empty():
         return
-    var index := _weather_sequence.find(_current_weather_id)
+    var index: int = _weather_sequence.find(_current_weather_id)
     if index == -1:
         index = 0
     index = (index + 1) % _weather_sequence.size()
@@ -103,20 +103,20 @@ func _advance_weather() -> void:
     _emit_weather_changed("rotation")
 
 func _roll_duration(weather_id: String) -> int:
-    var range := _duration_range(weather_id)
-    var minimum := max(range.x, 1)
-    var maximum := max(range.y, minimum)
+    var range: Vector2i = _duration_range(weather_id)
+    var minimum: int = max(range.x, 1)
+    var maximum: int = max(range.y, minimum)
     return _rng.randi_range(minimum, maximum)
 
 func _duration_range(weather_id: String) -> Vector2i:
     var entry: Dictionary = _weather_lookup.get(weather_id, {})
-    var variant := entry.get("duration_turns", [])
+    var variant: Variant = entry.get("duration_turns", [])
     if variant is Array:
         var duration: Array = variant
         if duration.size() >= 2:
             return Vector2i(int(duration[0]), int(duration[1]))
         if duration.size() == 1:
-            var value := int(duration[0])
+            var value: int = int(duration[0])
             return Vector2i(value, value)
     return Vector2i(1, 1)
 

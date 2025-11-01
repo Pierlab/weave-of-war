@@ -147,19 +147,19 @@ func _calculate_order_inertia(order_id: String, base_turns: float) -> int:
     var order: Dictionary = _orders_by_id.get(order_id, {})
     var profile: Dictionary = _active_command_profile if _active_command_profile is Dictionary else {}
 
-    var base_value := max(float(base_turns), 0.0)
+    var base_value: float = max(float(base_turns), 0.0)
     if base_value <= 0.0:
         return 0
 
     var multiplier: float = float(profile.get("inertia_multiplier", 1.0))
-    var doctrine_multiplier := 1.0
+    var doctrine_multiplier: float = 1.0
     var inertia_profile_variant: Variant = order.get("inertia_profile", {})
     if inertia_profile_variant is Dictionary:
         var doctrine_multipliers_variant: Variant = inertia_profile_variant.get("doctrine_multipliers", {})
         if doctrine_multipliers_variant is Dictionary:
             doctrine_multiplier = float(doctrine_multipliers_variant.get(_active_doctrine_id, doctrine_multiplier))
 
-    var computed := ceil(base_value * multiplier * doctrine_multiplier)
+    var computed := int(ceil(base_value * multiplier * doctrine_multiplier))
     if computed <= 0:
         return 0
     return max(computed, 1)

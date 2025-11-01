@@ -74,7 +74,7 @@ func _merge_definitions(entries: Array) -> void:
         var id := str(entry.get("id", ""))
         if id.is_empty():
             continue
-        var current := _terrain_definitions.get(id, {})
+        var current: Dictionary = _terrain_definitions.get(id, {})
         _terrain_definitions[id] = {
             "name": str(entry.get("name", current.get("name", id.capitalize()))),
             "movement_cost": float(entry.get("movement_cost", current.get("movement_cost", 1.0))),
@@ -90,7 +90,7 @@ func _apply_terrain_tiles(entries: Array) -> void:
         var r := int(entry.get("r", 0))
         var tile_id := _tile_id(q, r)
         var terrain_id := str(entry.get("terrain", "plains"))
-        var definition := _terrain_definitions.get(terrain_id, {})
+        var definition: Dictionary = _terrain_definitions.get(terrain_id, {})
         var name := str(entry.get("name", definition.get("name", terrain_id.capitalize())))
         var description := str(entry.get("description", definition.get("description", "")))
         var movement := float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
@@ -106,13 +106,13 @@ func _apply_default_terrain() -> void:
     if count == 0:
         return
     for tile_id in _tiles.keys():
-        var coords := tile_id.split(",")
+        var coords: PackedStringArray = tile_id.split(",")
         if coords.size() < 2:
             continue
-        var q := coords[0].to_int()
-        var r := coords[1].to_int()
+        var q: int = int(coords[0])
+        var r: int = int(coords[1])
         var terrain_id := str(keys[(q + r) % count])
-        var definition := _terrain_definitions.get(terrain_id, {})
+        var definition: Dictionary = _terrain_definitions.get(terrain_id, {})
         var name := str(definition.get("name", terrain_id.capitalize()))
         var description := str(definition.get("description", ""))
         var movement := float(definition.get("movement_cost", 1.0))
@@ -121,7 +121,7 @@ func _apply_default_terrain() -> void:
 func _set_tile_terrain(tile_id: String, terrain_id: String, name: String, description: String, movement_cost: float) -> void:
     if not _tiles.has(tile_id):
         return
-    var tile := _tiles.get(tile_id)
+    var tile: Node = _tiles.get(tile_id)
     if tile and tile.has_method("set_terrain"):
         tile.set_terrain({
             "id": terrain_id,

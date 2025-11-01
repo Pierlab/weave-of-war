@@ -59,11 +59,11 @@ func configure(order_entries: Array, unit_entries: Array) -> void:
 func add_elan(amount: float, reason: String = "manual", metadata: Dictionary = {}) -> void:
     if amount == 0.0:
         return
-    var previous_value := _current_elan
+    var previous_value: float = _current_elan
     var new_value: float = clamp(previous_value + amount, 0.0, max_elan)
     if !is_equal_approx(new_value, previous_value):
         _current_elan = new_value
-        var gained := max(new_value - previous_value, 0.0)
+        var gained: float = max(new_value - previous_value, 0.0)
         if gained > 0.0 and event_bus:
             event_bus.emit_elan_gained({
                 "amount": gained,
@@ -267,7 +267,7 @@ func _apply_decay_if_needed() -> void:
         return
     if decay_amount <= 0.0 or event_bus == null:
         return
-    var new_value := max(_current_elan - decay_amount, 0.0)
+    var new_value: float = max(_current_elan - decay_amount, 0.0)
     if is_equal_approx(new_value, _current_elan):
         return
     _current_elan = new_value
