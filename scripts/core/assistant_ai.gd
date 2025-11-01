@@ -8,6 +8,9 @@ static var _instance: AssistantAIAutoload
 
 var _event_bus: EventBusAutoload
 var _data_loader: DataLoaderAutoload
+var _recent_packets: Array[Dictionary] = []
+
+const MAX_PACKET_HISTORY := 10
 
 func _ready() -> void:
     _instance = self
@@ -37,6 +40,7 @@ func _on_order_issued(payload: Dictionary) -> void:
     var intention := str(order_data.get("intention", "unknown"))
     var signal_strength := float(order_data.get("intel_profile", {}).get("signal_strength", 0.4))
     var enriched_order := payload.duplicate(true)
+    enriched_order["order_id"] = order_id
     enriched_order["intention"] = intention
     enriched_order["pillar_weights"] = order_data.get("pillar_weights", {})
     if not enriched_order.has("target") and not enriched_order.has("target_hex"):
@@ -67,6 +71,7 @@ func _on_order_issued(payload: Dictionary) -> void:
 
     if _event_bus:
         _event_bus.emit_assistant_order_packet(packet)
+    _record_packet(packet)
 
 func _on_doctrine_selected(_payload: Dictionary) -> void:
     # Placeholder for doctrine awareness; will influence packet generation in Checklist C.
@@ -81,3 +86,11 @@ func _on_data_ready(_payload: Dictionary) -> void:
         _data_loader = DATA_LOADER.get_instance()
     var cache_ready := _data_loader != null and _data_loader.is_ready()
     print("[Autoload] AssistantAIAutoload observed data_loader_ready (cache_ready: %s)" % ("true" if cache_ready else "false"))
+
+func get_recent_packets() -> Array[Dictionary]:
+    return _recent_packets.duplicate(true)
+
+func _record_packet(packet: Dictionary) -> void:
+    _recent_packets.append(packet.duplicate(true))
+    while _recent_packets.size() > MAX_PACKET_HISTORY:
+        _recent_packets.remove_at(0)

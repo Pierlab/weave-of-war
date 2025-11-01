@@ -2,6 +2,7 @@
 
 ## Summary
 - 2025-11-11 — Les contrôles HUD de doctrine/ordre déclenchent désormais les requêtes EventBus, restaurent la doctrine active lorsqu'une inertie bloque un swap et ajoutent des infobulles de bouton détaillant l'Élan manquant pour exposer les validations directement dans l'interface.
+- 2025-11-12 — `AssistantAIAutoload` archive les paquets `order_issued`/`assistant_order_packet` et la debug overlay affiche un journal déroulant (ordre, cible, intention, confiance) validant la propagation des ordres côté assistant.
 - 2025-11-10 — Le couple Doctrine/Élan applique les multipliers SDS pour calculer l'inertie des ordres, ajoute les bonus de cap Élan propres à chaque doctrine, déclenche la décroissance automatique après un tour complet au plafond, et la HUD affiche désormais une ligne "Inertie" + des infobulles détaillant cap, bonus et tours bloqués (capture HUD à prendre lors du prochain run Godot local car le conteneur actuel est headless).
 - 2025-11-09 — `GameManager` attend désormais le signal `data_loader_ready` avant de configurer `DoctrineSystem`/`ElanSystem`, en journalisant les comptes et en ne démarrant le tour 1 qu'après l'initialisation garantie.
 - 2025-11-08 — Documenté la copie HUD (doctrines, ordres, messages de feedback, tonalités audio) et les notes d'accessibilité dans le README pour boucler l'item 8 de la checklist.
