@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-01 — `CombatSystem` applique désormais les formules SDS détaillant les piliers Position/Impulsion/Information : focus doctrinal multiplicatif, atténuation logistique (flow, movement_cost, sévérité), pondération météo/terrain et profils de renseignement (`signal_strength`, `counter_intel`). README, changelog et mission brief consignent les équations.
 - 2025-11-30 — `GameManager` instancie désormais `CombatSystem`, relie les signaux `logistics_update`/`order_*` et enrichit les
   payloads `combat_resolved` avec le contexte de supply (flow, niveau, sévérité) afin que la télémétrie et les futurs panneaux
   HUD expliquent comment la logistique influence les piliers.

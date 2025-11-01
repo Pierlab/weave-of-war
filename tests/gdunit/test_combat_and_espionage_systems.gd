@@ -106,6 +106,7 @@ func test_combat_system_resolves_three_pillars() -> void:
         "attacker_unit_ids": ["infantry", "cavalry"],
         "defender_unit_ids": ["infantry"],
         "terrain": "forest",
+        "target_hex": "2,2",
         "intel_confidence": 0.6,
         "espionage_bonus": 0.2,
         "defender_posture": "hold",
@@ -124,6 +125,22 @@ func test_combat_system_resolves_three_pillars() -> void:
     var intel := result.get("intel", {})
     asserts.is_equal(0.8, intel.get("confidence", 0.0), "Intel confidence should reflect base plus espionage bonus")
     asserts.is_true(stub_bus.payloads.size() == 1, "Combat system should emit a telemetry payload via the event bus")
+
+    system._on_logistics_update({
+        "turn": 3,
+        "logistics_id": "vs_logistics",
+        "supply_zones": [
+            {"tile_id": "2,2", "logistics_flow": 0.6, "movement_cost": 1.4, "supply_level": "strained"}
+        ],
+        "supply_deficits": [
+            {"tile_id": "2,2", "severity": "critical"}
+        ],
+    })
+    system.set_rng_seed(1)
+    var strained := system.resolve_engagement(engagement)
+    var strained_position := strained.get("pillars", {}).get("position", {}).get("attacker", 0.0)
+    var baseline_position := pillars.get("position", {}).get("attacker", 0.0)
+    asserts.is_true(strained_position < baseline_position, "Critical logistics should reduce attacker position strength")
 
     var baseline_impulse := pillars.get("impulse", {}).get("attacker", 0.0)
     system.set_rng_seed(1)

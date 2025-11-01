@@ -194,56 +194,44 @@ func resolve_engagement(engagement: Dictionary) -> Dictionary:
     var posture_bonus: Dictionary = DEFENDER_POSTURES.get(defender_posture, DEFENDER_POSTURES.get("hold"))
     var order_weights: Dictionary = order_entry.get("pillar_weights", {})
     var intel_profile: Dictionary = order_entry.get("intel_profile", {})
+    var doctrine_focus := str(doctrine_effects.get("combat_pillar_focus", ""))
 
     for pillar in PILLARS:
-        var attacker_strength := float(attacker_base.get(pillar, 0.0))
-        attacker_strength += float(order_weights.get(pillar, 0.0))
-        attacker_strength += float(doctrine_bonus.get(pillar, 0.0))
-        attacker_strength += float(attacker_bonuses.get(pillar, 0.0))
-        attacker_strength = max(attacker_strength, 0.0)
-
-        var defender_strength := float(defender_base.get(pillar, 0.0))
-        defender_strength += float(posture_bonus.get(pillar, 0.0))
-        defender_strength += float(defender_bonuses.get(pillar, 0.0))
-        defender_strength = max(defender_strength, 0.0)
-
-        var terrain_factor := float(terrain_profile.get(pillar, 1.0))
-        var weather_factor := float(weather_modifiers.get(pillar, 1.0))
-
-        if pillar == "information":
-            var intel_multiplier := clamp(intel_confidence + espionage_bonus + attacker_detection, 0.1, 1.75)
-            var counter_multiplier := clamp(1.0 + defender_counter + float(intel_profile.get("counter_intel", 0.0)), 0.1, 2.0)
-            attacker_strength *= intel_multiplier
-            defender_strength *= counter_multiplier
-        elif pillar == "impulse":
-            var momentum := clamp(intel_confidence + float(order_weights.get("impulse", 0.0)), 0.5, 2.0)
-            attacker_strength *= momentum
-            defender_strength *= clamp(1.0 + float(posture_bonus.get("impulse", 0.0)) - espionage_bonus, 0.4, 2.0)
-
-        attacker_strength *= terrain_factor * weather_factor
-        defender_strength *= terrain_factor * weather_factor
-        attacker_strength *= attacker_logistics_factor
-        defender_strength *= defender_logistics_factor
-
-        var jitter := _rng.randf_range(-0.05, 0.05)
-        attacker_strength = max(attacker_strength + jitter, 0.0)
-        defender_strength = max(defender_strength - jitter, 0.0)
-
-        var margin := snapped(attacker_strength - defender_strength, 0.01)
-        var pillar_winner := "stalemate"
-        if margin > 0.05:
-            pillar_winner = "attacker"
-            attacker_wins += 1
-        elif margin < -0.05:
-            pillar_winner = "defender"
-            defender_wins += 1
-
-        results[pillar] = {
-            "attacker": snapped(attacker_strength, 0.01),
-            "defender": snapped(defender_strength, 0.01),
-            "margin": margin,
-            "winner": pillar_winner,
+        var pillar_context := {
+            "terrain_factor": float(terrain_profile.get(pillar, 1.0)),
+            "weather_factor": float(weather_modifiers.get(pillar, 1.0)),
+            "order_weights": order_weights,
+            "doctrine_bonus": doctrine_bonus,
+            "attacker_bonus": attacker_bonuses,
+            "defender_bonus": defender_bonuses,
+            "posture_bonus": posture_bonus,
+            "intel_confidence": intel_confidence,
+            "espionage_bonus": espionage_bonus,
+            "attacker_detection": attacker_detection,
+            "defender_counter": defender_counter,
+            "intel_profile": intel_profile,
+            "doctrine_focus": doctrine_focus,
+            "attacker_logistics_factor": attacker_logistics_factor,
+            "defender_logistics_factor": defender_logistics_factor,
+            "movement_cost": float(logistics_context.get("movement_cost", 1.0)),
+            "logistics_severity": str(logistics_context.get("severity", "")),
         }
+
+        var pillar_result := _resolve_pillar(
+            pillar,
+            float(attacker_base.get(pillar, 0.0)),
+            float(defender_base.get(pillar, 0.0)),
+            pillar_context
+        )
+
+        results[pillar] = pillar_result
+        match pillar_result.get("winner", "stalemate"):
+            "attacker":
+                attacker_wins += 1
+            "defender":
+                defender_wins += 1
+            _:
+                pass
 
     var victor := "stalemate"
     if attacker_wins >= 2:
@@ -535,9 +523,18 @@ func _logistics_context_for_target(target_hex: String) -> Dictionary:
         _:
             pass
 
+    var defender_factor := 1.0
+    match severity:
+        "warning":
+            defender_factor *= 0.95
+        "critical":
+            defender_factor *= 0.8
+        _:
+            pass
+
     return {
         "attacker_factor": snapped(attacker_factor, 0.01),
-        "defender_factor": 1.0,
+        "defender_factor": snapped(defender_factor, 0.01),
         "logistics_flow": snapped(flow, 0.01),
         "supply_level": supply_level,
         "severity": severity,
@@ -546,3 +543,137 @@ func _logistics_context_for_target(target_hex: String) -> Dictionary:
         "logistics_id": str(_last_logistics_payload.get("logistics_id", "")),
         "target_hex": target_hex,
     }
+
+func _resolve_pillar(pillar: String, attacker_base: float, defender_base: float, context: Dictionary) -> Dictionary:
+    var order_weights: Dictionary = context.get("order_weights", {})
+    var doctrine_bonus: Dictionary = context.get("doctrine_bonus", {})
+    var attacker_bonus: Dictionary = context.get("attacker_bonus", {})
+    var defender_bonus: Dictionary = context.get("defender_bonus", {})
+    var posture_bonus: Dictionary = context.get("posture_bonus", {})
+
+    var attacker_strength := attacker_base
+    attacker_strength += float(order_weights.get(pillar, 0.0))
+    attacker_strength += float(doctrine_bonus.get(pillar, 0.0))
+    attacker_strength += float(attacker_bonus.get(pillar, 0.0))
+    attacker_strength = max(attacker_strength, 0.0)
+
+    var defender_strength := defender_base
+    defender_strength += float(posture_bonus.get(pillar, 0.0))
+    defender_strength += float(defender_bonus.get(pillar, 0.0))
+    defender_strength = max(defender_strength, 0.0)
+
+    var terrain_factor := float(context.get("terrain_factor", 1.0))
+    var weather_factor := float(context.get("weather_factor", 1.0))
+    attacker_strength *= terrain_factor * weather_factor
+    defender_strength *= terrain_factor * weather_factor
+
+    var doctrine_focus := str(context.get("doctrine_focus", ""))
+    if doctrine_focus == pillar:
+        attacker_strength *= 1.1
+    elif doctrine_focus != "" and doctrine_focus != pillar:
+        attacker_strength *= 0.98
+
+    var attacker_logistics_factor := float(context.get("attacker_logistics_factor", 1.0))
+    var defender_logistics_factor := float(context.get("defender_logistics_factor", 1.0))
+    attacker_strength *= attacker_logistics_factor
+    defender_strength *= defender_logistics_factor
+
+    match pillar:
+        "position":
+            attacker_strength *= _position_multiplier(context)
+            defender_strength *= _position_defender_multiplier(context)
+        "impulse":
+            attacker_strength *= _impulse_multiplier(context)
+            defender_strength *= _impulse_defender_multiplier(context)
+        "information":
+            attacker_strength *= _information_multiplier(context)
+            defender_strength *= _information_defender_multiplier(context)
+        _:
+            pass
+
+    var jitter := _rng.randf_range(-0.05, 0.05)
+    attacker_strength = max(attacker_strength + jitter, 0.0)
+    defender_strength = max(defender_strength - jitter, 0.0)
+
+    var margin := snapped(attacker_strength - defender_strength, 0.01)
+    var pillar_winner := "stalemate"
+    if margin > 0.05:
+        pillar_winner = "attacker"
+    elif margin < -0.05:
+        pillar_winner = "defender"
+
+    return {
+        "attacker": snapped(attacker_strength, 0.01),
+        "defender": snapped(defender_strength, 0.01),
+        "margin": margin,
+        "winner": pillar_winner,
+    }
+
+func _position_multiplier(context: Dictionary) -> float:
+    var movement_cost := float(context.get("movement_cost", 1.0))
+    var severity := str(context.get("logistics_severity", ""))
+    var espionage_bonus := float(context.get("espionage_bonus", 0.0))
+    var modifier := clamp(1.0 - ((movement_cost - 1.0) * 0.25), 0.6, 1.3)
+    match severity:
+        "warning":
+            modifier *= 0.9
+        "critical":
+            modifier *= 0.75
+        _:
+            pass
+    modifier += espionage_bonus * 0.05
+    return clamp(modifier, 0.4, 1.5)
+
+func _position_defender_multiplier(context: Dictionary) -> float:
+    var posture_bonus: Dictionary = context.get("posture_bonus", {})
+    var intel_confidence := float(context.get("intel_confidence", 0.5))
+    var severity := str(context.get("logistics_severity", ""))
+    var modifier := 1.0 + float(posture_bonus.get("position", 0.0)) * 0.5
+    modifier *= clamp(1.0 - (intel_confidence - 0.5) * 0.3, 0.7, 1.3)
+    match severity:
+        "warning":
+            modifier *= 0.95
+        "critical":
+            modifier *= 0.85
+        _:
+            pass
+    return clamp(modifier, 0.5, 1.6)
+
+func _impulse_multiplier(context: Dictionary) -> float:
+    var intel_confidence := float(context.get("intel_confidence", 0.5))
+    var espionage_bonus := float(context.get("espionage_bonus", 0.0))
+    var logistics_factor := float(context.get("attacker_logistics_factor", 1.0))
+    var bonus := (intel_confidence - 0.5) * 0.5
+    bonus += espionage_bonus * 0.35
+    bonus += (logistics_factor - 1.0) * 0.4
+    return clamp(1.0 + bonus, 0.5, 1.8)
+
+func _impulse_defender_multiplier(context: Dictionary) -> float:
+    var posture_bonus: Dictionary = context.get("posture_bonus", {})
+    var defender_counter := float(context.get("defender_counter", 0.0))
+    var espionage_bonus := float(context.get("espionage_bonus", 0.0))
+    var intel_confidence := float(context.get("intel_confidence", 0.5))
+    var modifier := 1.0 + float(posture_bonus.get("impulse", 0.0)) * 0.6
+    modifier += defender_counter * 0.2
+    modifier -= espionage_bonus * 0.2
+    modifier *= clamp(1.0 - (intel_confidence - 0.5) * 0.25, 0.7, 1.3)
+    return clamp(modifier, 0.4, 1.8)
+
+func _information_multiplier(context: Dictionary) -> float:
+    var intel_confidence := float(context.get("intel_confidence", 0.5))
+    var espionage_bonus := float(context.get("espionage_bonus", 0.0))
+    var attacker_detection := float(context.get("attacker_detection", 0.0))
+    var defender_counter := float(context.get("defender_counter", 0.0))
+    var intel_profile: Dictionary = context.get("intel_profile", {})
+    var signal_strength := float(intel_profile.get("signal_strength", 0.0))
+    var detection_delta := attacker_detection - defender_counter
+    var modifier := 0.6 + intel_confidence + espionage_bonus + signal_strength + detection_delta * 0.4
+    return clamp(modifier, 0.2, 2.4)
+
+func _information_defender_multiplier(context: Dictionary) -> float:
+    var defender_counter := float(context.get("defender_counter", 0.0))
+    var espionage_bonus := float(context.get("espionage_bonus", 0.0))
+    var intel_profile: Dictionary = context.get("intel_profile", {})
+    var counter_profile := float(intel_profile.get("counter_intel", 0.0))
+    var modifier := 0.9 + defender_counter + counter_profile - espionage_bonus * 0.4
+    return clamp(modifier, 0.3, 2.2)

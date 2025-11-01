@@ -102,6 +102,11 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 
 ### Phase 3 progress
 - 2025-11-30 — `GameManager` instancie désormais `CombatSystem`, branche les signaux `order_execution_requested`/`order_issued`/`logistics_update`, et chaque payload `combat_resolved` inclut un bloc `logistics` (flow, niveau, sévérité, tour) pour contextualiser les victoires de piliers côté HUD et télémétrie.
+- 2025-12-01 — Les formules des piliers Position/Impulsion/Information appliquent désormais le focus doctrinal, la sévérité logistique (flow + movement cost), les bonus de formation/compétence, ainsi que les multiplicateurs météo/terrain et renseignement (`intel_confidence`, `signal_strength`, `counter_intel`). Ce fichier conserve l'annotation de référence :
+  - **Position** = (profil unités + doctrine + formation + ordre + bonus attaque) × terrain × météo × focus doctrinal × facteur logistique × pénalité mouvement (selon `movement_cost`) × ajustement sévérité (warning=×0,9, critical=×0,75) + 5% de bonus espionnage.
+  - **Impulsion** = (profil unités + doctrine + formation + ordre + bonus attaque) × terrain × météo × focus doctrinal × facteur logistique × `[1 + 0,5*(intel_confidence-0,5) + 0,35*espionage_bonus + 0,4*(logistics_factor-1)]`.
+  - **Information** = (profil unités + doctrine + formation + ordre + bonus attaque) × terrain × météo × focus doctrinal × facteur logistique × `[0,6 + intel_confidence + espionage_bonus + signal_strength + 0,4*(detection-counter_intel)]`.
+  - Défenseurs : posture + bonus défense appliqués avant multiplications; pénalités logistiques warning/critical (×0,95/×0,8) et contrepoids d'intel `[0,9 + counter_intel + profil_counter - 0,4*espionage_bonus]` sur Information, `[1 + 0,6*posture_impulse + 0,2*counter_intel - 0,2*espionage_bonus]` sur Impulsion, `[1 + 0,5*posture_position] × clamp(1 - 0,3*(intel_confidence-0,5))` sur Position.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
