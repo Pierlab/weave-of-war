@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-01T15:00:33Z
+- Generated on: 2025-11-01T15:14:44Z
 - Branch: work
-- Commit when generated: e84e48ce9bb6e719726caa78e6813c773d9e761d
-- Subject: Merge pull request #54 from Pierlab/codex/add-item-to-checklist.md-mjfxu2
+- Commit when generated: c03ed658cad83dddcdcec1aa385a6fcf10768b56
+- Subject: Merge pull request #55 from Pierlab/codex/complete-checklist-item-in-checklist.md
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 
@@ -14,6 +14,7 @@
 ## Godot scenes
 - scenes/main.tscn
 - scenes/map/hex_tile.tscn
+- scenes/map/logistics_overlay.tscn
 - scenes/map/map.tscn
 - scenes/ui/debug_overlay.tscn
 - scenes/ui/hud.tscn

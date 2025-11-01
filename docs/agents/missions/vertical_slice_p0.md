@@ -27,7 +27,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 (Follow the numbered sequence in [`CHECKLISTS.md`](../../CHECKLISTS.md); each task must be completed in order with evidence linked back here.)
 - [ ] Phase 0 — Alignment, data hygiene, and instrumentation foundations.
 - [x] Phase 1 — Command Model & Élan core loop (data contracts, systems, telemetry). *(2025-11-15 — Acceptation manuelle documentée dans `docs/tests/acceptance_tests.md` pour valider doctrines, ordres et télémétrie.)*
-- [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-17 — `LogisticsSystem` charge désormais les cartes logistiques depuis `data/logistics.json` et la connectivité est verrouillée par `tests/gdunit/test_logistics_data_connectivity.gd`.)*
+- [~] Phase 2 — Logistics backbone with terrain & weather integration. *(2025-11-18 — `LogisticsOverlay` anime les anneaux d'approvisionnement et les convois à partir des payloads `logistics_update`; terrain et météo restent à livrer.)*
 - [ ] Phase 3 — Combat (3 Pillars) resolution pipeline.
 - [ ] Phase 4 — Espionage systems and fog of war feedback.
 - [ ] Phase 5 — Competence sliders (tactics/strategy/logistics) with inertia.
@@ -71,6 +71,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 ### Phase 2 progress
 - 2025-11-16 — `GameManager` instancie `LogisticsSystem`, partage les autoloads `EventBus`/`DataLoader`, et `tests/gdunit/test_game_manager_logistics_bootstrap.gd` capture la propagation des signaux de tour/toggle pour verrouiller l'intégration.
 - 2025-11-17 — `data/logistics.json` décrit désormais les centres d'approvisionnement et routes/convoys pour chaque scénario, `LogisticsSystem` les charge dynamiquement, et un test gdUnit (`tests/gdunit/test_logistics_data_connectivity.gd`) valide que chaque graphe reste connexe.
+- 2025-11-18 — `LogisticsOverlay` dessine des anneaux d'approvisionnement pulsés et anime les convois selon l'état (`active`, `delivered`, `intercepted`), avec des marqueurs rouges pour les interceptions; capture GIF à réaliser lors du prochain run Godot local car l'environnement actuel est headless.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
