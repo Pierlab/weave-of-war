@@ -1,12 +1,13 @@
 # Context Update — Current Branch
 
 ## Summary
-- 2025-12-03 — `combat_resolved` transporte désormais un résumé des piliers (totaux, marge, piliers décisifs) et un état par
-  unité (formation active, pertes estimées, remarques logistiques) que `TelemetryAutoload` sérialise pour les dashboards/HUD,
-  accompagnés de nouveaux tests gdUnit verrouillant la structure.
+- 2025-12-05 — Documenté le flux HUD → CombatSystem → Telemetry pour déclencher les engagements et lire le panneau "Dernier engagement"; README, mission brief et checklist Phase 3 item 31 mis à jour.
 - 2025-12-04 — Ajouté `tests/gdunit/test_combat_resolution.gd` pour couvrir la reproductibilité contrôlée par seed, les tie-breakers
   contestés et les pénalités logistiques critiques sur les pertes, clôturant l'item 30 de la checklist Phase 3. README, CHANGELOG,
   mission brief et checklist mis à jour en conséquence.
+- 2025-12-03 — `combat_resolved` transporte désormais un résumé des piliers (totaux, marge, piliers décisifs) et un état par
+  unité (formation active, pertes estimées, remarques logistiques) que `TelemetryAutoload` sérialise pour les dashboards/HUD,
+  accompagnés de nouveaux tests gdUnit verrouillant la structure.
 - 2025-12-02 — Le panneau HUD "Dernier engagement" consomme désormais `combat_resolved` : jauges Position/Impulsion/Information,
   résumé logistique (flow, sévérité, mouvement, hex cible) et rappel des dépenses/gains d'Élan. README, changelog, mission brief,
   checklist et tests d'acceptation documentent l'UX; capture écran en attente d'un run Godot non headless.

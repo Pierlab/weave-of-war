@@ -87,6 +87,7 @@ All notable changes to this project will be documented in this file.
 - Captured autoload readiness instrumentation: renamed the singletons in `project.godot`, extended `tests/gdunit/test_autoload_preparation.gd` to assert configuration/signals, and archived the startup log excerpt under `docs/logs/autoload_readiness_2025-11-04.log` for future audits.
 
 ### Changed
+- Documented the combat loop workflow: README now explique comment déclencher un engagement depuis la HUD Commandement, lire le panneau "Dernier engagement" et inspecter la télémétrie `combat_resolved`, tandis que le mission brief référence le Remote Debugger pour clôturer l'item 31 de la checklist.
 - Decoupled the core autoload script classes (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) from their singleton keys to avoid the Godot 4.6 `class_name_hides_autoload` parse error, refreshed docs/tests to reflect the new typing pattern, and hardened `DataLoader`/`LogisticsSystem` with explicit hints so warnings-as-errors no longer block startup.
 - Deferred `GameManager` core system initialisation until `data_loader_ready`, logging collection counts and starting the turn loop only after Doctrine/Élan setup succeeds.
 - Documented the expected Windows startup warnings (SDL controller mappings, Vulkan loader layer manifests, optional Vulkan extensions) in the README so agents know the logs are benign and how to silence them locally if desired.

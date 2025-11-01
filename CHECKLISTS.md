@@ -47,7 +47,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 28. [x] **Build combat UI.** Deliver HUD panels/modals showing gauges, textual summaries, and Élan adjustments; capture UI screenshots. *(2025-12-02 — HUD "Dernier engagement" panel affiche les piliers, le contexte logistique et les deltas d'Élan; capture écran à réaliser hors conteneur headless.)*
 29. [x] **Record telemetry.** Emit `combat_resolved` payloads with per-pillar breakdowns and resulting unit states. *(2025-12-03 — Payload enrichi avec `pillar_summary` et `units`, sérialisé par `TelemetryAutoload`, gdUnit vérifie la structure.)*
 30. [x] **Automate combat checks.** Write gdUnit scenarios covering deterministic outcomes, tie-breakers, and edge cases. Archive result summaries. *(2025-12-04 — Ajouté `tests/gdunit/test_combat_resolution.gd` couvrant la reproductibilité par seed, les égalités 1-1-1 et l'impact logistique critique sur les pertes.)*
-31. [ ] **Document combat loop.** Update `README.md` and the mission brief with instructions for triggering combat and interpreting results.
+31. [x] **Document combat loop.** Update `README.md` and the mission brief with instructions for triggering combat and interpreting results. *(2025-12-05 — README décrit désormais le flux HUD → CombatSystem → Telemetry avec étapes pas-à-pas; mission brief Phase 3 rappelle l'inspection via Remote Debugger et lie l'item 31.)*
 
 ## Phase 4 — Espionage & Fog of War
 32. [ ] **Spawn EspionageSystem.** Ensure it initialises alongside combat/logistics systems and updates fog state each turn.
