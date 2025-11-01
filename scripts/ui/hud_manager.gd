@@ -514,6 +514,8 @@ func _ensure_feedback_playback() -> AudioStreamGeneratorPlayback:
         _feedback_generator.mix_rate = FEEDBACK_SAMPLE_RATE
         _feedback_generator.buffer_length = FEEDBACK_DURATION * 2.0
         feedback_player.stream = _feedback_generator
+    if not feedback_player.playing:
+        feedback_player.play()
     var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
         return playback

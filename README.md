@@ -70,6 +70,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - The procedural audio generator now queues tone requests, waits for the playback instance to go inactive, then clears and
   refills the buffer before replaying. This deferred guard removes the recurring `AudioStreamGeneratorPlayback.clear_buffer`
   warnings/leaks that previously spammed the console during rapid doctrine/order swaps and on shutdown.
+- The HUD now primes the `AudioStreamPlayer` before fetching the generator playback handle, eliminating the startup
+  `Player is inactive` errors seen when Godot attempted to queue tones before the stream entered an active state (notably on
+  headless or freshly opened sessions).
 
 ### HUD UX copy & feedback
 - **Doctrine selector** — Each entry mirrors the doctrine `name` from `data/doctrines.json`. Selecting a doctrine updates the status label with the template `Doctrine : {Nom} — Inertie {N} tour(s)` so players see how many turns remain before the stance can change again, while the tooltip lists remaining swap tokens and the current Élan cap bonus granted by the doctrine. When the selector is locked by inertia, the HUD now restores the previous choice automatically and surfaces the validation message inline instead of silently ignoring the input.

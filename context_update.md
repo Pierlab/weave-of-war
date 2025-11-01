@@ -1,6 +1,10 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-07 — Corrigé le typage de `CombatSystem.unit_states` pour accepter le dictionnaire `{"attacker", "defender"}` renvoyé
+  par `_build_unit_states`, restaurant la compilation de `GameManager` et le bootstrap du pipeline combat/logistique. Le HUD
+  amorce désormais son `AudioStreamPlayer` avant de récupérer le playback du générateur pour supprimer l'erreur Godot
+  "Player is inactive" lors des premières interactions.
 - 2025-12-06 — Corrigé les erreurs de parsing Godot en annotant explicitement les variables `CombatSystem`/`HUDManager`,
   rétablissant l'initialisation du GameManager; README et CHANGELOG documentent le pattern de typage renforcé.
 - 2025-12-05 — Documenté le flux HUD → CombatSystem → Telemetry pour déclencher les engagements et lire le panneau "Dernier engagement"; README, mission brief et checklist Phase 3 item 31 mis à jour.
