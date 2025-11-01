@@ -60,6 +60,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-06 — Locked the doctrine dataset to the SDS stances with command profile metadata and aligned logistics synergies (`data/doctrines.json`, `data/logistics.json`).
 - 2025-11-07 — Élargi `data/orders.json` avec les coûts CP, délais de base, exigences doctrinales, ciblage/postures et métadonnées Assistant AI, puis renforcé `DataLoaderAutoload` + `tests/gdunit/test_data_integrity.gd` et documenté le nouveau contrat dans README/CHANGELOG.
 - 2025-11-08 — Documenté dans le README la copie HUD (doctrine/order), les messages de validation, les couleurs de feedback et les bips associés, avec rappel des considérations accessibilité pour la boucle Commandement & Élan.
+- 2025-11-09 — `GameManager` retarde désormais l'initialisation de `DoctrineSystem`/`ElanSystem` jusqu'au signal `data_loader_ready`, journalise le handshake (comptes des collections) et ne lance le tour 1 qu'une fois les systèmes configurés.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

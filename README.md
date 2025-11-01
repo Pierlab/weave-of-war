@@ -54,6 +54,7 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   emitting `order_issued` telemetry.
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
+- `GameManager` now waits for the deferred `data_loader_ready` signal before wiring `DoctrineSystem`/`ElanSystem` and kicking off the first turn, printing the collection counts to confirm the handshake.
 - The procedural audio generator now queues tone requests, waits for the playback instance to go inactive, then clears and
   refills the buffer before replaying. This deferred guard removes the recurring `AudioStreamGeneratorPlayback.clear_buffer`
   warnings/leaks that previously spammed the console during rapid doctrine/order swaps and on shutdown.
