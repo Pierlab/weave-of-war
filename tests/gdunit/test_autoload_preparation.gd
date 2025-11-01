@@ -85,3 +85,19 @@ func test_autoloads_emit_data_loader_ready_captured_by_telemetry() -> void:
     # Ensure AssistantAI received the ready payload to guarantee downstream systems can rely on it.
     var assistant_received := assistant_ai._data_loader != null and assistant_ai._data_loader.is_ready()
     asserts.is_true(assistant_received, "AssistantAI should have access to the ready DataLoader instance after initialisation")
+
+func test_telemetry_preserves_event_history() -> void:
+    Telemetry._instance = null
+    var telemetry: Telemetry = TELEMETRY.new()
+    telemetry._ready()
+    telemetry.clear()
+
+    telemetry.log_event("espionage_ping", {"target": "0,0", "success": true})
+    telemetry.log_event("espionage_ping", {"target": "1,0", "success": false})
+    telemetry.log_event("combat_resolved", {"order_id": "advance"})
+
+    var history := telemetry.get_history("espionage_ping")
+    asserts.is_equal(2, history.size(), "Telemetry history should retain all espionage ping events")
+    if history.size() == 2:
+        var last_payload: Dictionary = history.back().get("payload", {})
+        asserts.is_equal("1,0", last_payload.get("target", ""), "History should preserve payload order")

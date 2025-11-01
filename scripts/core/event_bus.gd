@@ -19,6 +19,7 @@ signal logistics_update(payload: Dictionary)
 signal logistics_break(payload: Dictionary)
 signal combat_resolved(payload: Dictionary)
 signal espionage_ping(payload: Dictionary)
+signal intel_intent_revealed(payload: Dictionary)
 signal fog_of_war_updated(payload: Dictionary)
 signal weather_changed(payload: Dictionary)
 signal competence_reallocated(payload: Dictionary)
@@ -81,6 +82,9 @@ func emit_combat_resolved(payload: Dictionary) -> void:
 
 func emit_espionage_ping(payload: Dictionary) -> void:
     espionage_ping.emit(payload)
+
+func emit_intel_intent_revealed(payload: Dictionary) -> void:
+    intel_intent_revealed.emit(payload)
 
 func emit_fog_of_war_updated(payload: Dictionary) -> void:
     fog_of_war_updated.emit(payload)

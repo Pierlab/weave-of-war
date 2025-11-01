@@ -15,7 +15,8 @@ used. Keep it updated when events evolve or dashboards shift.
 | `combat_resolved` | `CombatSystem` | `pillars`, `pillar_summary`, `units[]`, `victor`, `weather_id`, `doctrine_id`, `logistics` | Quels piliers décident des engagements, quelles unités encaissent les pertes et comment météo/doctrine/supply déplacent-ils les victoires ? |
 | `weather_changed` | `WeatherSystem` | `weather_id`, `movement_modifier`, `logistics_flow_modifier`, `intel_noise`, `elan_regeneration_bonus`, `duration_remaining`, `reason` | How often does climate shift and how strong are the applied penalties/bonuses by scenario? |
 | `logistics_break` (new) | `LogisticsSystem` | `type`, `tile_id`/`route_id`, `elan_penalty`, `competence_penalty`, `weather_id` | Where do supply chains fail and what are the resulting costs? |
-| `espionage_ping` | `EspionageSystem` | `target`, `success`, `confidence`, `intention` | When do pings reveal intentions and how reliable is intel noise? |
+| `espionage_ping` | `EspionageSystem` | `target`, `success`, `confidence`, `intention`, `visibility_before/after`, `noise` | When do pings reveal intentions and how reliable is intel noise? |
+| `intel_intent_revealed` (new) | `EspionageSystem` | `target`, `intention`, `intention_confidence`, `confidence`, `source`, `turn` | Which probes confirm intentions and how closely does RNG confidence match the stored intel? |
 
 ## KPI seeds
 
@@ -26,12 +27,13 @@ used. Keep it updated when events evolve or dashboards shift.
 - **Pillar victory distribution**: share of engagements where each pillar was decisive, split by weather using `combat_resolved`.
 - **Logistics stability index**: total Élan/competence penalties from `logistics_break` over time and by route type.
 - **Intel fidelity**: percentage of `espionage_ping` events that reveal intentions and the median confidence when they do.
+- **Intent confirmation quality**: compare `intel_intent_revealed` confidence against the originating ping rolls to track how often probes over/under perform expectations.
 
 ## Dashboard sketches
 
 1. **Operations Pulse** — Turn-level stacked bar showing Élan spent vs. recovered, annotated with `logistics_break` penalties.
 2. **Battle Insight Board** — Heatmap of pillar victories (rows) by doctrine (columns) using `combat_resolved` payloads.
 3. **Supply Chain Monitor** — Timeline chart of `logistics_break` events grouped by `type`, highlighting recurring tiles/routes.
-4. **Intel Reliability Dial** — Gauge showing rolling success rate of `espionage_ping` reveals and average confidence.
+4. **Intel Reliability Dial** — Gauge showing rolling success rate of `espionage_ping` reveals and average confidence, annotated with `intel_intent_revealed` confidence deltas when intentions surface.
 
 Document blockers or new questions in `context_update.md` whenever the instrumentation or KPIs change.

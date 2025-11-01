@@ -145,6 +145,23 @@ func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadat
     _last_ping = payload.duplicate(true)
     if event_bus:
         event_bus.emit_espionage_ping(_last_ping)
+        if revealed_intention != "unknown":
+            event_bus.emit_intel_intent_revealed({
+                "target": target,
+                "intention": revealed_intention,
+                "intent_category": revealed_intention,
+                "intention_confidence": snapped(intention_confidence, 0.01),
+                "confidence": snapped(effective_confidence, 0.01),
+                "turn": _turn_counter,
+                "source": metadata.get("source", "probe"),
+                "order_id": metadata.get("order_id", metadata.get("source", "")),
+                "roll": snapped(roll, 0.01),
+                "noise": snapped(weather_noise + counter_intel, 0.01),
+                "probe_strength": snapped(probe_strength, 0.01),
+                "detection_bonus": snapped(detection_bonus, 0.01),
+                "visibility_before": snapped(base_visibility, 0.01),
+                "visibility_after": snapped(visibility_after, 0.01),
+            })
         _emit_fog_update()
     return _last_ping
 

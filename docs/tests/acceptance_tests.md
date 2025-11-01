@@ -92,6 +92,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 - **Given** la carte dispose d'un brouillard initial et de niveaux de logistique hétérogènes
 - **When** `EspionageSystem` exécute un ping sous météo claire puis brumeuse
 - **Then** la télémétrie `espionage_ping` reflète la confiance, le bruit météo, et révèle les intentions connues lorsque le ping réussit
+- **And** un événement `intel_intent_revealed` séparé capture l'intention confirmée (avec confiance/intention) et reste visible via `TelemetryAutoload.get_history`
 - **And** la HUD met à jour le panneau "Renseignements" avec un résumé coloré (succès/échec, intention révélée, probabilité vs jet) et déroule la chronologie des derniers pings
 - **And** l'overlay debug consigne une timeline détaillée (tour, ordre source, cible, roll, bruit/détection) pour inspection rapide
 

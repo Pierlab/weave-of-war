@@ -160,8 +160,10 @@ func _connect_event_bus() -> void:
         event_bus.elan_gained.connect(_on_elan_gained)
     if not event_bus.competence_reallocated.is_connected(_on_competence_reallocated):
         event_bus.competence_reallocated.connect(_on_competence_reallocated)
-    if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
-        event_bus.espionage_ping.connect(_on_espionage_ping)
+        if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
+            event_bus.espionage_ping.connect(_on_espionage_ping)
+        if not event_bus.intel_intent_revealed.is_connected(_on_intel_intent_revealed):
+            event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
 
 func _populate_from_data_loader() -> void:
     if data_loader == null or not data_loader.is_ready():
@@ -467,6 +469,21 @@ func _on_espionage_ping(payload: Dictionary) -> void:
     _update_intel_panel()
     var positive := bool(entry.get("success", false))
     _play_feedback(520.0 if positive else 180.0)
+
+func _on_intel_intent_revealed(payload: Dictionary) -> void:
+    if payload.is_empty():
+        return
+    var entry: Dictionary = payload.duplicate(true)
+    entry["event_name"] = "intel_intent_revealed"
+    if not entry.has("success"):
+        entry["success"] = true
+    if not entry.has("intent_category"):
+        entry["intent_category"] = entry.get("intention", "unknown")
+    _intel_events.append(entry)
+    while _intel_events.size() > MAX_INTEL_EVENTS:
+        _intel_events.remove_at(0)
+    _update_intel_panel()
+    _play_feedback(600.0)
 
 func _on_elan_spent(payload: Dictionary) -> void:
     var amount: float = -abs(float(payload.get("amount", 0.0)))

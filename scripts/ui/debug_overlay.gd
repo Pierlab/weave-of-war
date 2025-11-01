@@ -56,6 +56,8 @@ func _ready() -> void:
             event_bus.data_loader_ready.connect(_on_data_loader_ready)
         if not event_bus.espionage_ping.is_connected(_on_espionage_ping):
             event_bus.espionage_ping.connect(_on_espionage_ping)
+        if not event_bus.intel_intent_revealed.is_connected(_on_intel_intent_revealed):
+            event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
 
     _refresh_intel_log()
 
@@ -94,6 +96,20 @@ func _on_espionage_ping(payload: Dictionary) -> void:
     if payload.is_empty():
         return
     var entry: Dictionary = payload.duplicate(true)
+    _intel_events.append(entry)
+    while _intel_events.size() > MAX_INTEL_LOG_ENTRIES:
+        _intel_events.remove_at(0)
+    _refresh_intel_log()
+
+func _on_intel_intent_revealed(payload: Dictionary) -> void:
+    if payload.is_empty():
+        return
+    var entry: Dictionary = payload.duplicate(true)
+    entry["event_name"] = "intel_intent_revealed"
+    if not entry.has("success"):
+        entry["success"] = true
+    if not entry.has("intent_category"):
+        entry["intent_category"] = entry.get("intention", "unknown")
     _intel_events.append(entry)
     while _intel_events.size() > MAX_INTEL_LOG_ENTRIES:
         _intel_events.remove_at(0)

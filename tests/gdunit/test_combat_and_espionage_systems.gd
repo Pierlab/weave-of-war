@@ -15,9 +15,13 @@ class StubCombatEventBus:
 
 class StubIntelEventBus:
     var payloads: Array = []
+    var intel_reveals: Array = []
 
     func emit_espionage_ping(payload: Dictionary) -> void:
         payloads.append(payload)
+
+    func emit_intel_intent_revealed(payload: Dictionary) -> void:
+        intel_reveals.append(payload)
 
 func test_combat_system_resolves_three_pillars() -> void:
     var system: CombatSystem = COMBAT_SYSTEM.new()
@@ -200,6 +204,7 @@ func test_espionage_ping_reflects_visibility_and_noise() -> void:
     asserts.is_true(sunny_ping.get("success", false), "High visibility ping should usually succeed")
     asserts.is_equal("offense", sunny_ping.get("intention", ""), "Successful ping should reveal stored intention")
     asserts.is_true(stub_bus.payloads.size() == 1, "Ping should emit telemetry")
+    asserts.is_true(stub_bus.intel_reveals.size() == 1, "Successful ping should emit an intel_intent_revealed event")
     asserts.is_equal("offense", sunny_ping.get("intent_category", ""), "Intention category should mirror revealed intention")
     asserts.is_true(sunny_ping.has("roll"), "Ping should record the RNG roll")
     asserts.is_true(sunny_ping.has("visibility_before"), "Ping should expose visibility deltas")
@@ -217,6 +222,7 @@ func test_espionage_ping_reflects_visibility_and_noise() -> void:
 
     var mist_ping := system.perform_ping("0,0", 0.2)
     asserts.is_true(mist_ping.get("confidence", 1.0) < sunny_ping.get("confidence", 0.0), "Mist should reduce confidence")
+    asserts.is_equal(1, stub_bus.intel_reveals.size(), "Follow-up pings without new intentions should not duplicate reveal events")
     var snapshot := system.get_fog_snapshot()
     asserts.is_true(snapshot.size() > 0, "Fog snapshot should expose tracked tiles")
     asserts.is_true(mist_ping.has("visibility_before"), "Fog pings should expose before visibility")

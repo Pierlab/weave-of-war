@@ -7,6 +7,7 @@ static var _instance: Telemetry
 
 var _buffer: Array = []
 var _event_bus: EventBus
+var _history_by_event: Dictionary = {}
 
 func _ready() -> void:
     _instance = self
@@ -19,6 +20,7 @@ static func get_instance() -> Telemetry:
     return _instance
 
 func log_event(name: StringName, payload: Dictionary = {}) -> void:
+    var event_key := String(name)
     var entry := {
         "name": name,
         "payload": payload.duplicate(true),
@@ -26,11 +28,23 @@ func log_event(name: StringName, payload: Dictionary = {}) -> void:
     }
     _buffer.append(entry)
 
+    var history: Array = _history_by_event.get(event_key, [])
+    history.append(entry)
+    _history_by_event[event_key] = history
+
 func get_buffer() -> Array:
     return _buffer.duplicate(true)
 
+func get_history(event_name: StringName) -> Array:
+    var key := String(event_name)
+    var events: Variant = _history_by_event.get(key, [])
+    if events is Array:
+        return (events as Array).duplicate(true)
+    return []
+
 func clear() -> void:
     _buffer.clear()
+    _history_by_event.clear()
 
 func _connect_signals() -> void:
     if _event_bus == null:
@@ -46,7 +60,8 @@ func _connect_signals() -> void:
     _event_bus.logistics_update.connect(_capture_event.bind("logistics_update"))
     _event_bus.logistics_break.connect(_capture_event.bind("logistics_break"))
     _event_bus.combat_resolved.connect(_on_combat_resolved)
-    _event_bus.espionage_ping.connect(_capture_event.bind("espionage_ping"))
+    _event_bus.espionage_ping.connect(_on_espionage_ping)
+    _event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
     _event_bus.weather_changed.connect(_on_weather_changed)
     _event_bus.assistant_order_packet.connect(_capture_event.bind("assistant_order_packet"))
     _event_bus.data_loader_ready.connect(_capture_event.bind("data_loader_ready"))
@@ -79,6 +94,54 @@ func _on_combat_resolved(payload: Dictionary) -> void:
     safe_payload["units"] = _serialise_units(payload.get("units", {}))
 
     log_event("combat_resolved", safe_payload)
+
+func _on_espionage_ping(payload: Dictionary) -> void:
+    var safe_payload := {
+        "target": str(payload.get("target", "")),
+        "success": bool(payload.get("success", false)),
+        "confidence": float(payload.get("confidence", 0.0)),
+        "noise": float(payload.get("noise", 0.0)),
+        "intention": str(payload.get("intention", "unknown")),
+        "intent_category": str(payload.get("intent_category", payload.get("intention", "unknown"))),
+        "intention_confidence": float(payload.get("intention_confidence", 0.0)),
+        "turn": int(payload.get("turn", 0)),
+        "source": str(payload.get("source", "")),
+        "order_id": str(payload.get("order_id", "")),
+        "roll": float(payload.get("roll", 0.0)),
+        "probe_strength": float(payload.get("probe_strength", 0.0)),
+        "detection_bonus": float(payload.get("detection_bonus", 0.0)),
+        "visibility_before": float(payload.get("visibility_before", 0.0)),
+        "visibility_after": float(payload.get("visibility_after", 0.0)),
+        "counter_intel_before": float(payload.get("counter_intel_before", 0.0)),
+        "counter_intel_after": float(payload.get("counter_intel_after", 0.0)),
+        "visibility_map": _serialise_visibility_map(payload.get("visibility_map", [])),
+    }
+
+    if payload.has("competence_remaining") and payload.get("competence_remaining") is Dictionary:
+        safe_payload["competence_remaining"] = (payload.get("competence_remaining") as Dictionary).duplicate(true)
+
+    log_event("espionage_ping", safe_payload)
+
+func _on_intel_intent_revealed(payload: Dictionary) -> void:
+    var safe_payload := {
+        "target": str(payload.get("target", "")),
+        "intention": str(payload.get("intention", "unknown")),
+        "intent_category": str(payload.get("intent_category", payload.get("intention", "unknown"))),
+        "intention_confidence": float(payload.get("intention_confidence", 0.0)),
+        "confidence": float(payload.get("confidence", 0.0)),
+        "success": true,
+        "turn": int(payload.get("turn", 0)),
+        "source": str(payload.get("source", "")),
+        "order_id": str(payload.get("order_id", "")),
+        "roll": float(payload.get("roll", 0.0)),
+        "noise": float(payload.get("noise", 0.0)),
+        "probe_strength": float(payload.get("probe_strength", 0.0)),
+        "detection_bonus": float(payload.get("detection_bonus", 0.0)),
+        "visibility_before": float(payload.get("visibility_before", 0.0)),
+        "visibility_after": float(payload.get("visibility_after", 0.0)),
+    }
+
+    log_event("intel_intent_revealed", safe_payload)
 
 func _on_doctrine_selected(payload: Dictionary) -> void:
     var allowed_variant: Variant = payload.get("allowed_orders", [])
@@ -168,6 +231,21 @@ func _on_weather_changed(payload: Dictionary) -> void:
         "reason": str(payload.get("reason", "status")),
         "source": str(payload.get("source", "weather_system")),
     })
+
+func _serialise_visibility_map(value: Variant) -> Array:
+    if not (value is Array):
+        return []
+    var result: Array = []
+    for entry in (value as Array):
+        if not (entry is Dictionary):
+            continue
+        var tile := entry as Dictionary
+        result.append({
+            "tile_id": str(tile.get("tile_id", "")),
+            "visibility": float(tile.get("visibility", 0.0)),
+            "counter_intel": float(tile.get("counter_intel", 0.0)),
+        })
+    return result
 
 func _coerce_dictionary(value: Variant) -> Dictionary:
     if value is Dictionary:

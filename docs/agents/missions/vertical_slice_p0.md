@@ -126,6 +126,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   HUD → CombatSystem → Telemetry, cette note rappelle l'inspection via Remote Debugger et référence l'item 31 de la checklist.
 
 ### Phase 4 progress
+- 2025-12-12 — `EspionageSystem` émet désormais `intel_intent_revealed` lorsqu'un ping confirme une intention ; `TelemetryAutoload` normalise les payloads, expose `get_history` pour analyser la timeline, et HUD/Debug overlay consignent les révélations avec un feedback audio dédié.
 - 2025-12-08 — `GameManager` instancie désormais `EspionageSystem`, hydrate le brouillard depuis `data/terrain.json`, et un test
   gdUnit (`test_game_manager_logistics_bootstrap.gd`) vérifie que les tours diffusés par `EventBus` synchronisent les pings
   `espionage_ping` avec l'état logistique.
