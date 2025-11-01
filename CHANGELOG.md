@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Bootstrapped `LogisticsSystem` from `GameManager` so headless turn cycles and HUD toggles immediately emit supply payloads, backed by gdUnit coverage of the integration path.
 - Instrumented the command loop telemetry: `EventBusAutoload` now emits `order_rejected`/`elan_gained`, `TelemetryAutoload` normalises the `doctrine_selected`/`order_issued`/`order_rejected`/`elan_spent`/`elan_gained` payloads, and `tests/gdunit/test_command_elan_loop.gd` locks the new schemas while README + telemetry dashboard docs capture the fields.
 - Added gdUnit regression tests covering doctrine swap gating, Élan spend failures, and Assistant AI acknowledgements to secure the command loop behaviour.
 - Expanded `data/orders.json` with CP costs, base delay turns, doctrine requirements, targeting scopes, posture gates, and assistant intent metadata, updating the DataLoader schema and gdUnit data integrity coverage accordingly.

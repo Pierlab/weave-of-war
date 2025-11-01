@@ -85,6 +85,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads
   that describe supply levels, terrain-driven flow modifiers, and convoy progress/interruptions for the HUD and telemetry.
+- `GameManager` instantiates `LogisticsSystem` after `DataLoader` readiness so `turn_started` and `logistics_toggled` signals
+  immediately drive supply payloads, with gdUnit coverage guarding the bootstrap path.
 - Logistics disruptions now raise a dedicated `logistics_break` event for analytics, capturing the disrupted tile/route, Élan and
   competence penalties, and current weather/logistics contexts for downstream dashboards.
 - Weather definitions (`sunny`, `rain`, `mist`) rotate automatically and apply movement/logistics multipliers sourced from

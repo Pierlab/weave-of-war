@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-11-16 — `GameManager` instancie `LogisticsSystem`, partage les autoloads `EventBus`/`DataLoader`, et le test `tests/gdunit/test_game_manager_logistics_bootstrap.gd` verrouille la propagation des signaux `turn_started`/`logistics_toggled` pour lancer la Phase 2.
 - 2025-11-15 — Documenté l'acceptation manuelle de la boucle Commandement & Élan : `docs/tests/acceptance_tests.md` détaille le swap de doctrine, l'émission d'ordres et la vérification du buffer `TelemetryAutoload`, clôturant l'item 15 de la checklist Phase 1.
 - 2025-11-11 — Les contrôles HUD de doctrine/ordre déclenchent désormais les requêtes EventBus, restaurent la doctrine active lorsqu'une inertie bloque un swap et ajoutent des infobulles de bouton détaillant l'Élan manquant pour exposer les validations directement dans l'interface.
 - 2025-11-12 — `AssistantAIAutoload` archive les paquets `order_issued`/`assistant_order_packet` et la debug overlay affiche un journal déroulant (ordre, cible, intention, confiance) validant la propagation des ordres côté assistant.

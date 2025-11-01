@@ -30,7 +30,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 15. [x] **Update manual checks.** Extend `docs/tests/acceptance_tests.md` with steps for doctrine selection, order issuance, and telemetry review. *(2025-11-15 — AT-07 détaille désormais le swap de doctrine, l'émission d'ordres et la vérification du buffer `TelemetryAutoload`.)*
 
 ## Phase 2 — Logistics Backbone with Terrain & Weather Layering
-16. [ ] **Bootstrap LogisticsSystem.** Instantiate the logistics controller within `GameManager`, wiring turn update hooks and HUD toggles via `EventBusAutoload`.
+16. [x] **Bootstrap LogisticsSystem.** Instantiate the logistics controller within `GameManager`, wiring turn update hooks and HUD toggles via `EventBusAutoload`. *(2025-11-16 — `GameManager` now spins up `LogisticsSystem`, shares the autoload instances, and gdUnit coverage (`test_game_manager_logistics_bootstrap.gd`) locks the turn/toggle signals.)*
 17. [ ] **Load logistics data.** Parse rings, nodes, and convoy routes from `data/logistics.json`; create gdUnit assertions that every scenario graph is connected.
 18. [ ] **Animate supply flows.** Render ring pulses and moving convoy sprites with state-dependent colouring (supply OK/at risk/broken). Capture GIF or screenshot evidence.
 19. [ ] **Publish logistics updates.** Emit `logistics_update` signals containing reachable tiles, supply deficits, and convoy statuses each turn. Document payload examples in mission notes.
