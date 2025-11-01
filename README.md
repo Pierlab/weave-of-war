@@ -55,6 +55,7 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `AssistantAIAutoload` now records the latest order packets, emits enriched `assistant_order_packet` payloads, and the debug
   overlay surfaces a scrollable log (order, target, intent, confidence) so designers can verify the propagation loop without
   leaving the HUD.
+- Targeted gdUnit coverage in [`tests/gdunit/test_command_elan_loop.gd`](tests/gdunit/test_command_elan_loop.gd) now exercises doctrine swap failures, Élan spend success/error states, and the Assistant AI acknowledgement to keep the command loop locked while the HUD evolves.
 - Doctrine swaps and order execution now scale inertia using the SDS multipliers (`command_profile.inertia_multiplier` plus
   `orders[].inertia_profile.doctrine_multipliers`), guaranteeing at least one full turn of lock when orders are issued while
   reporting the remaining inertia through HUD tooltips and telemetry payloads.
