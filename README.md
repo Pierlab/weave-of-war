@@ -142,8 +142,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   resolutions. Engagement telemetry embeds a `logistics` block (flow, supply level, deficit severity) so HUD panels and
   dashboards can explain how supply health shifted pillar results.
 - `EspionageSystem` maintains fog of war at the tile level, ingests logistics payloads to boost visibility, and fires
-  probabilistic pings that can reveal enemy intentions via `espionage_ping`. The dedicated gdUnit coverage in
-  `tests/gdunit/test_combat_and_espionage_systems.gd` locks behaviour under sunny vs. misty weather noise.
+  probabilistic pings that can reveal enemy intentions via `espionage_ping`. `GameManager` now spawns the system beside
+  logistics/combat controllers, hydrates the fog map from `data/terrain.json`, and gdUnit coverage
+  (`tests/gdunit/test_game_manager_logistics_bootstrap.gd`) locks the turn-synchronised telemetry.
 - `tests/gdunit/test_combat_resolution.gd` verrouille la reproductibilité contrôlée par seed, les cas contestés (une victoire
   chacun + stalemate) et l'impact des déficits logistiques critiques sur les pertes pour clore la checklist Phase 3 item 30.
 

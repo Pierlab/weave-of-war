@@ -50,7 +50,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 31. [x] **Document combat loop.** Update `README.md` and the mission brief with instructions for triggering combat and interpreting results. *(2025-12-05 — README décrit désormais le flux HUD → CombatSystem → Telemetry avec étapes pas-à-pas; mission brief Phase 3 rappelle l'inspection via Remote Debugger et lie l'item 31.)*
 
 ## Phase 4 — Espionage & Fog of War
-32. [ ] **Spawn EspionageSystem.** Ensure it initialises alongside combat/logistics systems and updates fog state each turn.
+32. [x] **Spawn EspionageSystem.** Ensure it initialises alongside combat/logistics systems and updates fog state each turn. *(2025-12-08 — GameManager instantiates EspionageSystem, seeds fog from terrain data, and a gdUnit regression confirms turn-syncing telemetry.)*
 33. [ ] **Render fog visuals.** Dim hidden tiles, hide enemy intel, and keep player territory visible; document shader/material changes if any.
 34. [ ] **Design recon flows.** Implement reconnaissance/spy orders with Élan/competence costs, integrate them into HUD + assistant pipeline, and log validation rules.
 35. [ ] **Generate intel feedback.** Produce probabilistic pings with intent categories surfaced via HUD notifications and debug overlay timelines.

@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
   now outline the equations for future tuning.
 - Instantiated `CombatSystem` from `GameManager`, wired it to `logistics_update`/order events, and extended `combat_resolved`
   payloads with logistics context so engagements reflect supply health alongside doctrine, weather, and espionage inputs.
+- Instantiated `EspionageSystem` from `GameManager`, hydrated fog-of-war from `data/terrain.json`, and added gdUnit coverage to
+  ensure EventBus turn ticks keep `espionage_ping` telemetry aligned with logistics updates.
 - Refreshed manual acceptance tests (AT-08 à AT-10) pour couvrir la bascule HUD/debug du overlay logistique, les tooltips terrain dynamiques et les impacts météo sur `logistics_update`.
 - Introduced `WeatherSystem` to cycle weather states deterministically from `data/weather.json`, emit rich `weather_changed`
   payloads, and drive the new HUD weather panel. Added gdUnit coverage in `tests/gdunit/test_weather_system.gd` to lock the

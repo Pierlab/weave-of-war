@@ -7,6 +7,7 @@ const ELAN_SYSTEM := preload("res://scripts/systems/elan_system.gd")
 const LOGISTICS_SYSTEM := preload("res://scripts/systems/logistics_system.gd")
 const WEATHER_SYSTEM := preload("res://scripts/systems/weather_system.gd")
 const COMBAT_SYSTEM := preload("res://scripts/systems/combat_system.gd")
+const ESPIONAGE_SYSTEM := preload("res://scripts/systems/espionage_system.gd")
 
 var event_bus: EventBus
 var turn_manager: TurnManager
@@ -16,6 +17,7 @@ var elan_system: ElanSystem
 var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
 var combat_system: CombatSystem
+var espionage_system: EspionageSystem
 
 var _core_systems_initialised: bool = false
 
@@ -41,6 +43,9 @@ func _ready() -> void:
 
     combat_system = COMBAT_SYSTEM.new()
     add_child(combat_system)
+
+    espionage_system = ESPIONAGE_SYSTEM.new()
+    add_child(espionage_system)
 
     turn_manager = TurnManager.new()
     add_child(turn_manager)
@@ -83,6 +88,11 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
         weather_system.setup(event_bus, data_loader)
     if logistics_system:
         logistics_system.setup(event_bus, data_loader)
+    if espionage_system:
+        espionage_system.setup(event_bus, data_loader)
+        var terrain_lookup: Dictionary = _build_terrain_lookup(payload)
+        if not terrain_lookup.is_empty():
+            espionage_system.configure_map(terrain_lookup)
 
     _core_systems_initialised = true
 
@@ -115,6 +125,77 @@ func _build_data_loader_payload() -> Dictionary:
             "weather": data_loader.list_weather_states() if data_loader else [],
             "logistics": data_loader.list_logistics_states() if data_loader else [],
             "formations": data_loader.list_formations() if data_loader else [],
-            "terrain": data_loader.list_terrain_tiles() if data_loader else [],
+            "terrain": data_loader.list_terrain_entries() if data_loader else [],
         }
+    }
+
+func _build_terrain_lookup(payload: Dictionary) -> Dictionary:
+    var terrain_entries: Array = _extract_terrain_entries(payload)
+    if terrain_entries.is_empty():
+        return {}
+
+    var definitions: Dictionary = _index_terrain_definitions(terrain_entries)
+    var lookup: Dictionary = {}
+    for entry in terrain_entries:
+        var descriptor: Dictionary = _build_tile_descriptor(entry, definitions)
+        if descriptor.is_empty():
+            continue
+        var tile_id := str(descriptor.get("tile_id", ""))
+        if tile_id.is_empty():
+            continue
+        lookup[tile_id] = descriptor
+    return lookup
+
+func _extract_terrain_entries(payload: Dictionary) -> Array:
+    var collections: Dictionary = payload.get("collections", {})
+    var terrain_entries_variant: Variant = collections.get("terrain", [])
+    if terrain_entries_variant is Array:
+        return terrain_entries_variant
+    if data_loader:
+        return data_loader.list_terrain_entries()
+    return []
+
+func _index_terrain_definitions(entries: Array) -> Dictionary:
+    var definitions: Dictionary = {}
+    for entry in entries:
+        if not (entry is Dictionary):
+            continue
+        if str(entry.get("type", "")) != "definition":
+            continue
+        var definition_id := str(entry.get("id", ""))
+        if definition_id.is_empty():
+            continue
+        definitions[definition_id] = {
+            "name": str(entry.get("name", definition_id.capitalize())),
+            "description": str(entry.get("description", "")),
+            "movement_cost": float(entry.get("movement_cost", 1.0)),
+        }
+    return definitions
+
+func _build_tile_descriptor(entry: Dictionary, definitions: Dictionary) -> Dictionary:
+    if not (entry is Dictionary):
+        return {}
+    if str(entry.get("type", "")) != "tile":
+        return {}
+
+    var q := int(entry.get("q", 0))
+    var r := int(entry.get("r", 0))
+    var tile_id := str(entry.get("id", "%d,%d" % [q, r]))
+    if tile_id.is_empty():
+        tile_id = "%d,%d" % [q, r]
+
+    var terrain_id := str(entry.get("terrain", "plains"))
+    var definition: Dictionary = definitions.get(terrain_id, {})
+    var name := str(entry.get("name", definition.get("name", terrain_id.capitalize())))
+    var description := str(entry.get("description", definition.get("description", "")))
+    var movement := float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
+
+    return {
+        "tile_id": tile_id,
+        "q": q,
+        "r": r,
+        "terrain": terrain_id,
+        "name": name,
+        "description": description,
+        "movement_cost": movement,
     }
