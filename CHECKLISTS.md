@@ -55,7 +55,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 34. [x] **Design recon flows.** Implement reconnaissance/spy orders with Élan/competence costs, integrate them into HUD + assistant pipeline, and log validation rules. *(2025-12-10 — Added `recon_probe`/`deep_cover` orders with competence budgets, HUD tooltips, automatic `espionage_ping`, and validation in DataLoader/tests.)*
 35. [x] **Generate intel feedback.** Produce probabilistic pings with intent categories surfaced via HUD notifications and debug overlay timelines. *(2025-12-11 — HUD "Renseignements" + timeline debug exposent roll/probabilité, intention révélée et deltas de visibilité pour chaque ping.)*
 36. [x] **Instrument espionage telemetry.** Emit `espionage_ping` and `intel_intent_revealed` events, preserving history in telemetry buffers. *(2025-12-12 — Added `intel_intent_revealed`, normalised telemetry payloads with history accessors, and wired HUD/debug feedback.)*
-37. [ ] **Test espionage systems.** Add gdUnit coverage for fog toggling, ping probability distribution, and intel decay. Attach outputs to mission notes.
+37. [x] **Test espionage systems.** Add gdUnit coverage for fog toggling, ping probability distribution, and intel decay. Attach outputs to mission notes. *(2025-12-13 — Expanded `tests/gdunit/test_combat_and_espionage_systems.gd` with fog snapshot regression, probabilistic ping sampling, and intel decay clamps.)*
 
 ## Phase 5 — Competence Sliders (Tactics / Strategy / Logistics)
 38. [ ] **Extend TurnManager.** Track competence budget, inertia, and modifiers following SDS guidelines; expose state to HUD/telemetry.

@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added espionage-focused gdUnit coverage (`tests/gdunit/test_combat_and_espionage_systems.gd`) validating fog snapshot emissions, probabilistic ping success rates, and counter-intel decay to close checklist item 37.
 - Instrumented espionage telemetry with a dedicated `intel_intent_revealed` event, normalised payloads in `TelemetryAutoload`, and preserved per-event history so analytics dashboards can compare ping confidence against revealed intentions.
 - Added a fog-of-war rendering pipeline: `EspionageSystem` now emits `fog_of_war_updated` snapshots and the hex map applies a
   dark overlay/tooltip redaction when visibility falls below scout confidence, keeping player-controlled supply rings readable

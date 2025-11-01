@@ -145,6 +145,7 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   probabilistic pings that can reveal enemy intentions via `espionage_ping`. `GameManager` now spawns the system beside
   logistics/combat controllers, hydrates the fog map from `data/terrain.json`, and gdUnit coverage
   (`tests/gdunit/test_game_manager_logistics_bootstrap.gd`) locks the turn-synchronised telemetry.
+- Additional gdUnit scenarios in [`tests/gdunit/test_combat_and_espionage_systems.gd`](tests/gdunit/test_combat_and_espionage_systems.gd) now assert fog snapshot emissions, probabilistic ping success rates, and counter-intel decay so the espionage loop stays predictable under changing visibility.
 - Telemetry captures both the raw `espionage_ping` payloads and a dedicated `intel_intent_revealed` event whenever a probe
   exposes an intention. Use `TelemetryAutoload.get_history("espionage_ping")` or `get_history("intel_intent_revealed")` to
   compare confidence, RNG rolls, and revealed intents across the full session timeline.
