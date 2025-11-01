@@ -56,6 +56,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-04 — Confirmed autoload readiness: renamed the four singletons in `project.godot` to their `*Autoload` identifiers, extended `tests/gdunit/test_autoload_preparation.gd` to assert configuration + readiness telemetry, and captured startup instrumentation in [`docs/logs/autoload_readiness_2025-11-04.log`](../../docs/logs/autoload_readiness_2025-11-04.log).
 - 2025-11-05 — Stabilised HUD procedural audio: `_play_feedback()` now queues tone requests, defers buffer clears until playback goes inactive, and archives a repeated doctrine/order swap run in [`docs/logs/hud_audio_feedback_2025-11-05.log`](../../docs/logs/hud_audio_feedback_2025-11-05.log).
 
+### Phase 1 progress
+- 2025-11-06 — Locked the doctrine dataset to the SDS stances with command profile metadata and aligned logistics synergies (`data/doctrines.json`, `data/logistics.json`).
+
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
 - **Semaine 1 — Command Model & Élan loop**: Implement doctrine selection, Élan accumulation caps, and command order validation with debug HUD feedback. Target gdUnit smoke coverage around Élan spend and doctrine toggles.
