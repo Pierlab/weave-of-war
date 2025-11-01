@@ -47,6 +47,7 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 
 ## Command & Élan loop (Semaine 0–1)
 - The doctrine catalogue in [`data/doctrines.json`](data/doctrines.json) now locks the five SDS-approved stances (Force/Ruse/Patience/Vitesse/Équilibre) with command profiles covering CP cap deltas, swap token budgets, and inertia multipliers for downstream systems.
+- The command orders dataset in [`data/orders.json`](data/orders.json) now captures CP costs, base delay turns, doctrine requirements, targeting scopes, posture gates, and assistant intent metadata so Command Model, Élan, and Assistant AI flows consume a single contract aligned with the SDS.
 - The HUD now exposes a doctrine selector tied to the `DoctrineSystem`, displays inertia locks, and lists the orders authorised
   by the active doctrine.
 - Order execution routes through the Élan system, enforcing Élan caps, doctrine-based restrictions, and inertia impacts before

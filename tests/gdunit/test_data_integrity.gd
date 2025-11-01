@@ -48,32 +48,103 @@ func test_orders_json_schema() -> void:
         _assert_has_keys(entry, [
             "id",
             "name",
+            "tags",
             "description",
+            "cp_cost",
             "base_elan_cost",
             "inertia_impact",
+            "base_delay_turns",
             "allowed_doctrines",
+            "doctrine_requirements",
             "logistics_demand",
+            "inertia_profile",
+            "targeting",
+            "posture_requirements",
             "resolution_effects",
+            "intention",
+            "pillar_weights",
+            "intel_profile",
+            "assistant_metadata",
         ], context)
         _assert_string(entry.get("id"), context, "id")
         _assert_string(entry.get("name"), context, "name")
         _assert_string(entry.get("description"), context, "description")
+        _assert_array_of_strings(entry.get("tags"), context, "tags")
+        _assert_integerish(entry.get("cp_cost"), context, "cp_cost")
         _assert_integerish(entry.get("base_elan_cost"), context, "base_elan_cost")
         _assert_integerish(entry.get("inertia_impact"), context, "inertia_impact")
+        _assert_integerish(entry.get("base_delay_turns"), context, "base_delay_turns")
         _assert_array_of_strings(entry.get("allowed_doctrines"), context, "allowed_doctrines")
+
+        var doctrine_requirements := entry.get("doctrine_requirements")
+        _assert_dictionary(doctrine_requirements, context, "doctrine_requirements")
+        if doctrine_requirements is Dictionary:
+            _assert_array_of_strings(doctrine_requirements.get("required_tags"), context + ".doctrine_requirements", "required_tags")
+            _assert_integerish(doctrine_requirements.get("minimum_swap_tokens"), context + ".doctrine_requirements", "minimum_swap_tokens")
+            _assert_string(doctrine_requirements.get("command_profile"), context + ".doctrine_requirements", "command_profile")
+
         _assert_dictionary(entry.get("logistics_demand"), context, "logistics_demand")
+
+        var inertia_profile := entry.get("inertia_profile")
+        _assert_dictionary(inertia_profile, context, "inertia_profile")
+        if inertia_profile is Dictionary:
+            _assert_dictionary(inertia_profile.get("doctrine_multipliers"), context + ".inertia_profile", "doctrine_multipliers")
+            var doctrine_multipliers := inertia_profile.get("doctrine_multipliers")
+            if doctrine_multipliers is Dictionary:
+                for key in doctrine_multipliers.keys():
+                    _assert_number(doctrine_multipliers.get(key), context + ".inertia_profile.doctrine_multipliers", key)
+            _assert_dictionary(inertia_profile.get("logistics_state_multipliers"), context + ".inertia_profile", "logistics_state_multipliers")
+            var logistics_multipliers := inertia_profile.get("logistics_state_multipliers")
+            if logistics_multipliers is Dictionary:
+                for key in logistics_multipliers.keys():
+                    _assert_number(logistics_multipliers.get(key), context + ".inertia_profile.logistics_state_multipliers", key)
+            _assert_dictionary(inertia_profile.get("competence_offsets"), context + ".inertia_profile", "competence_offsets")
+            var competence_offsets := inertia_profile.get("competence_offsets")
+            if competence_offsets is Dictionary:
+                for key in competence_offsets.keys():
+                    _assert_number(competence_offsets.get(key), context + ".inertia_profile.competence_offsets", key)
+
+        var targeting := entry.get("targeting")
+        _assert_dictionary(targeting, context, "targeting")
+        if targeting is Dictionary:
+            _assert_string(targeting.get("scope"), context + ".targeting", "scope")
+            _assert_boolean(targeting.get("requires_line_of_sight"), context + ".targeting", "requires_line_of_sight")
+            _assert_array_of_strings(targeting.get("preferred_unit_classes"), context + ".targeting", "preferred_unit_classes")
+            _assert_array_of_strings(targeting.get("allowed_postures"), context + ".targeting", "allowed_postures")
+            _assert_integerish(targeting.get("max_concurrent"), context + ".targeting", "max_concurrent")
+
+        var posture_requirements := entry.get("posture_requirements")
+        _assert_dictionary(posture_requirements, context, "posture_requirements")
+        if posture_requirements is Dictionary:
+            _assert_array_of_strings(posture_requirements.get("required_postures"), context + ".posture_requirements", "required_postures")
+            _assert_array_of_strings(posture_requirements.get("incompatible_postures"), context + ".posture_requirements", "incompatible_postures")
+
         _assert_dictionary(entry.get("resolution_effects"), context, "resolution_effects")
         _assert_string(entry.get("intention"), context, "intention")
+
         var pillar_weights := entry.get("pillar_weights")
         _assert_dictionary(pillar_weights, context, "pillar_weights")
         if pillar_weights is Dictionary:
             for pillar in COMBAT_PILLARS:
                 _assert_number(pillar_weights.get(pillar), context + ".pillar_weights", pillar)
+
         var intel_profile := entry.get("intel_profile")
         _assert_dictionary(intel_profile, context, "intel_profile")
         if intel_profile is Dictionary:
             _assert_number(intel_profile.get("signal_strength"), context + ".intel_profile", "signal_strength")
             _assert_number(intel_profile.get("counter_intel"), context + ".intel_profile", "counter_intel")
+
+        var assistant_metadata := entry.get("assistant_metadata")
+        _assert_dictionary(assistant_metadata, context, "assistant_metadata")
+        if assistant_metadata is Dictionary:
+            _assert_dictionary(assistant_metadata.get("intent_profile"), context + ".assistant_metadata", "intent_profile")
+            var intent_profile := assistant_metadata.get("intent_profile")
+            if intent_profile is Dictionary:
+                for key in intent_profile.keys():
+                    _assert_number(intent_profile.get(key), context + ".assistant_metadata.intent_profile", key)
+            _assert_string(assistant_metadata.get("risk_level"), context + ".assistant_metadata", "risk_level")
+            _assert_array_of_strings(assistant_metadata.get("recommended_followups"), context + ".assistant_metadata", "recommended_followups")
+            _assert_array_of_strings(assistant_metadata.get("telemetry_tags"), context + ".assistant_metadata", "telemetry_tags")
 
 func test_units_json_schema() -> void:
     var units := _load_json_array("res://data/units.json", "units")
@@ -292,6 +363,9 @@ func _assert_string(value, context: String, key: String) -> void:
 func _assert_number(value, context: String, key: String) -> void:
     var type := typeof(value)
     asserts.is_true(type == TYPE_INT or type == TYPE_FLOAT, "%s.%s should be numeric" % [context, key])
+
+func _assert_boolean(value, context: String, key: String) -> void:
+    asserts.is_true(typeof(value) == TYPE_BOOL, "%s.%s should be a boolean" % [context, key])
 
 func _assert_integerish(value, context: String, key: String) -> void:
     var type := typeof(value)

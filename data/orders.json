@@ -2,13 +2,49 @@
   {
     "id": "advance",
     "name": "Advance",
+    "tags": ["advance", "press"],
     "description": "Push forward cautiously to test the enemy line.",
+    "cp_cost": 3,
     "base_elan_cost": 1,
     "inertia_impact": 1,
+    "base_delay_turns": 2,
     "allowed_doctrines": ["force", "vitesse", "equilibre"],
+    "doctrine_requirements": {
+      "required_tags": ["advance", "press"],
+      "minimum_swap_tokens": 0,
+      "command_profile": "frontline"
+    },
     "logistics_demand": {
       "minimum_supply_state": "stable",
       "convoy_usage": "optional"
+    },
+    "inertia_profile": {
+      "doctrine_multipliers": {
+        "force": 0.9,
+        "vitesse": 0.75,
+        "equilibre": 1.0
+      },
+      "logistics_state_multipliers": {
+        "stable": 1.0,
+        "flexible": 0.9,
+        "surged": 1.1,
+        "strained": 1.3
+      },
+      "competence_offsets": {
+        "strategy": -0.1,
+        "tactics": -0.05
+      }
+    },
+    "targeting": {
+      "scope": "frontline",
+      "requires_line_of_sight": true,
+      "preferred_unit_classes": ["line", "mobile"],
+      "allowed_postures": ["aggressive", "balanced"],
+      "max_concurrent": 2
+    },
+    "posture_requirements": {
+      "required_postures": ["aggressive", "balanced"],
+      "incompatible_postures": ["defensive"]
     },
     "resolution_effects": {
       "position_bias": 0.15,
@@ -23,18 +59,64 @@
     "intel_profile": {
       "signal_strength": 0.65,
       "counter_intel": 0.1
+    },
+    "assistant_metadata": {
+      "intent_profile": {
+        "pressure": 0.7,
+        "tempo": 0.6,
+        "subterfuge": 0.1
+      },
+      "risk_level": "moderate",
+      "recommended_followups": ["fortify"],
+      "telemetry_tags": ["frontline_pressure", "elan_spike"]
     }
   },
   {
     "id": "fortify",
     "name": "Fortify",
+    "tags": ["fortify", "hold"],
     "description": "Dig in, reinforce, and prepare to absorb an assault.",
+    "cp_cost": 4,
     "base_elan_cost": 2,
     "inertia_impact": 2,
-    "allowed_doctrines": ["force", "equilibre"],
+    "base_delay_turns": 3,
+    "allowed_doctrines": ["force", "patience", "equilibre"],
+    "doctrine_requirements": {
+      "required_tags": ["fortify", "hold"],
+      "minimum_swap_tokens": 1,
+      "command_profile": "stronghold"
+    },
     "logistics_demand": {
       "minimum_supply_state": "stable",
       "convoy_usage": "required"
+    },
+    "inertia_profile": {
+      "doctrine_multipliers": {
+        "force": 1.1,
+        "patience": 0.85,
+        "equilibre": 1.0
+      },
+      "logistics_state_multipliers": {
+        "stable": 1.0,
+        "flexible": 1.1,
+        "surged": 0.95,
+        "strained": 1.4
+      },
+      "competence_offsets": {
+        "strategy": -0.2,
+        "logistics": -0.15
+      }
+    },
+    "targeting": {
+      "scope": "frontline",
+      "requires_line_of_sight": false,
+      "preferred_unit_classes": ["line", "siege"],
+      "allowed_postures": ["defensive", "balanced"],
+      "max_concurrent": 1
+    },
+    "posture_requirements": {
+      "required_postures": ["defensive"],
+      "incompatible_postures": ["fluid", "recon"]
     },
     "resolution_effects": {
       "position_bias": 0.4,
@@ -49,18 +131,64 @@
     "intel_profile": {
       "signal_strength": 0.45,
       "counter_intel": 0.35
+    },
+    "assistant_metadata": {
+      "intent_profile": {
+        "pressure": 0.2,
+        "tempo": 0.1,
+        "fortification": 0.8
+      },
+      "risk_level": "low",
+      "recommended_followups": ["advance"],
+      "telemetry_tags": ["fortification", "supply_anchor"]
     }
   },
   {
     "id": "feint",
     "name": "Feint",
+    "tags": ["feint", "probe"],
     "description": "Stage a misleading thrust to draw defenders out of position.",
+    "cp_cost": 2,
     "base_elan_cost": 1,
     "inertia_impact": 1,
-    "allowed_doctrines": ["vitesse", "equilibre"],
+    "base_delay_turns": 1,
+    "allowed_doctrines": ["ruse", "vitesse", "equilibre"],
+    "doctrine_requirements": {
+      "required_tags": ["feint", "probe"],
+      "minimum_swap_tokens": 0,
+      "command_profile": "maneuver"
+    },
     "logistics_demand": {
       "minimum_supply_state": "flexible",
       "convoy_usage": "optional"
+    },
+    "inertia_profile": {
+      "doctrine_multipliers": {
+        "ruse": 0.7,
+        "vitesse": 0.8,
+        "equilibre": 1.05
+      },
+      "logistics_state_multipliers": {
+        "stable": 1.05,
+        "flexible": 0.85,
+        "surged": 1.0,
+        "strained": 1.25
+      },
+      "competence_offsets": {
+        "strategy": -0.05,
+        "tactics": -0.15
+      }
+    },
+    "targeting": {
+      "scope": "flank",
+      "requires_line_of_sight": false,
+      "preferred_unit_classes": ["mobile", "skirmisher"],
+      "allowed_postures": ["fluid", "recon"],
+      "max_concurrent": 3
+    },
+    "posture_requirements": {
+      "required_postures": ["fluid", "recon"],
+      "incompatible_postures": ["defensive"]
     },
     "resolution_effects": {
       "position_bias": -0.1,
@@ -75,6 +203,16 @@
     "intel_profile": {
       "signal_strength": 0.3,
       "counter_intel": 0.55
+    },
+    "assistant_metadata": {
+      "intent_profile": {
+        "pressure": 0.2,
+        "tempo": 0.7,
+        "subterfuge": 0.9
+      },
+      "risk_level": "high",
+      "recommended_followups": ["advance", "fortify"],
+      "telemetry_tags": ["deception", "intel_pull"]
     }
   }
 ]
