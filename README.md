@@ -31,12 +31,12 @@ The logs above are mirrored in `errors.log` at the repository root to help futur
 
 ## Core autoloads
 
-| Autoload | Script | Responsibilities |
-| --- | --- | --- |
-| `EventBusAutoload` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
-| `DataLoaderAutoload` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
-| `TelemetryAutoload` | `scripts/core/telemetry.gd` | Records gameplay telemetry with normalised payloads for doctrine selection, order issuance/rejection, Élan spend/gain, logistics, combat, and espionage signals. Exposes `log_event`, `get_buffer`, and `clear` helpers so tests can assert Checklist C flows. |
-| `AssistantAIAutoload` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
+| Autoload (project.godot) | Class name | Script | Responsibilities |
+| --- | --- | --- | --- |
+| `EventBusAutoload` | `EventBus` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
+| `DataLoaderAutoload` | `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
+| `TelemetryAutoload` | `Telemetry` | `scripts/core/telemetry.gd` | Records gameplay telemetry with normalised payloads for doctrine selection, order issuance/rejection, Élan spend/gain, logistics, combat, and espionage signals. Exposes `log_event`, `get_buffer`, and `clear` helpers so tests can assert Checklist C flows. |
+| `AssistantAIAutoload` | `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
 
 The autoloads initialise automatically when the project starts (and during headless test runs). Systems being developed for
 Checklist C should request dependencies from these singletons instead of reading JSON files or crafting their own signal buses.
@@ -52,9 +52,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   inertia multipliers, and lists the orders authorised by the active doctrine.
 - Order execution routes through the Élan system, enforcing Élan caps, doctrine-based restrictions, and inertia impacts before
   emitting `order_issued` telemetry.
-- `AssistantAIAutoload` now records the latest order packets, emits enriched `assistant_order_packet` payloads, and the debug
-  overlay surfaces a scrollable log (order, target, intent, confidence) so designers can verify the propagation loop without
-  leaving the HUD.
+- `AssistantAI` now records the latest order packets, emits enriched `assistant_order_packet` payloads, and the debug overlay
+  surfaces a scrollable log (order, target, intent, confidence) so designers can verify the propagation loop without leaving
+  the HUD.
 - Targeted gdUnit coverage in [`tests/gdunit/test_command_elan_loop.gd`](tests/gdunit/test_command_elan_loop.gd) now exercises doctrine swap failures, Élan spend success/error states, and the Assistant AI acknowledgement to keep the command loop locked while the HUD evolves.
 - Doctrine swaps and order execution now scale inertia using the SDS multipliers (`command_profile.inertia_multiplier` plus
   `orders[].inertia_profile.doctrine_multipliers`), guaranteeing at least one full turn of lock when orders are issued while
@@ -62,9 +62,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `ElanSystem` clamps the pool to the configured cap, applies doctrine-driven cap bonuses, and schedules automatic decay when
   the gauge stays maxed for consecutive rounds. Decay emits `elan_spent` events with a `reason="decay"` flag so telemetry can
   distinguish voluntary spends.
-- `EventBusAutoload` et `TelemetryAutoload` consignent désormais des payloads normalisés `doctrine_selected`, `order_issued`,
-  `order_rejected`, `elan_spent` et `elan_gained`, donnant aux dashboards/tests une vision fidèle des décisions de commandement
-  et du flux d'Élan.
+- `EventBus` et `Telemetry` consignent désormais des payloads normalisés `doctrine_selected`, `order_issued`, `order_rejected`,
+  `elan_spent` et `elan_gained`, donnant aux dashboards/tests une vision fidèle des décisions de commandement et du flux d'Élan.
 - A lightweight audio cue (generated on the fly) and status label provide immediate visual/sonore feedback when doctrines or
   orders change.
 - `GameManager` now waits for the deferred `data_loader_ready` signal before wiring `DoctrineSystem`/`ElanSystem` and kicking off the first turn, printing the collection counts to confirm the handshake.
@@ -101,9 +100,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `WeatherSystem` now orchestrates the rotation of `sunny`/`rain`/`mist` states using the `duration_turns` ranges in
   [`data/weather.json`](data/weather.json), emitting deterministic `weather_changed` payloads with modifiers and remaining
   turns so logistics, combat, espionage, and UI consumers stay in sync without bespoke plumbing.
-- `TelemetryAutoload` capture désormais chaque `weather_changed` avec un schéma normalisé (modificateurs de mouvement, flux
-  logistique, bruit d'intel, bonus d'Élan, durée restante), ce qui alimente directement les dashboards météo/logistique sans
-  devoir réhydrater les dictionnaires Godot côté analytique.
+- `Telemetry` capture désormais chaque `weather_changed` avec un schéma normalisé (modificateurs de mouvement, flux logistique,
+  bruit d'intel, bonus d'Élan, durée restante), ce qui alimente directement les dashboards météo/logistique sans devoir
+  réhydrater les dictionnaires Godot côté analytique.
 - Weather-driven penalties now feed directly into logistics throughput: `LogisticsSystem` publishes a `weather_adjustments`
   summary and per-route `intercept_risk` blocks so QA/debug overlays can trace how rain or mist slow convoys and heighten
   interceptions across the hybrid supply network.
@@ -167,7 +166,7 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - If the build smoke check reports missing class names (for example `HexTile` or `EventBus`), preload the corresponding script
   resource before using it for type annotations or `is` checks. See `scenes/map/map.gd` and the UI scripts under
   `scripts/ui/` for reference on the preferred preload pattern.
-- If Godot reports `Could not find type "EventBusAutoload"` (or similar) after renaming an autoload, remove the `.godot/`
+- If Godot reports `Could not find type "EventBus"` (or similar) after adjusting an autoload script, remove the `.godot/`
   folder or regenerate the project class cache so `.godot/global_script_class_cache.cfg` picks up the new `class_name`
   identifiers.
 - Godot 4.5 removed the `condition ? a : b` ternary helper. Replace those expressions with the Python-style
@@ -175,10 +174,10 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - If you encounter `Unexpected "class_name" here` parse errors, declare the `class_name` **before** the `extends` line. The
   core systems and autoloads (for example `scripts/core/event_bus.gd`) now follow this order for compatibility with older
   editor builds that still read the project.
-- Treating warnings as errors is intentional. Godot 4.5+ flags autoloads whose `class_name` matches the singleton name; we
-  suppress that warning explicitly with `@warning_ignore("class_name_hides_autoload")` so the runtime globals stay aligned
-  with their class identifiers (`EventBusAutoload`, `DataLoaderAutoload`, etc.). Mirror that pattern when you add new
-  autoloads so the parser remains noise-free without renaming the singletons.
+- Treating warnings as errors is intentional. Godot 4.6+ now blocks scripts whose `class_name` matches the autoload singleton
+  name, so the four core scripts expose distinct classes (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) while the
+  `project.godot` entries keep the `*Autoload` suffix. Use the class names for type hints and the autoload keys when accessing
+  the singletons via the global scope.
 - When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
   `:=` inference. Godot 4.5 infers such values as `Variant`, which now triggers blocking parse errors. Inspect
   `scripts/core/data_loader.gd`, `scripts/systems/elan_system.gd`, and `scripts/ui/hud_manager.gd` for the preferred explicit

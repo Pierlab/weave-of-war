@@ -14,8 +14,8 @@ func after_each() -> void:
                 node.queue_free()
         _nodes_to_cleanup.clear()
         await tree.process_frame
-    EventBusAutoload._instance = null
-    DataLoaderAutoload._instance = null
+    EventBus._instance = null
+    DataLoader._instance = null
 
 func test_game_manager_bootstraps_logistics_system() -> void:
     var tree := Engine.get_main_loop()
@@ -25,8 +25,8 @@ func test_game_manager_bootstraps_logistics_system() -> void:
 
     var root := tree.get_root()
 
-    var event_bus: EventBusAutoload = EVENT_BUS.new()
-    var data_loader: DataLoaderAutoload = DATA_LOADER.new()
+    var event_bus: EventBus = EVENT_BUS.new()
+    var data_loader: DataLoader = DATA_LOADER.new()
 
     root.add_child(event_bus)
     root.add_child(data_loader)

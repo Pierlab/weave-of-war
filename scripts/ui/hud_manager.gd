@@ -27,8 +27,8 @@ const WEATHER_COLORS := {
     "default": Color(0.8, 0.8, 0.8, 1.0),
 }
 
-var event_bus: EventBusAutoload
-var data_loader: DataLoaderAutoload
+var event_bus: EventBus
+var data_loader: DataLoader
 
 var _doctrine_lookup: Dictionary = {}
 var _doctrine_names: Dictionary = {}

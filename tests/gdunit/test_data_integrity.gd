@@ -281,7 +281,7 @@ func test_formations_json_schema() -> void:
                 _assert_number(competence_weight.get(key), context + ".competence_weight", key)
 
 func test_data_loader_exposes_caches() -> void:
-    var loader: DataLoaderAutoload = DATA_LOADER.new()
+    var loader: DataLoader = DATA_LOADER.new()
     var result := loader.load_all()
     asserts.is_true(result.get("ready", false), "DataLoader should report ready when assets load correctly")
     asserts.is_true(result.get("errors", []).is_empty(), "DataLoader should not surface schema errors with valid assets")
@@ -313,7 +313,7 @@ func test_data_loader_exposes_caches() -> void:
     asserts.is_true(terrain_definitions.size() >= 3, "Terrain definitions should expose the baseline biomes")
 
 func test_data_loader_validation_reports_missing_keys() -> void:
-    var errors := DataLoaderAutoload.validate_collection("orders", [{"id": "invalid_order"}])
+    var errors := DataLoader.validate_collection("orders", [{"id": "invalid_order"}])
     asserts.is_true(errors.size() > 0, "Validation should report missing required keys")
     var first_error := errors[0]
     asserts.is_equal("orders", first_error.get("label"), "Validation error should report the correct label")
@@ -321,7 +321,7 @@ func test_data_loader_validation_reports_missing_keys() -> void:
 
 func test_data_loader_validation_accepts_valid_payload() -> void:
     var orders := _load_json_array("res://data/orders.json", "orders")
-    var errors := DataLoaderAutoload.validate_collection("orders", orders)
+    var errors := DataLoader.validate_collection("orders", orders)
     asserts.is_true(errors.is_empty(), "Orders dataset should satisfy the hardened schema validation")
 
 func _load_json_array(path: String, label: String) -> Array:

@@ -10,9 +10,9 @@ const MAX_ASSISTANT_LOG_ENTRIES := 10
 @onready var spawn_unit_button: Button = $PanelContainer/MarginContainer/VBoxContainer/SpawnUnitButton
 @onready var assistant_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/AssistantLog
 
-var event_bus: EventBusAutoload
-var assistant_ai: AssistantAIAutoload
-var data_loader: DataLoaderAutoload
+var event_bus: EventBus
+var assistant_ai: AssistantAI
+var data_loader: DataLoader
 var _assistant_packets: Array[Dictionary] = []
 
 func _ready() -> void:
@@ -21,10 +21,10 @@ func _ready() -> void:
         await get_tree().process_frame
         event_bus = EVENT_BUS.get_instance()
 
-    assistant_ai = AssistantAIAutoload.get_instance()
+    assistant_ai = AssistantAI.get_instance()
     if assistant_ai == null:
         await get_tree().process_frame
-        assistant_ai = AssistantAIAutoload.get_instance()
+        assistant_ai = AssistantAI.get_instance()
     if assistant_ai:
         _ingest_assistant_history(assistant_ai.get_recent_packets())
         _refresh_assistant_log()

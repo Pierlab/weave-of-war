@@ -1,14 +1,13 @@
-@warning_ignore("class_name_hides_autoload")
-class_name AssistantAIAutoload
+class_name AssistantAI
 extends Node
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 
-static var _instance: AssistantAIAutoload
+static var _instance: AssistantAI
 
-var _event_bus: EventBusAutoload
-var _data_loader: DataLoaderAutoload
+var _event_bus: EventBus
+var _data_loader: DataLoader
 var _recent_packets: Array[Dictionary] = []
 
 const MAX_PACKET_HISTORY := 10
@@ -20,7 +19,7 @@ func _ready() -> void:
     _connect_signals()
     print("[Autoload] AssistantAIAutoload ready (awaiting data_loader_ready)")
 
-static func get_instance() -> AssistantAIAutoload:
+static func get_instance() -> AssistantAI:
     return _instance
 
 func _connect_signals() -> void:

@@ -18,8 +18,8 @@ const DEFENDER_POSTURES := {
 const COMPETENCE_CATEGORIES := ["tactics", "strategy", "logistics"]
 const COMPETENCE_SCALAR := 0.05
 
-var event_bus: EventBusAutoload
-var data_loader: DataLoaderAutoload
+var event_bus: EventBus
+var data_loader: DataLoader
 
 var _orders_by_id: Dictionary = {}
 var _units_by_id: Dictionary = {}
@@ -42,7 +42,7 @@ var _competence_allocations := {
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
+func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
     _rng.randomize()

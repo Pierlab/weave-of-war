@@ -8,8 +8,8 @@ const TERRAIN_DATA := preload("res://scenes/map/terrain_data.gd")
 @export var map_columns := 6
 @export var map_rows := 5
 
-var event_bus: EventBusAutoload
-var data_loader: DataLoaderAutoload
+var event_bus: EventBus
+var data_loader: DataLoader
 
 var _terrain_lookup: Dictionary = {}
 var _terrain_definitions: Dictionary = {}
@@ -33,7 +33,7 @@ var _weather_controlled_externally := false
 func _ready() -> void:
     setup(EVENT_BUS.get_instance(), DATA_LOADER.get_instance())
 
-func setup(event_bus_ref: EventBusAutoload, data_loader_ref: DataLoaderAutoload) -> void:
+func setup(event_bus_ref: EventBus, data_loader_ref: DataLoader) -> void:
     event_bus = event_bus_ref
     data_loader = data_loader_ref
     _terrain_definitions = TERRAIN_DATA.get_default()
@@ -370,7 +370,7 @@ func _ensure_convoy_states() -> void:
     for route in _routes:
         if not (route is Dictionary):
             continue
-        var route_id := route.get("id", "")
+        var route_id: String = str(route.get("id", ""))
         if route_id.is_empty():
             continue
         if not _convoys_by_route.has(route_id):
@@ -457,7 +457,7 @@ func _emit_break_events() -> void:
     for break_event in _pending_breaks:
         if not (break_event is Dictionary):
             continue
-        var payload := break_event.duplicate(true)
+        var payload: Dictionary = break_event.duplicate(true)
         if not payload.has("turn"):
             payload["turn"] = _turn_counter
         payload["logistics_id"] = _current_logistics_id
@@ -466,17 +466,17 @@ func _emit_break_events() -> void:
 
 func _build_supply_payload(supply_radius: int, flow_multiplier: float, weather_config: Dictionary, logistics_config: Dictionary) -> Array:
     var zones: Array = []
-    var movement_modifier := float(weather_config.get("movement_modifier", 1.0))
+    var movement_modifier: float = float(weather_config.get("movement_modifier", 1.0))
     for tile_id in _terrain_lookup.keys():
         var tile: Dictionary = _terrain_lookup.get(tile_id, {})
-        var axial := Vector2i(int(tile.get("q", 0)), int(tile.get("r", 0)))
-        var distance := _distance_to_nearest_center(axial)
-        var base_movement := float(tile.get("base_movement_cost", 1.0))
-        var terrain_id := str(tile.get("terrain", "plains"))
-        var terrain_name := str(tile.get("name", terrain_id.capitalize()))
-        var terrain_description := str(tile.get("description", ""))
-        var supply_level := _supply_level(distance, supply_radius)
-        var logistics_flow := _compute_tile_flow(flow_multiplier, terrain_id, distance, supply_radius)
+        var axial: Vector2i = Vector2i(int(tile.get("q", 0)), int(tile.get("r", 0)))
+        var distance: int = _distance_to_nearest_center(axial)
+        var base_movement: float = float(tile.get("base_movement_cost", 1.0))
+        var terrain_id: String = str(tile.get("terrain", "plains"))
+        var terrain_name: String = str(tile.get("name", terrain_id.capitalize()))
+        var terrain_description: String = str(tile.get("description", ""))
+        var supply_level: String = _supply_level(distance, supply_radius)
+        var logistics_flow: float = _compute_tile_flow(flow_multiplier, terrain_id, distance, supply_radius)
         zones.append({
             "tile_id": tile_id,
             "terrain": terrain_id,
@@ -495,13 +495,13 @@ func _build_route_payload(flow_multiplier: float, logistics_config: Dictionary) 
     for route in _routes:
         if not (route is Dictionary):
             continue
-        var route_id := str(route.get("id", ""))
+        var route_id: String = str(route.get("id", ""))
         if route_id.is_empty():
             continue
         var state: Dictionary = _convoys_by_route.get(route_id, _new_convoy_state())
         var path: Array = route.get("path", [])
         var route_length: int = max(path.size() - 1, 1)
-        var eta := 0.0
+        var eta: float = 0.0
         if state.get("active", false) and state.get("last_speed", 0.0) > 0.0:
             eta = max((route_length - state.get("progress", 0.0)) / state.get("last_speed", 0.01), 0.0)
         var risk: Dictionary = _intercept_components(route, logistics_config, flow_multiplier)
@@ -540,11 +540,11 @@ func _derive_reachable_tiles(zones: Array) -> Array:
     for zone in zones:
         if not (zone is Dictionary):
             continue
-        var tile_id := str(zone.get("tile_id", ""))
+        var tile_id: String = str(zone.get("tile_id", ""))
         if tile_id.is_empty():
             continue
         var supply_level := str(zone.get("supply_level", "isolated"))
-        var flow := float(zone.get("logistics_flow", 0.0))
+        var flow: float = float(zone.get("logistics_flow", 0.0))
         if flow <= 0.0 or supply_level == "isolated":
             continue
         reachable.append({
@@ -564,12 +564,12 @@ func _collect_supply_deficits(zones: Array, logistics_config: Dictionary) -> Arr
     for zone in zones:
         if not (zone is Dictionary):
             continue
-        var tile_id := str(zone.get("tile_id", ""))
+        var tile_id: String = str(zone.get("tile_id", ""))
         if tile_id.is_empty():
             continue
         var supply_level := str(zone.get("supply_level", "isolated"))
-        var flow := float(zone.get("logistics_flow", 0.0))
-        var severity := ""
+        var flow: float = float(zone.get("logistics_flow", 0.0))
+        var severity: String = ""
         if supply_level == "isolated":
             severity = "critical"
         elif flow < threshold:
@@ -596,7 +596,7 @@ func _summarise_convoys(routes_payload: Array) -> Array:
         var route_id := str(route.get("id", ""))
         if route_id.is_empty():
             continue
-        var convoy_variant := route.get("convoy", {})
+        var convoy_variant: Variant = route.get("convoy", {})
         var convoy: Dictionary = convoy_variant if convoy_variant is Dictionary else {}
         statuses.append({
             "route_id": route_id,
@@ -620,7 +620,7 @@ func _advance_convoys() -> void:
     for route in _routes:
         if not (route is Dictionary):
             continue
-        var route_id := str(route.get("id", ""))
+        var route_id: String = str(route.get("id", ""))
         if route_id.is_empty():
             continue
         var state: Dictionary = _convoys_by_route.get(route_id, _new_convoy_state())
@@ -635,7 +635,7 @@ func _advance_convoys() -> void:
                 state["last_event"] = "spawned"
                 state["intercept_reported"] = true
         if state.get("active", false):
-            var speed := _route_speed(route.get("type", "road"), flow_multiplier)
+            var speed: float = _route_speed(route.get("type", "road"), flow_multiplier)
             state["last_speed"] = speed
             state["progress"] = min(state.get("progress", 0.0) + speed, route_length)
             if not state.get("intercepted", false) and _should_intercept(route, logistics_config, flow_multiplier):
@@ -659,7 +659,7 @@ func _maybe_rotate_weather() -> void:
         return
     if _turn_counter % _weather_rotation_turns != 0:
         return
-    var index := _weather_sequence.find(_current_weather_id)
+    var index: int = _weather_sequence.find(_current_weather_id)
     if index == -1:
         index = 0
     index = (index + 1) % _weather_sequence.size()
@@ -778,15 +778,15 @@ func _tile_id_from_variant(node: Variant) -> String:
     return ""
 
 func _flow_context(logistics_config: Dictionary, weather_config: Dictionary) -> Dictionary:
-    var base := float(weather_config.get("logistics_flow_modifier", 1.0))
-    var adjustment := 0.0
+    var base: float = float(weather_config.get("logistics_flow_modifier", 1.0))
+    var adjustment: float = 0.0
     var links: Dictionary = logistics_config.get("links", {})
     if links.has("weather_modifiers"):
         var weather_modifiers: Dictionary = links.get("weather_modifiers")
         if weather_modifiers.has(_current_weather_id):
             adjustment = float(weather_modifiers.get(_current_weather_id))
     var raw := base + adjustment
-    var final_value := clamp(raw, 0.2, 2.0)
+    var final_value: float = clamp(raw, 0.2, 2.0)
     return {
         "base": base,
         "adjustment": adjustment,
@@ -795,22 +795,22 @@ func _flow_context(logistics_config: Dictionary, weather_config: Dictionary) -> 
     }
 
 func _build_weather_adjustments(flow_context: Dictionary, logistics_config: Dictionary, weather_config: Dictionary) -> Dictionary:
-    var base_flow := float(flow_context.get("base", 1.0))
-    var adjustment := float(flow_context.get("adjustment", 0.0))
-    var final_flow := float(flow_context.get("final", base_flow))
-    var movement_modifier := float(weather_config.get("movement_modifier", 1.0))
-    var intercept_base := clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
-    var flow_penalty := max(0.0, 1.0 - final_flow)
-    var intercept_effective := clamp(intercept_base + flow_penalty, 0.0, 1.0)
-    var note_segments := PackedStringArray()
+    var base_flow: float = float(flow_context.get("base", 1.0))
+    var adjustment: float = float(flow_context.get("adjustment", 0.0))
+    var final_flow: float = float(flow_context.get("final", base_flow))
+    var movement_modifier: float = float(weather_config.get("movement_modifier", 1.0))
+    var intercept_base: float = clamp(float(logistics_config.get("intercept_chance", 0.0)), 0.0, 1.0)
+    var flow_penalty: float = max(0.0, 1.0 - final_flow)
+    var intercept_effective: float = clamp(intercept_base + flow_penalty, 0.0, 1.0)
+    var note_segments: Array[String] = []
     note_segments.append("Weather base %.2f" % base_flow)
     if abs(adjustment) > 0.001:
         note_segments.append("Scenario delta %.2f" % adjustment)
     note_segments.append("Final flow %.2f" % final_flow)
     note_segments.append("Intercept %.2f→%.2f" % [intercept_base, intercept_effective])
-    var notes := ""
-    if note_segments.size() > 0:
-        notes = note_segments.join("; ")
+    var notes: String = ""
+    if not note_segments.is_empty():
+        notes = String("; ").join(note_segments)
     return {
         "weather_id": _current_weather_id,
         "movement_modifier": snapped(movement_modifier, 0.01),

@@ -15,10 +15,10 @@ func after_each() -> void:
                 node.queue_free()
         _nodes_to_cleanup.clear()
         await tree.process_frame
-    EventBusAutoload._instance = null
-    DataLoaderAutoload._instance = null
-    TelemetryAutoload._instance = null
-    AssistantAIAutoload._instance = null
+    EventBus._instance = null
+    DataLoader._instance = null
+    Telemetry._instance = null
+    AssistantAI._instance = null
 
 func test_project_autoload_configuration() -> void:
     var config := ConfigFile.new()
@@ -48,10 +48,10 @@ func test_autoloads_emit_data_loader_ready_captured_by_telemetry() -> void:
         return
 
     var root := tree.get_root()
-    var event_bus: EventBusAutoload = EVENT_BUS.new()
-    var data_loader: DataLoaderAutoload = DATA_LOADER.new()
-    var telemetry: TelemetryAutoload = TELEMETRY.new()
-    var assistant_ai: AssistantAIAutoload = ASSISTANT_AI.new()
+    var event_bus: EventBus = EVENT_BUS.new()
+    var data_loader: DataLoader = DATA_LOADER.new()
+    var telemetry: Telemetry = TELEMETRY.new()
+    var assistant_ai: AssistantAI = ASSISTANT_AI.new()
 
     root.add_child(event_bus)
     root.add_child(data_loader)
