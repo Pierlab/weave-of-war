@@ -84,7 +84,8 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 
 ## Logistics backbone & terrain feedback (Semaine 2–3)
 - `LogisticsSystem` now simulates hybrid rings, overland roads, and harbor convoys, emitting rich `logistics_update` payloads
-  that describe supply levels, terrain-driven flow modifiers, and convoy progress/interruptions for the HUD and telemetry.
+  that describe supply levels, terrain-driven flow modifiers, convoy progress/interruptions, the list of reachable tiles, and
+  any supply deficits flagged for command follow-up.
 - The logistics overlay renders pulsing supply rings and animated convoy markers driven directly by those payloads, tinting
   `core`, `fringe`, and `isolated` tiles differently and swapping convoy icons to red crosses when interceptions occur so the
   map immediately reflects supply health.

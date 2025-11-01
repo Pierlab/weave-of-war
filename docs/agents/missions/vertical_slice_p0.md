@@ -72,6 +72,21 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - 2025-11-16 — `GameManager` instancie `LogisticsSystem`, partage les autoloads `EventBus`/`DataLoader`, et `tests/gdunit/test_game_manager_logistics_bootstrap.gd` capture la propagation des signaux de tour/toggle pour verrouiller l'intégration.
 - 2025-11-17 — `data/logistics.json` décrit désormais les centres d'approvisionnement et routes/convoys pour chaque scénario, `LogisticsSystem` les charge dynamiquement, et un test gdUnit (`tests/gdunit/test_logistics_data_connectivity.gd`) valide que chaque graphe reste connexe.
 - 2025-11-18 — `LogisticsOverlay` dessine des anneaux d'approvisionnement pulsés et anime les convois selon l'état (`active`, `delivered`, `intercepted`), avec des marqueurs rouges pour les interceptions; capture GIF à réaliser lors du prochain run Godot local car l'environnement actuel est headless.
+- 2025-11-19 — `LogisticsSystem` enrichit `logistics_update` avec `reachable_tiles`, `supply_deficits` et `convoy_statuses`. Exemple capturé depuis le debug overlay :
+  ```json
+  {
+    "turn": 3,
+    "reachable_tiles": ["1,1", "2,1", "3,1"],
+    "supply_deficits": [
+      { "tile_id": "4,2", "severity": "warning", "logistics_flow": 0.62 },
+      { "tile_id": "5,3", "severity": "critical", "logistics_flow": 0.0 }
+    ],
+    "convoy_statuses": [
+      { "route_id": "forward_road", "last_event": "delivered", "eta_turns": 0.0 },
+      { "route_id": "harbor_convoy", "last_event": "intercepted", "eta_turns": 1.0 }
+    ]
+  }
+  ```
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

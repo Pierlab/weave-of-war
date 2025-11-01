@@ -63,7 +63,7 @@ These checks validate the initial Godot project skeleton. Run them alongside the
 ### AT-08: Overlay logistique hybride
 - **Given** la scène principale est en cours d'exécution et `LogisticsSystem` a chargé les données JSON enrichies
 - **When** j'active le bouton "Show Logistics"
-- **Then** la console (ou le debug overlay) affiche un payload `logistics_update` listant anneaux `core/fringe/isolated`, routes actives et l'état des convois (progression, interception, livraisons)
+- **Then** la console (ou le debug overlay) affiche un payload `logistics_update` listant anneaux `core/fringe/isolated`, les tuiles atteignables, les déficits de ravitaillement signalés et l'état des convois (progression, interception, livraisons)
 
 ### AT-09: Rotation météo et impacts mouvement/logistique
 - **Given** la partie progresse sur plusieurs tours

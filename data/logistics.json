@@ -6,6 +6,7 @@
     "route_types": ["ring", "road"],
     "convoy_spawn_threshold": 4,
     "intercept_chance": 0.1,
+    "deficit_flow_threshold": 0.75,
     "elan_penalty_on_break": 2,
     "recovery_per_turn": 1,
     "links": {
@@ -70,6 +71,7 @@
     "route_types": ["ring", "road", "convoy"],
     "convoy_spawn_threshold": 3,
     "intercept_chance": 0.2,
+    "deficit_flow_threshold": 0.85,
     "elan_penalty_on_break": 3,
     "recovery_per_turn": 2,
     "links": {

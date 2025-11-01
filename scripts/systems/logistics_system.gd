@@ -322,6 +322,9 @@ func _recalculate_state(reason: String) -> void:
     _pending_breaks.clear()
     var supply_zones := _build_supply_payload(supply_radius, flow_multiplier, weather_config, logistics_config)
     var routes_payload := _build_route_payload(flow_multiplier, logistics_config)
+    var reachable_tiles := _derive_reachable_tiles(supply_zones)
+    var supply_deficits := _collect_supply_deficits(supply_zones, logistics_config)
+    var convoy_statuses := _summarise_convoys(routes_payload)
     var total_competence_penalty := _aggregate_break_penalty()
 
     _last_payload = {
@@ -333,6 +336,9 @@ func _recalculate_state(reason: String) -> void:
         "flow_multiplier": flow_multiplier,
         "supply_zones": supply_zones,
         "routes": routes_payload,
+        "reachable_tiles": reachable_tiles,
+        "supply_deficits": supply_deficits,
+        "convoy_statuses": convoy_statuses,
         "breaks": _pending_breaks.duplicate(true),
         "competence_penalty": total_competence_penalty,
     }
@@ -413,6 +419,76 @@ func _build_route_payload(flow_multiplier: float, logistics_config: Dictionary) 
                 "competence_penalty": max(1.0, float(logistics_config.get("elan_penalty_on_break", 0)) * 0.5),
             })
     return payload
+
+func _derive_reachable_tiles(zones: Array) -> Array:
+    var reachable: Array = []
+    for zone in zones:
+        if not (zone is Dictionary):
+            continue
+        var tile_id := str(zone.get("tile_id", ""))
+        if tile_id.is_empty():
+            continue
+        var supply_level := str(zone.get("supply_level", "isolated"))
+        var flow := float(zone.get("logistics_flow", 0.0))
+        if flow <= 0.0 or supply_level == "isolated":
+            continue
+        reachable.append({
+            "tile_id": tile_id,
+            "supply_level": supply_level,
+            "logistics_flow": snapped(flow, 0.01),
+        })
+    reachable.sort_custom(func(a, b): return String(a.get("tile_id", "")) < String(b.get("tile_id", "")))
+    return reachable
+
+func _collect_supply_deficits(zones: Array, logistics_config: Dictionary) -> Array:
+    var deficits: Array = []
+    var threshold := float(logistics_config.get("deficit_flow_threshold", 0.75))
+    for zone in zones:
+        if not (zone is Dictionary):
+            continue
+        var tile_id := str(zone.get("tile_id", ""))
+        if tile_id.is_empty():
+            continue
+        var supply_level := str(zone.get("supply_level", "isolated"))
+        var flow := float(zone.get("logistics_flow", 0.0))
+        var severity := ""
+        if supply_level == "isolated":
+            severity = "critical"
+        elif flow < threshold:
+            severity = "warning"
+        else:
+            continue
+        deficits.append({
+            "tile_id": tile_id,
+            "supply_level": supply_level,
+            "logistics_flow": snapped(flow, 0.01),
+            "severity": severity,
+        })
+    deficits.sort_custom(func(a, b): return String(a.get("tile_id", "")) < String(b.get("tile_id", "")))
+    return deficits
+
+func _summarise_convoys(routes_payload: Array) -> Array:
+    var statuses: Array = []
+    for route in routes_payload:
+        if not (route is Dictionary):
+            continue
+        var route_id := str(route.get("id", ""))
+        if route_id.is_empty():
+            continue
+        var convoy_variant := route.get("convoy", {})
+        var convoy: Dictionary = convoy_variant if convoy_variant is Dictionary else {}
+        statuses.append({
+            "route_id": route_id,
+            "type": route.get("type", "road"),
+            "active": bool(convoy.get("active", false)),
+            "last_event": str(convoy.get("last_event", "idle")),
+            "progress": snapped(float(convoy.get("progress", 0.0)), 0.01),
+            "eta_turns": snapped(float(convoy.get("eta_turns", 0.0)), 0.01),
+            "intercepted": bool(convoy.get("intercepted", false)),
+            "completed": int(convoy.get("completed", 0)),
+        })
+    statuses.sort_custom(func(a, b): return String(a.get("route_id", "")) < String(b.get("route_id", "")))
+    return statuses
 
 func _advance_convoys() -> void:
     var logistics_config: Dictionary = _logistics_by_id.get(_current_logistics_id, {})
