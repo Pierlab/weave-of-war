@@ -524,6 +524,7 @@ func test_formation_system_enforces_cost_and_inertia() -> void:
 
     var formation_system: FormationSystem = FORMATION_SYSTEM.new()
     formation_system.setup(event_bus, loader, combat_system, elan_system, turn_manager)
+    asserts.is_not_null(formation_system, "FormationSystem should stay alive for inertia coverage")
 
     turn_manager.start_game()
 
@@ -635,3 +636,105 @@ func test_formation_system_enforces_cost_and_inertia() -> void:
     if context_variant is Dictionary:
         context = context_variant as Dictionary
     asserts.is_equal("formation_lock_check", context.get("engagement_id", ""), "Status context should expose the latest engagement id")
+
+func test_formation_system_dataset_swap_consumes_elan_and_modifies_pillars() -> void:
+    var event_bus: EventBus = EVENT_BUS.new()
+    event_bus._ready()
+
+    var loader: DataLoader = DATA_LOADER.new()
+    loader.load_all()
+
+    var turn_manager: TurnManager = TURN_MANAGER.new()
+    turn_manager.setup(event_bus)
+
+    var elan_system: ElanSystem = ELAN_SYSTEM.new()
+    elan_system.setup(event_bus, loader)
+    elan_system.set_turn_manager(turn_manager)
+    elan_system.add_elan(5.0)
+
+    var combat_system: CombatSystem = COMBAT_SYSTEM.new()
+    combat_system.setup(event_bus, loader)
+
+    var formation_system: FormationSystem = FORMATION_SYSTEM.new()
+    formation_system.setup(event_bus, loader, combat_system, elan_system, turn_manager)
+    asserts.is_not_null(formation_system, "FormationSystem should remain available for dataset swap assertions")
+
+    turn_manager.start_game()
+
+    var default_formation := combat_system.get_unit_formation("infantry")
+    asserts.is_equal("shield_wall", default_formation, "Infantry should start in the Shield Wall formation from dataset defaults")
+
+    var change_events: Array = []
+    event_bus.formation_changed.connect(func(payload: Dictionary) -> void:
+        change_events.append(payload.duplicate(true))
+    )
+    var status_events: Array = []
+    event_bus.formation_status_updated.connect(func(payload: Dictionary) -> void:
+        status_events.append(payload.duplicate(true))
+    )
+
+    change_events.clear()
+    status_events.clear()
+
+    var elan_before: float = float(elan_system.get_state_payload().get("current", 0.0))
+    var engagement_seed := 17
+    var engagement := {
+        "engagement_id": "formation_dataset_swap",
+        "order_id": "advance",
+        "attacker_unit_ids": ["infantry"],
+        "defender_unit_ids": [],
+        "terrain": "plains",
+        "weather_id": "sunny",
+    }
+
+    combat_system.set_rng_seed(engagement_seed)
+    var baseline_resolution: Dictionary = combat_system.resolve_engagement(engagement)
+    var baseline_pillars_variant: Variant = baseline_resolution.get("pillars", {})
+    var baseline_pillars: Dictionary = baseline_pillars_variant as Dictionary if baseline_pillars_variant is Dictionary else {}
+    var baseline_position_variant: Variant = baseline_pillars.get("position", {})
+    var baseline_position: float = 0.0
+    if baseline_position_variant is Dictionary:
+        baseline_position = float((baseline_position_variant as Dictionary).get("attacker", 0.0))
+    var baseline_impulse_variant: Variant = baseline_pillars.get("impulse", {})
+    var baseline_impulse: float = 0.0
+    if baseline_impulse_variant is Dictionary:
+        baseline_impulse = float((baseline_impulse_variant as Dictionary).get("attacker", 0.0))
+
+    event_bus.request_formation_change({
+        "unit_id": "infantry",
+        "formation_id": "advance_column",
+        "source": "test",
+    })
+
+    asserts.is_true(change_events.size() > 0, "Dataset swap should emit at least one formation_changed payload")
+    var manual_change: Dictionary = change_events.back()
+    asserts.is_equal("manual", manual_change.get("reason", ""), "Manual dataset swap should keep the manual tag")
+    asserts.is_equal("advance_column", manual_change.get("formation_id", ""), "Payload should record the requested formation")
+
+    var elan_after: float = float(elan_system.get_state_payload().get("current", 0.0))
+    var elan_delta: float = elan_before - elan_after
+    asserts.is_true(is_equal_approx(elan_delta, 1.0, 0.01), "Advance Column should deduct exactly 1.0 Élan (delta=%.2f)" % elan_delta)
+
+    combat_system.set_rng_seed(engagement_seed)
+    var swapped_resolution: Dictionary = combat_system.resolve_engagement(engagement)
+    var swapped_pillars_variant: Variant = swapped_resolution.get("pillars", {})
+    var swapped_pillars: Dictionary = swapped_pillars_variant as Dictionary if swapped_pillars_variant is Dictionary else {}
+    var swapped_position_variant: Variant = swapped_pillars.get("position", {})
+    var swapped_position: float = 0.0
+    if swapped_position_variant is Dictionary:
+        swapped_position = float((swapped_position_variant as Dictionary).get("attacker", 0.0))
+    var swapped_impulse_variant: Variant = swapped_pillars.get("impulse", {})
+    var swapped_impulse: float = 0.0
+    if swapped_impulse_variant is Dictionary:
+        swapped_impulse = float((swapped_impulse_variant as Dictionary).get("attacker", 0.0))
+
+    asserts.is_true(swapped_position < baseline_position, "Advance Column should trade a portion of the Position pillar")
+    asserts.is_true(swapped_impulse > baseline_impulse, "Advance Column should boost Impulse relative to Shield Wall")
+
+    asserts.is_true(status_events.size() > 0, "Formation status updates should fire after the swap")
+    var latest_status_variant: Variant = status_events.back().get("units", {}) if status_events.size() > 0 else {}
+    var latest_units: Dictionary = latest_status_variant as Dictionary if latest_status_variant is Dictionary else {}
+    var infantry_status_variant: Variant = latest_units.get("infantry", {})
+    var infantry_status: Dictionary = infantry_status_variant as Dictionary if infantry_status_variant is Dictionary else {}
+    asserts.is_equal("advance_column", infantry_status.get("formation_id", ""), "Status payload should mirror the active formation")
+    asserts.is_true(bool(infantry_status.get("locked", false)), "Advance Column should apply its inertia lock in status updates")

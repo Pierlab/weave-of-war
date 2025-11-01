@@ -208,9 +208,11 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
 - Unit formations are described in the new [`data/formations.json`](data/formations.json) catalogue. `CombatSystem` tracks the
   active formation for each unit, publishes `formation_changed` events, and folds formation posture bonuses into pillar
   resolution alongside competence allocations. Formation swaps now translate into visible pillar shifts (ex. « Shield Wall »
-  augmente Position mais réduit Impulsion/Information), locked in place by new gdUnit coverage. The combat pipeline now falls
-  back to any formation compatible with the unit's archetype when defaults are missing so every class (`line`, `mobile`,
-  `ranged`, `support`) retains a legal posture during future UI work.
+  augmente Position mais réduit Impulsion/Information), locked in place by new gdUnit coverage. A dataset-driven regression in
+  `tests/gdunit/test_competence_and_formations.gd` now proves that swapping to « Advance Column » spends Élan, refreshes the
+  inertia lock state, and boosts Impulsion at the expense of Position before the combat pipeline falls back to any formation
+  compatible with the unit's archetype when defaults are missing so every class (`line`, `mobile`, `ranged`, `support`) retains
+  a legal posture during future UI work.
 - The HUD sports a dedicated **Formations** panel: every unit lists its compatible postures with Élan cost, inertia lock and
   descriptive tooltips. Selecting a new posture dispatches `formation_change_requested` via the event bus, and the UI locks the
   selector while inertia cools down or highlights Élan shortfalls so players understand why a swap is unavailable.

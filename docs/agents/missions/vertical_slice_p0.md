@@ -34,7 +34,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   `data/competence_sliders.json`, applique des caps de réallocation/inertie par catégorie, expose l'état des modificateurs et la
   télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
   livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
-- [~] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-21 — Panneau HUD « Formations » opérationnel avec validations Élan/inertie; restent à propager les sélections dans les résolutions combat et à enrichir la télémétrie/tests.)*
+- [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work.)*
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 
@@ -157,6 +157,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   que la documentation (README, CHANGELOG, checklist) reflète les nouveaux contrats.
 
 ### Phase 6 progress
+- 2025-12-26 — Added a dataset-grounded gdUnit scenario (`test_formation_system_dataset_swap_consumes_elan_and_modifies_pillars`) validating Élan deductions, status locks, and pillar swings when swapping from « Shield Wall » to « Advance Column », archiving evidence for checklist item 49.
 - 2025-12-24 — `CombatSystem` republie chaque formation active après `combat_resolved` avec `reason: "combat"`, en joignant l'id d'engagement, l'ordre et le `unit_result`. `FormationSystem` préserve désormais les verrous d'inertie lors de ces instantanés, stocke le contexte de combat dans `formation_status_updated`, et les tests gdUnit couvrent la télémétrie + la persistance des locks, clôturant l'item 48.
 - 2025-12-23 — La carte hex adopte un `FormationOverlay` qui affiche badges de posture (initiales + couleur), anneau d'inertie et
   halo d'animation lors des swaps. Map `Map` transmet désormais `EventBus`/`DataLoader` à l'overlay pour rester en phase avec
