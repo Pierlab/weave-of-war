@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Derived formation archetype mapping: `DataLoader` now links each [`data/formations.json`](data/formations.json) entry to the unit classes that can field it, exposes helper lookups, and `CombatSystem` consumes the mapping for formation fallbacks. README, mission brief, checklist, and gdUnit data integrity tests document and verify the coverage while unlocking checklist item 44.
 - Automated competence slider regression tests capturing EventBus allocation requests: successful reallocations now assert the emitted `competence_reallocated` payloads while delta/inertie violations trigger `competence_allocation_failed` with contextual reasons, closing checklist item 42.
 - Enriched `competence_reallocated` telemetry with a `turn_id` and explicit `before`/`after` snapshots (allocations, budget, inertia, modifiers). `TelemetryAutoload` now normalises these fields and documentation/checklists/acceptance tests reflect the new auditing flow.
 - Propagated competence slider allocations into combat impulse multipliers, Assistant AI planning confidence, and logistics flow efficiency. `competence_reallocated` now ships allocation ratios, `LogisticsSystem` scales its `flow_multiplier`/`competence_multiplier`, and new gdUnit coverage locks the behaviour across combat, logistics, and assistant planning tests.

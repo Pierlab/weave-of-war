@@ -207,9 +207,13 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
   economy stays responsive to convoy disruptions.
 - Unit formations are described in the new [`data/formations.json`](data/formations.json) catalogue. `CombatSystem` tracks the
   active formation for each unit, publishes `formation_changed` events, and folds formation posture bonuses into pillar
-  resolution alongside competence allocations.
-- `DataLoader` exposes the formations dataset, while `Telemetry` records competence and formation events with the enriched
-  before/after snapshots so gdUnit tests and dashboards can assert on the complete Semaine 6 loop without diffing raw payloads.
+  resolution alongside competence allocations. The combat pipeline now falls back to any formation compatible with the unit's
+  archetype when defaults are missing so every class (`line`, `mobile`, `ranged`, `support`) retains a legal posture during
+  future UI work.
+- `DataLoader` exposes the formations dataset, maps each formation to the archetypes that can field it, and offers helper
+  lookups (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `Telemetry` records
+  competence and formation events with the enriched before/after snapshots so gdUnit tests and dashboards can assert on the
+  complete Semaine 6 loop without diffing raw payloads.
 
 ## Running automated checks
 All headless commands assume the Godot executable is available on your `PATH`. When switching branches or updating Godot, remove

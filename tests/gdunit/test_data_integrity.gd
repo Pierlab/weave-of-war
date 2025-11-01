@@ -359,6 +359,32 @@ func test_data_loader_validation_accepts_valid_payload() -> void:
     var errors := DataLoader.validate_collection("orders", orders)
     asserts.is_true(errors.is_empty(), "Orders dataset should satisfy the hardened schema validation")
 
+func test_formations_map_to_unit_archetypes() -> void:
+    var loader := DataLoader.new()
+    loader.load_all()
+
+    var shield_wall_classes := loader.get_unit_classes_for_formation("shield_wall")
+    asserts.is_true(shield_wall_classes.has("line"), "Shield Wall formation should belong to line archetypes")
+    asserts.is_equal(1, shield_wall_classes.size(), "Shield Wall should only target the line archetype for now")
+
+    var screen_classes := loader.get_unit_classes_for_formation("screen")
+    asserts.is_true(screen_classes.has("mobile"), "Screen formation should support mobile units")
+    asserts.is_true(screen_classes.has("ranged"), "Screen formation should support ranged units")
+
+    var mobile_formations := loader.list_formations_for_unit_class("mobile")
+    var mobile_ids: Array = mobile_formations.map(func(entry: Dictionary):
+        return entry.get("id", "")
+    )
+    asserts.is_true(mobile_ids.has("wedge"), "Mobile archetype should expose the Wedge formation")
+    asserts.is_true(mobile_ids.has("screen"), "Mobile archetype should expose the Screen formation")
+
+    var cavalry_formations := loader.list_formations_for_unit("cavalry")
+    var cavalry_ids: Array = cavalry_formations.map(func(entry: Dictionary):
+        return entry.get("id", "")
+    )
+    asserts.is_true(cavalry_ids.has("wedge"), "Cavalry default formations should include Wedge")
+    asserts.is_true(cavalry_ids.has("screen"), "Cavalry formations should include Screen via archetype mapping")
+
 func _load_json_array(path: String, label: String) -> Array:
     var file := FileAccess.open(path, FileAccess.READ)
     asserts.is_not_null(file, "Failed to open %s data file" % label)
