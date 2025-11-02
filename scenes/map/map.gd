@@ -17,7 +17,7 @@ var data_loader: DataLoader
 var _terrain_definitions: Dictionary = TERRAIN_DATA.get_default()
 var _tiles: Dictionary = {}
 var _default_visibility: float = 0.2
-var _formation_overlay: FormationOverlay
+var _formation_overlay: Node
 
 func _ready() -> void:
     _generate_map()
@@ -87,7 +87,7 @@ func _merge_definitions(entries: Array) -> void:
         var current_variant: Variant = _terrain_definitions.get(id, {})
         var current: Dictionary = {}
         if current_variant is Dictionary:
-            current = current_variant
+            current = (current_variant as Dictionary)
         _terrain_definitions[id] = {
             "name": str(entry.get("name", current.get("name", id.capitalize()))),
             "movement_cost": float(entry.get("movement_cost", current.get("movement_cost", 1.0))),
@@ -106,7 +106,7 @@ func _apply_terrain_tiles(entries: Array) -> void:
         var definition_variant: Variant = _terrain_definitions.get(terrain_id, {})
         var definition: Dictionary = {}
         if definition_variant is Dictionary:
-            definition = definition_variant
+            definition = (definition_variant as Dictionary)
         var name := str(entry.get("name", definition.get("name", terrain_id.capitalize())))
         var description := str(entry.get("description", definition.get("description", "")))
         var movement := float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
@@ -131,7 +131,7 @@ func _apply_default_terrain() -> void:
         var definition_variant: Variant = _terrain_definitions.get(terrain_id, {})
         var definition: Dictionary = {}
         if definition_variant is Dictionary:
-            definition = definition_variant
+            definition = (definition_variant as Dictionary)
         var name := str(definition.get("name", terrain_id.capitalize()))
         var description := str(definition.get("description", ""))
         var movement := float(definition.get("movement_cost", 1.0))
@@ -160,7 +160,7 @@ func _on_fog_of_war_updated(payload: Dictionary) -> void:
     var entries_variant: Variant = payload.get("visibility", payload.get("visibility_map", []))
     var entries: Array = []
     if entries_variant is Array:
-        entries = entries_variant
+        entries = (entries_variant as Array)
     var applied: Dictionary = {}
     for entry in entries:
         if not (entry is Dictionary):
@@ -181,9 +181,10 @@ func _configure_overlays() -> void:
             if child is FORMATION_OVERLAY:
                 _formation_overlay = child
                 break
-    if _formation_overlay:
-        _formation_overlay.set_dimensions(columns, rows)
-        _formation_overlay.set_data_sources(event_bus, data_loader)
+    if _formation_overlay and _formation_overlay.has_method("set_dimensions"):
+        _formation_overlay.call("set_dimensions", columns, rows)
+    if _formation_overlay and _formation_overlay.has_method("set_data_sources"):
+        _formation_overlay.call("set_data_sources", event_bus, data_loader)
 
 func _tile_id(q: int, r: int) -> String:
     return "%d,%d" % [q, r]

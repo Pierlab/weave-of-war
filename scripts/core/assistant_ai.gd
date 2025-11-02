@@ -102,7 +102,10 @@ func _on_doctrine_selected(_payload: Dictionary) -> void:
     pass
 
 func _on_competence_reallocated(payload: Dictionary) -> void:
-    var allocations: Dictionary = payload.get("allocations", {})
+    var allocations_variant: Variant = payload.get("allocations", {})
+    var allocations: Dictionary = {}
+    if allocations_variant is Dictionary:
+        allocations = (allocations_variant as Dictionary)
     for category in _competence_allocations.keys():
         _competence_allocations[category] = float(allocations.get(category, _competence_allocations.get(category, 0.0)))
     var config_variant: Variant = payload.get("config", {})
