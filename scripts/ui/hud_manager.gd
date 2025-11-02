@@ -297,9 +297,12 @@ func _setup_competence_panel() -> void:
         child.queue_free()
     _competence_rows.clear()
 
-    var config_map := _extract_competence_config()
+    var config_map: Dictionary = _extract_competence_config()
     for category in COMPETENCE_CATEGORIES:
-        var config: Dictionary = config_map.get(category, {})
+        var config_variant: Variant = config_map.get(category, {})
+        var config: Dictionary = {}
+        if config_variant is Dictionary:
+            config = config_variant
         _build_competence_row(category, config)
 
     if _active_competence_category.is_empty() and not COMPETENCE_CATEGORIES.is_empty():
@@ -607,7 +610,7 @@ func _on_competence_slider_changed(category: String, value: float) -> void:
         return
     if not _competence_rows.has(category):
         return
-    var target_value := snapped(value, 0.01)
+    var target_value: float = snapped(value, 0.01)
     var row: Dictionary = _competence_rows.get(category, {})
     var slider: HSlider = row.get("slider")
     if slider and abs(slider.value - target_value) > 0.0001:
@@ -621,7 +624,7 @@ func _on_competence_slider_changed(category: String, value: float) -> void:
     if abs(current_allocation - target_value) <= 0.001:
         _update_competence_panel(true)
         return
-    var requested := _gather_competence_allocations_from_sliders()
+    var requested: Dictionary = _gather_competence_allocations_from_sliders()
     requested[category] = target_value
     if event_bus:
         event_bus.request_competence_allocation(requested)
@@ -678,8 +681,8 @@ func _nudge_competence_slider(category: String, step_multiplier: float) -> void:
     var slider: HSlider = row.get("slider")
     if slider == null:
         return
-    var step := slider.step if slider.step > 0.0 else COMPETENCE_DEFAULT_STEP
-    var next_value := clamp(slider.value + step * step_multiplier, slider.min_value, slider.max_value)
+    var step: float = slider.step if slider.step > 0.0 else COMPETENCE_DEFAULT_STEP
+    var next_value: float = clamp(slider.value + step * step_multiplier, slider.min_value, slider.max_value)
     if abs(next_value - slider.value) <= 0.0001:
         return
     _suppress_competence_slider_signal = true
@@ -687,7 +690,7 @@ func _nudge_competence_slider(category: String, step_multiplier: float) -> void:
     _suppress_competence_slider_signal = false
     _on_competence_slider_changed(category, slider.value)
 
-func _update_competence_panel(use_slider_values := false) -> void:
+func _update_competence_panel(use_slider_values: bool = false) -> void:
     if competence_panel == null:
         return
     if _competence_state.is_empty():
@@ -705,7 +708,7 @@ func _update_competence_panel(use_slider_values := false) -> void:
     var inertia_map: Dictionary = {}
     if inertia_variant is Dictionary:
         inertia_map = (inertia_variant as Dictionary)
-    var config_map := _extract_competence_config()
+    var config_map: Dictionary = _extract_competence_config()
 
     _suppress_competence_slider_signal = true
     for category in COMPETENCE_CATEGORIES:
@@ -716,7 +719,10 @@ func _update_competence_panel(use_slider_values := false) -> void:
         var name_label: Label = row.get("name_label")
         var hotkey_label: Label = row.get("hotkey_label")
         var status_label: Label = row.get("status_label")
-        var config: Dictionary = config_map.get(category, {})
+        var config_variant: Variant = config_map.get(category, {})
+        var config: Dictionary = {}
+        if config_variant is Dictionary:
+            config = config_variant
         if name_label:
             name_label.text = str(config.get("name", category.capitalize()))
         if hotkey_label:
@@ -726,15 +732,15 @@ func _update_competence_panel(use_slider_values := false) -> void:
             slider.max_value = float(config.get("max_allocation", slider.max_value))
             slider.step = COMPETENCE_DEFAULT_STEP
             slider.tooltip_text = str(config.get("description", ""))
-        var base_value := float(allocations.get(category, slider.value if slider else 0.0))
-        var display_value := snapped(base_value, 0.01)
+        var base_value: float = float(allocations.get(category, slider.value if slider else 0.0))
+        var display_value: float = snapped(base_value, 0.01)
         if use_slider_values and slider:
             display_value = snapped(slider.value, 0.01)
         elif slider:
             slider.value = display_value
         var inertia_state: Dictionary = {}
         if inertia_map.has(category) and inertia_map.get(category) is Dictionary:
-            inertia_state = inertia_map.get(category, {})
+            inertia_state = (inertia_map.get(category, {}) as Dictionary)
         if status_label:
             status_label.text = _format_competence_status(category, display_value, config, inertia_state)
     _suppress_competence_slider_signal = false
@@ -743,29 +749,29 @@ func _update_competence_panel(use_slider_values := false) -> void:
 
     var budget := float(_competence_state.get("budget", 0.0))
     var available := float(_competence_state.get("available", 0.0))
-    var used := max(budget - available, 0.0)
+    var used: float = max(budget - available, 0.0)
     var modifiers_variant: Variant = _competence_state.get("modifiers", {})
-    var penalty := 0.0
+    var penalty: float = 0.0
     if modifiers_variant is Dictionary:
         penalty = float((modifiers_variant as Dictionary).get("logistics_penalty", 0.0))
-    var label_text := "Budget : %.2f pts (Utilisés %.2f · Restant %.2f)" % [budget, used, available]
+    var label_text: String = "Budget : %.2f pts (Utilisés %.2f · Restant %.2f)" % [budget, used, available]
     if penalty > 0.0:
         label_text += " | Pénalité logistique %.2f" % penalty
     if competence_available_label:
         competence_available_label.text = label_text
 
 func _format_competence_status(category: String, allocation: float, config: Dictionary, inertia_state: Dictionary) -> String:
-    var min_value := float(config.get("min_allocation", 0.0))
-    var max_value := float(config.get("max_allocation", min_value))
+    var min_value: float = float(config.get("min_allocation", 0.0))
+    var max_value: float = float(config.get("max_allocation", min_value))
     if max_value < min_value:
         max_value = min_value
     var parts: Array[String] = []
     parts.append("Allocation %.2f pts" % allocation)
     parts.append("Bornes %.2f–%.2f" % [min_value, max_value])
-    var max_delta := float(inertia_state.get("max_delta_per_turn", config.get("max_delta_per_turn", 0.0)))
-    var spent := float(inertia_state.get("spent_this_turn", 0.0))
+    var max_delta: float = float(inertia_state.get("max_delta_per_turn", config.get("max_delta_per_turn", 0.0)))
+    var spent: float = float(inertia_state.get("spent_this_turn", 0.0))
     parts.append("Δ %.2f / %.2f" % [spent, max_delta])
-    var turns := int(inertia_state.get("turns_remaining", 0))
+    var turns: int = int(inertia_state.get("turns_remaining", 0))
     if turns > 0:
         parts.append("Verrou %dT" % turns)
     else:
@@ -1305,7 +1311,7 @@ func _format_intel_log_entry(entry: Dictionary) -> String:
     var noise_percent := _format_percent(float(entry.get("noise", 0.0)))
     var detection_bonus := _format_percent(float(entry.get("detection_bonus", 0.0)))
     var roll_display := _format_percent(float(entry.get("roll", 0.0)))
-    var parts := []
+    var parts: Array[String] = []
     parts.append("T%02d" % turn_number)
     parts.append(target)
     parts.append("%s" % ("Succès" if success else "Échec"))
@@ -1332,7 +1338,7 @@ func _format_target(target: String) -> String:
     return target if not target.is_empty() else "hex inconnu"
 
 func _format_percent(value: float) -> String:
-    var percent := clamp(roundi(value * 100.0), -999, 999)
+    var percent: int = clampi(roundi(value * 100.0), -999, 999)
     return "%d%%" % percent
 
 func _intention_label(code: String) -> String:

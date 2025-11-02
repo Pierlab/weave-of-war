@@ -34,7 +34,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   `data/competence_sliders.json`, applique des caps de réallocation/inertie par catégorie, expose l'état des modificateurs et la
   télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
   livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
-- [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work.)*
+- [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work; 2025-12-28 — Consolidated dictionary typing across Assistant AI, map overlays, and HUD panels so warnings-as-errors no longer block the formation visualisation pipeline.)*
 - [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 

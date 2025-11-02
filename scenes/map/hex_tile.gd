@@ -10,12 +10,12 @@ const TERRAIN_COLORS := {
 const FOG_MIN_ALPHA := 0.0
 const FOG_MAX_ALPHA := 0.85
 
-@export var axial_coords := Vector2.ZERO
-var terrain_id := "plains"
-var terrain_name := "Plains"
-var terrain_description := ""
-var movement_cost := 1.0
-var fog_visibility := 0.2
+@export var axial_coords: Vector2 = Vector2.ZERO
+var terrain_id: String = "plains"
+var terrain_name: String = "Plains"
+var terrain_description: String = ""
+var movement_cost: float = 1.0
+var fog_visibility: float = 0.2
 
 @onready var polygon: Polygon2D = $Polygon2D
 @onready var label: Label = $Label
@@ -54,7 +54,7 @@ func apply_visibility(value: float) -> void:
 func _update_label() -> void:
     if label == null:
         return
-    var coords_text := "%d,%d" % [int(axial_coords.x), int(axial_coords.y)]
+    var coords_text: String = "%d,%d" % [int(axial_coords.x), int(axial_coords.y)]
     if fog_visibility < 0.35:
         label.text = "%s\n??" % coords_text
     elif terrain_name.is_empty():
@@ -67,11 +67,11 @@ func _update_label() -> void:
 func _update_tooltip() -> void:
     if label == null:
         return
-    var heading := terrain_name if terrain_name != "" else terrain_id.capitalize()
+    var heading: String = terrain_name if terrain_name != "" else terrain_id.capitalize()
     if fog_visibility < 0.35:
         label.tooltip_text = "%s\nBrouillard de guerre" % heading
         return
-    var lines := ["%s — coût déplacement %.1f" % [heading, movement_cost]]
+    var lines: Array[String] = ["%s — coût déplacement %.1f" % [heading, movement_cost]]
     if terrain_description != "":
         lines.append(terrain_description)
     label.tooltip_text = "\n".join(lines)
@@ -85,11 +85,11 @@ func _apply_terrain_style() -> void:
 func _update_fog_overlay() -> void:
     if fog_overlay == null:
         return
-    var intensity := clamp(1.0 - fog_visibility, 0.0, 1.0)
+    var intensity: float = clamp(1.0 - fog_visibility, 0.0, 1.0)
     if intensity <= 0.01:
         fog_overlay.visible = false
         return
     fog_overlay.visible = true
-    var color := Color.BLACK
+    var color: Color = Color.BLACK
     color.a = lerp(FOG_MIN_ALPHA, FOG_MAX_ALPHA, intensity)
     fog_overlay.color = color
