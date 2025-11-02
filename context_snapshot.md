@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-02T00:16:21Z
+- Generated on: 2025-11-02T09:31:25Z
 - Branch: work
-- Commit when generated: b3d77172f5f64e5659152ea5f71580343e731c0d
-- Subject: Merge pull request #92 from Pierlab/codex/fix-gdscript-parse-and-load-errors
+- Commit when generated: 3a7f5f21aa96a8b4e0e8b7c988872f990565f718
+- Subject: Merge pull request #93 from Pierlab/codex/fix-gdscript-parse-and-access-errors
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 

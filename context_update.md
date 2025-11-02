@@ -1,6 +1,10 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-30 — Revu l'intégralité des schémas `TelemetryAutoload`, confirmé la duplication profonde des payloads et mis à jour
+  `docs/telemetry/dashboard_plan.md` avec une matrice de champs (readiness, commandement, logistique/météo, combat/formation,
+  compétence, renseignement) plus un plan KPI/dashboards Phase 7. CHECKLISTS item 50 et mission brief Phase 7 reflètent
+  l'avancement.
 - 2025-12-29 — Corrigé les arrêts de chargement Godot : cast explicite des dictionnaires dans `AssistantAI`, `Map`,
   `FormationSystem` et `HUDManager`, remplacement des overrides `theme_override_constants` par
   `add_theme_constant_override`, ce qui restaure l'affichage de la carte et des panneaux HUD sans warnings-as-errors.

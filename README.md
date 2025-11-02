@@ -306,7 +306,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
 - Reference the draft SDS outlines for the eight P0 systems in [`docs/design/sds_outlines.md`](docs/design/sds_outlines.md) when
   planning gameplay or telemetry changes.
 - Align telemetry instrumentation and KPI tracking with the dashboard starter kit outlined in
-  [`docs/telemetry/dashboard_plan.md`](docs/telemetry/dashboard_plan.md) to keep analytics expectations visible during iteration.
+  [`docs/telemetry/dashboard_plan.md`](docs/telemetry/dashboard_plan.md). The 2025-12-30 refresh captures the full
+  event-to-field matrix (readiness, command, logistics, combat, compétence, renseignement) plus an updated KPI/dashboard
+  roadmap so analytics expectations stay visible during iteration.
 - Use the locked SDS packages for [`Command Model`](docs/design/sds_command_model.md) and
   [`Élan`](docs/design/sds_elan.md) as the source of truth for acceptance criteria and telemetry requirements during the
   vertical slice build.
