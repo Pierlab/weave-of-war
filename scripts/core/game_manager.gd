@@ -19,7 +19,7 @@ var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
 var combat_system: CombatSystem
 var espionage_system: EspionageSystem
-var formation_system: FormationSystem
+var formation_system: Node
 
 var _core_systems_initialised: bool = false
 
@@ -100,8 +100,15 @@ func _on_data_loader_ready(payload: Dictionary) -> void:
         var terrain_lookup: Dictionary = _build_terrain_lookup(payload)
         if not terrain_lookup.is_empty():
             espionage_system.configure_map(terrain_lookup)
-    if formation_system:
-        formation_system.setup(event_bus, data_loader, combat_system, elan_system, turn_manager)
+    if formation_system and formation_system.has_method("setup"):
+        formation_system.call(
+            "setup",
+            event_bus,
+            data_loader,
+            combat_system,
+            elan_system,
+            turn_manager,
+        )
 
     _core_systems_initialised = true
 

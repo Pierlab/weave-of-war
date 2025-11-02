@@ -114,20 +114,20 @@ func _draw() -> void:
                     _font,
                     lock_pos,
                     lock_text,
-                    alignment := HORIZONTAL_ALIGNMENT_LEFT,
-                    width := -1.0,
-                    font_size := _lock_font_size,
-                    outline_size := 1,
-                    modulate := Color(0.0, 0.0, 0.0, 0.85),
+                    HORIZONTAL_ALIGNMENT_LEFT,
+                    -1.0,
+                    _lock_font_size,
+                    1,
+                    Color(0.0, 0.0, 0.0, 0.85),
                 )
                 draw_string(
                     _font,
                     lock_pos,
                     lock_text,
-                    alignment := HORIZONTAL_ALIGNMENT_LEFT,
-                    width := -1.0,
-                    font_size := _lock_font_size,
-                    modulate := Color(0.95, 0.95, 0.95, 0.95),
+                    HORIZONTAL_ALIGNMENT_LEFT,
+                    -1.0,
+                    _lock_font_size,
+                    Color(0.95, 0.95, 0.95, 0.95),
                 )
         var label := str(token.get("label", ""))
         if label != "" and _font:
@@ -139,20 +139,20 @@ func _draw() -> void:
                 _font,
                 label_pos,
                 label,
-                alignment := HORIZONTAL_ALIGNMENT_LEFT,
-                width := -1.0,
-                font_size := _font_size,
-                outline_size := 2,
-                modulate := Color(0.0, 0.0, 0.0, 0.85),
+                HORIZONTAL_ALIGNMENT_LEFT,
+                -1.0,
+                _font_size,
+                2,
+                Color(0.0, 0.0, 0.0, 0.85),
             )
             draw_string(
                 _font,
                 label_pos,
                 label,
-                alignment := HORIZONTAL_ALIGNMENT_LEFT,
-                width := -1.0,
-                font_size := _font_size,
-                modulate := Color(1.0, 1.0, 1.0, 0.95),
+                HORIZONTAL_ALIGNMENT_LEFT,
+                -1.0,
+                _font_size,
+                Color(1.0, 1.0, 1.0, 0.95),
             )
 
 func _acquire_sources() -> void:

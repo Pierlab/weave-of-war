@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-07 — Corrigé l'échec de preload `FormationOverlay` sur Godot 4.6 en remplaçant la syntaxe d'arguments nommés
+  invalide sur les appels `draw_string*` par des paramètres positionnels et en redonnant à `GameManager` une garde générique
+  (`Node.has_method`) avant d'appeler `FormationSystem.setup`. La carte se charge à nouveau sans erreurs de parsing ni
+  avertissements "Could not find type FormationSystem". README/CHANGELOG/mission reflètent le correctif ; les commandes
+  Godot headless restent bloquées faute de binaire provisionné dans ce conteneur.
 - 2026-01-06 — Réparé le preload de `FormationOverlay` en initialisant explicitement les tableaux typés (Godot 4.6 charge
   désormais la carte sans parse error) et mémorisé le playback audio générateur pour que `_stop_feedback_stream()` vide le
   buffer sans appeler `get_stream_playback()` sur un player inactif. README/CHANGELOG/mission reflètent le correctif ; les

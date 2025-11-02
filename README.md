@@ -234,9 +234,9 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
 - The hex map renders live formation badges above each unit: posture colours and initials update instantly when
   `formation_changed` fires, a white inertia ring and remaining-turn counter appear while a unit is locked, and recent swaps emit
   a brief highlight pulse so formation changes are visible without opening the HUD panel.
-- `FormationOverlay` now sources its font from `ThemeDB.fallback_font`, uses the Godot 4.x `draw_string*` signatures, and caches
-  typed unit dictionaries so warnings-as-errors no longer break the overlay when the project loads in headless or strict parser
-  environments.
+- `FormationOverlay` now sources its font from `ThemeDB.fallback_font`, uses the Godot 4.x `draw_string*` signatures with positional
+  parameters, and caches typed unit dictionaries so warnings-as-errors no longer break the overlay when the project loads in
+  headless or strict parser environments.
 - `DataLoader` exposes the formations dataset, maps each formation to the archetypes that can field it, and offers helper
   lookups (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `Telemetry` records
   competence and formation events with the enriched before/after snapshots so gdUnit tests and dashboards can assert on the
