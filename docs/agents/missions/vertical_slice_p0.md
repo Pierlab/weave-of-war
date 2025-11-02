@@ -35,7 +35,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
   livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
 - [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work; 2025-12-28 — Consolidated dictionary typing across Assistant AI, map overlays, and HUD panels so warnings-as-errors no longer block the formation visualisation pipeline.)*
-- [~] Phase 7 — Telemetry dashboards and Assistant AI insights. *(2025-12-30 — Checklist item 50 complete: telemetry schema audit + refreshed KPI/dashboard plan.)*
+- [~] Phase 7 — Telemetry dashboards and Assistant AI insights. *(2025-12-31 — Checklist item 51 complete: telemetry sessions persist to `user://telemetry_sessions/` with README + mission guidance, following the 2025-12-30 schema audit and dashboard refresh.)*
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 
 ## Deliverables
@@ -180,6 +180,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 
 ### Phase 7 progress
 - 2025-12-30 — Passé en revue tous les serializers de `TelemetryAutoload`, aligné les schémas (readiness, boucle commandement, logistique/météo, combat/formation, compétence, renseignement) et étoffé `docs/telemetry/dashboard_plan.md` avec une matrice de champs par événement plus une feuille de route KPI/dashboards pour la Phase 7.
+- 2025-12-31 — `TelemetryAutoload` persiste désormais chaque session dans `user://telemetry_sessions/telemetry_session_<horodatage>.jsonl`, et la checklist/README/mission brief documentent le rituel pour archiver les buffers télémétrie hors du runtime.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.

@@ -101,3 +101,77 @@ func test_telemetry_preserves_event_history() -> void:
     if history.size() == 2:
         var last_payload: Dictionary = history.back().get("payload", {})
         asserts.is_equal("1,0", last_payload.get("target", ""), "History should preserve payload order")
+
+    var session_path := telemetry.get_session_file_path()
+    if !session_path.is_empty() and FileAccess.file_exists(session_path):
+        DirAccess.remove_absolute(session_path)
+        var session_dir := session_path.get_base_dir()
+        if DirAccess.dir_exists_absolute(session_dir):
+            var dir := DirAccess.open(session_dir)
+            if dir != null:
+                dir.list_dir_begin()
+                var has_children := false
+                var name := dir.get_next()
+                while name != "":
+                    if name != "." and name != "..":
+                        has_children = true
+                        break
+                    name = dir.get_next()
+                dir.list_dir_end()
+                if not has_children:
+                    DirAccess.remove_absolute(session_dir)
+    telemetry.free()
+
+func test_telemetry_persists_session_buffer_to_disk() -> void:
+    Telemetry._instance = null
+    var telemetry: Telemetry = TELEMETRY.new()
+    telemetry._ready()
+    telemetry.clear()
+
+    asserts.is_true(telemetry.is_persistence_enabled(), "Telemetry persistence should be enabled after initialisation")
+
+    var session_path := telemetry.get_session_file_path()
+    asserts.is_true(!session_path.is_empty(), "Telemetry should expose the session file path")
+    asserts.is_true(FileAccess.file_exists(session_path), "Telemetry session file should be created on disk")
+
+    telemetry.log_event("doctrine_selected", {"id": "force"})
+    telemetry.log_event("elan_spent", {"amount": 2.0})
+
+    var file := FileAccess.open(session_path, FileAccess.READ)
+    asserts.is_not_null(file, "Telemetry session file should be readable")
+    if file == null:
+        return
+
+    var entries: Array = []
+    while not file.eof_reached():
+        var line := file.get_line()
+        if line.strip_edges().is_empty():
+            continue
+        var parsed := JSON.parse_string(line)
+        if parsed is Dictionary:
+            entries.append(parsed)
+    file.close()
+
+    asserts.is_true(entries.size() >= 3, "Telemetry session file should contain the header and logged events")
+    if entries.size() >= 3:
+        var last_entry: Dictionary = entries.back()
+        asserts.is_equal("elan_spent", str(last_entry.get("name", "")), "Telemetry should persist event names in session logs")
+        asserts.is_equal(telemetry.is_persistence_enabled(), true, "Persistence flag should remain true after writing events")
+
+    DirAccess.remove_absolute(session_path)
+    var session_dir := session_path.get_base_dir()
+    if DirAccess.dir_exists_absolute(session_dir):
+        var dir := DirAccess.open(session_dir)
+        if dir != null:
+            dir.list_dir_begin()
+            var has_children := false
+            var name := dir.get_next()
+            while name != "":
+                if name != "." and name != "..":
+                    has_children = true
+                    break
+                name = dir.get_next()
+            dir.list_dir_end()
+            if not has_children:
+                DirAccess.remove_absolute(session_dir)
+    telemetry.free()
