@@ -67,7 +67,7 @@ func advance_turn() -> void:
 
 func set_competence_allocations(allocations: Dictionary) -> Dictionary:
     _ensure_slider_config_loaded()
-    var validation := _validate_allocations(allocations, true)
+    var validation: Dictionary = _validate_allocations(allocations, true)
     if not validation.get("success", false):
         return validation
 
@@ -90,7 +90,7 @@ func set_competence_allocations(allocations: Dictionary) -> Dictionary:
     }
 
 func request_competence_cost(costs: Dictionary, context: Dictionary = {}) -> Dictionary:
-    var sanitised := _sanitize_competence_cost(costs)
+    var sanitised: Dictionary = _sanitize_competence_cost(costs)
     if not sanitised.get("success", false):
         return sanitised
 
@@ -102,7 +102,7 @@ func request_competence_cost(costs: Dictionary, context: Dictionary = {}) -> Dic
             "remaining": _competence_allocations.duplicate(true),
         }
 
-    var deficits := _competence_deficits(filtered)
+    var deficits: Dictionary = _competence_deficits(filtered)
     if not deficits.is_empty():
         return {
             "success": false,
@@ -463,7 +463,7 @@ func _default_allocations_for_budget(budget: float) -> Dictionary:
     var base_map: Dictionary = {}
     var total: float = 0.0
     for category in COMPETENCE_CATEGORIES:
-        var config := _get_slider_config(category)
+        var config: Dictionary = _get_slider_config(category)
         var base_value := max(float(config.get("base_allocation", DEFAULT_SLIDER_BASE.get(category, budget))), 0.0)
         base_map[category] = base_value
         total += base_value
@@ -498,7 +498,7 @@ func _serialise_inertia_state() -> Dictionary:
     var report: Dictionary = {}
     for category in COMPETENCE_CATEGORIES:
         var state: Dictionary = _inertia_state.get(category, {})
-        var config := _get_slider_config(category)
+        var config: Dictionary = _get_slider_config(category)
         report[category] = {
             "turns_remaining": int(state.get("turns_remaining", 0)),
             "spent_this_turn": float(state.get("spent_this_turn", 0.0)),
@@ -515,7 +515,7 @@ func _clamp_and_snap(category: String, value: float) -> float:
     return snapped(_clamp_to_slider_bounds(category, value), 0.01)
 
 func _clamp_to_slider_bounds(category: String, value: float) -> float:
-    var config := _get_slider_config(category)
+    var config: Dictionary = _get_slider_config(category)
     var min_value := float(config.get("min_allocation", 0.0))
     var max_value := float(config.get("max_allocation", min_value))
     if max_value < min_value:

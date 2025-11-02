@@ -1365,20 +1365,22 @@ func _process_feedback_queue() -> void:
         return
     if _pending_feedback_pitches.is_empty():
         return
-    var playback := _ensure_feedback_playback()
+    var playback: AudioStreamGeneratorPlayback = _ensure_feedback_playback()
     if playback == null:
-        _pending_feedback_pitches.clear()
+        if not _feedback_flush_scheduled:
+            _feedback_flush_scheduled = true
+            call_deferred("_process_feedback_queue")
         return
     if feedback_player.playing:
         feedback_player.stop()
-    if playback.active:
         playback.stop()
-        if playback.active:
-            _feedback_flush_scheduled = true
-            call_deferred("_process_feedback_queue")
+        if feedback_player.playing:
+            if not _feedback_flush_scheduled:
+                _feedback_flush_scheduled = true
+                call_deferred("_process_feedback_queue")
             return
     playback.clear_buffer()
-    var pitch: float = _pending_feedback_pitches.pop_front()
+    var pitch: float = float(_pending_feedback_pitches.pop_front())
     _synth_feedback_tone(playback, pitch)
     feedback_player.play()
     if not _pending_feedback_pitches.is_empty():
@@ -1395,6 +1397,7 @@ func _ensure_feedback_playback() -> AudioStreamGeneratorPlayback:
         feedback_player.stream = _feedback_generator
     if not feedback_player.playing:
         feedback_player.play()
+        return null
     var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
         return playback

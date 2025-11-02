@@ -62,7 +62,7 @@ func _refresh_catalog() -> void:
     for entry_variant in data_loader.list_formations():
         if not (entry_variant is Dictionary):
             continue
-        var entry: Dictionary = (entry_variant as Dictionary)
+        var entry: Dictionary = entry_variant
         var formation_id := str(entry.get("id", ""))
         if formation_id.is_empty():
             continue
@@ -79,15 +79,15 @@ func _refresh_catalog() -> void:
     for unit_variant in data_loader.list_units():
         if not (unit_variant is Dictionary):
             continue
-        var unit: Dictionary = (unit_variant as Dictionary)
+        var unit: Dictionary = unit_variant
         var unit_id := str(unit.get("id", ""))
         if unit_id.is_empty():
             continue
-        var formations: Array = []
+        var formations: Array[String] = []
         for formation_variant in data_loader.list_formations_for_unit(unit_id):
             if not (formation_variant is Dictionary):
                 continue
-            var formation: Dictionary = (formation_variant as Dictionary)
+            var formation: Dictionary = formation_variant
             var formation_id := str(formation.get("id", ""))
             if formation_id.is_empty() or formations.has(formation_id):
                 continue
@@ -100,7 +100,8 @@ func _refresh_catalog() -> void:
 func _sync_with_combat() -> void:
     if combat_system == null:
         return
-    for unit_id_variant in _unit_catalog.keys():
+    var catalog_keys: Array = _unit_catalog.keys()
+    for unit_id_variant in catalog_keys:
         var unit_id := str(unit_id_variant)
         var current := combat_system.get_unit_formation(unit_id)
         _update_unit_status(unit_id, current, "sync")
@@ -117,8 +118,8 @@ func _on_elan_updated(payload: Dictionary) -> void:
 func _on_turn_started(turn_number: int) -> void:
     _current_turn = turn_number
     var updated := false
-    var keys := _unit_inertia.keys()
-    for unit_id_variant in keys:
+    var inertia_keys: Array = _unit_inertia.keys()
+    for unit_id_variant in inertia_keys:
         var unit_id := str(unit_id_variant)
         var state_variant: Variant = _unit_inertia.get(unit_id, {})
         var state: Dictionary = {}
@@ -255,7 +256,7 @@ func _update_unit_status(unit_id: String, formation_id: String, reason: String, 
     if inertia_state_variant is Dictionary:
         inertia_state = (inertia_state_variant as Dictionary)
     var turns_remaining := max(int(inertia_state.get("turns_remaining", 0)), 0)
-    var available_formations := _get_available_formations(unit_id)
+    var available_formations: Array = _get_available_formations(unit_id)
     var status := {
         "unit_id": unit_id,
         "unit_name": str(unit_info.get("name", unit_id)),

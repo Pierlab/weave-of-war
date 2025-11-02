@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-05 — Réparé les parse errors Godot apparus au démarrage : `FormationOverlay` s'appuie désormais sur
+  `ThemeDB.fallback_font`, adopte les signatures `draw_string*` 4.x et typifie ses caches, `TurnManager`/`FormationSystem`/`EspionageSystem`
+  explicitent leurs dictionnaires/tableaux (y compris la connexion `assistant_order_packet`), et la HUD retarde la synthèse audio
+  jusqu'à ce que le playback soit prêt pour supprimer les erreurs `AudioStreamPlayer`. README/CHANGELOG/mission reflètent les correctifs ;
+  les commandes Godot headless restent bloquées faute de binaire provisionné dans ce conteneur.
 - 2026-01-04 — Neutralisé la vague de parse errors Godot 4.6 en typant explicitement les chaînes/flottants entiers utilisés par
   `AssistantAIAutoload`, la carte (`Map`) et l'overlay debug, tout en élargissant la propriété `formation_system` du
   `GameManager` à `Node` le temps que le cache de classes se recharge. Les warnings-as-errors "Variant inferred" et "Could not

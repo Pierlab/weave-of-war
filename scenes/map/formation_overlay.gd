@@ -47,9 +47,7 @@ func _ready() -> void:
     z_index = 30
     visible = true
     set_process(false)
-    _font = get_theme_default_font()
-    if _font == null:
-        _font = ThemeDB.fallback_font
+    _font = ThemeDB.fallback_font
     _acquire_sources()
 
 func _exit_tree() -> void:
@@ -90,7 +88,10 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
     for unit_id in _unit_tokens.keys():
-        var token: Dictionary = _unit_tokens.get(unit_id, {})
+        var token_variant: Variant = _unit_tokens.get(unit_id, {})
+        var token: Dictionary = {}
+        if token_variant is Dictionary:
+            token = token_variant
         var position: Vector2 = token.get("position", Vector2.ZERO)
         var posture := str(token.get("posture", ""))
         var base_color := posture_color(posture)
@@ -109,16 +110,50 @@ func _draw() -> void:
                 var lock_text := str(turns_remaining)
                 var lock_size := _font.get_string_size(lock_text, HORIZONTAL_ALIGNMENT_CENTER, -1.0, _lock_font_size)
                 var lock_pos := position + Vector2(-lock_size.x / 2.0, TOKEN_RADIUS + lock_size.y + 2.0)
-                draw_string_outline(_font, lock_pos, lock_text, 1, Color(0.0, 0.0, 0.0, 0.85), HORIZONTAL_ALIGNMENT_LEFT, -1.0, _lock_font_size)
-                draw_string(_font, lock_pos, lock_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, _lock_font_size, Color(0.95, 0.95, 0.95, 0.95))
+                draw_string_outline(
+                    _font,
+                    lock_pos,
+                    lock_text,
+                    alignment := HORIZONTAL_ALIGNMENT_LEFT,
+                    width := -1.0,
+                    font_size := _lock_font_size,
+                    outline_size := 1,
+                    modulate := Color(0.0, 0.0, 0.0, 0.85),
+                )
+                draw_string(
+                    _font,
+                    lock_pos,
+                    lock_text,
+                    alignment := HORIZONTAL_ALIGNMENT_LEFT,
+                    width := -1.0,
+                    font_size := _lock_font_size,
+                    modulate := Color(0.95, 0.95, 0.95, 0.95),
+                )
         var label := str(token.get("label", ""))
         if label != "" and _font:
             var text_size := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1.0, _font_size)
             var ascent := _font.get_ascent(_font_size)
             var label_pos := position + Vector2(-text_size.x / 2.0, text_size.y / 2.0)
             label_pos.y += (ascent - text_size.y)
-            draw_string_outline(_font, label_pos, label, 2, Color(0.0, 0.0, 0.0, 0.85), HORIZONTAL_ALIGNMENT_LEFT, -1.0, _font_size)
-            draw_string(_font, label_pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, _font_size, Color(1.0, 1.0, 1.0, 0.95))
+            draw_string_outline(
+                _font,
+                label_pos,
+                label,
+                alignment := HORIZONTAL_ALIGNMENT_LEFT,
+                width := -1.0,
+                font_size := _font_size,
+                outline_size := 2,
+                modulate := Color(0.0, 0.0, 0.0, 0.85),
+            )
+            draw_string(
+                _font,
+                label_pos,
+                label,
+                alignment := HORIZONTAL_ALIGNMENT_LEFT,
+                width := -1.0,
+                font_size := _font_size,
+                modulate := Color(1.0, 1.0, 1.0, 0.95),
+            )
 
 func _acquire_sources() -> void:
     if event_bus == null:
@@ -168,7 +203,10 @@ func _on_formation_status_updated(payload: Dictionary) -> void:
         if not (status_variant is Dictionary):
             continue
         var status: Dictionary = status_variant
-        var token := _unit_tokens.get(unit_id, {})
+        var token_variant: Variant = _unit_tokens.get(unit_id, {})
+        var token: Dictionary = {}
+        if token_variant is Dictionary:
+            token = token_variant
         token["unit_name"] = str(status.get("unit_name", unit_id.capitalize()))
         token["formation_id"] = str(status.get("formation_id", token.get("formation_id", "")))
         token["formation_name"] = str(status.get("formation_name", token.get("formation_name", "")))
@@ -180,10 +218,10 @@ func _on_formation_status_updated(payload: Dictionary) -> void:
         token["position"] = _unit_positions.get(unit_id, {}).get("position", Vector2.ZERO)
         token["label"] = _build_label(token)
         _unit_tokens[unit_id] = token
-    var incoming_ids := []
+    var incoming_ids: Array[String] = []
     for unit_id_variant in units.keys():
         incoming_ids.append(str(unit_id_variant))
-    var stored_ids := _unit_tokens.keys()
+    var stored_ids: Array = _unit_tokens.keys()
     for stored_id_variant in stored_ids:
         var stored_id := str(stored_id_variant)
         if not incoming_ids.has(stored_id):
@@ -250,12 +288,14 @@ func _rebuild_unit_positions() -> void:
         var key := class_id if not class_id.is_empty() else "_"
         if not groups.has(key):
             groups[key] = []
-        var group: Array = groups.get(key, [])
+        var group_variant: Variant = groups.get(key, [])
+        var group: Array = [] if not (group_variant is Array) else group_variant
         group.append(entry)
         groups[key] = group
     _unit_positions.clear()
     for class_id in groups.keys():
-        var group: Array = groups.get(class_id, [])
+        var group_variant: Variant = groups.get(class_id, [])
+        var group: Array = [] if not (group_variant is Array) else group_variant
         if group.is_empty():
             continue
         group.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
