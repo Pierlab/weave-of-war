@@ -81,7 +81,7 @@ func _merge_definitions(entries: Array) -> void:
     for entry in entries:
         if not (entry is Dictionary):
             continue
-        var id := str(entry.get("id", ""))
+        var id: String = str(entry.get("id", ""))
         if id.is_empty():
             continue
         var current_variant: Variant = _terrain_definitions.get(id, {})
@@ -99,17 +99,17 @@ func _apply_terrain_tiles(entries: Array) -> void:
     for entry in entries:
         if not (entry is Dictionary):
             continue
-        var q := int(entry.get("q", 0))
-        var r := int(entry.get("r", 0))
+        var q: int = int(entry.get("q", 0))
+        var r: int = int(entry.get("r", 0))
         var tile_id: String = _tile_id(q, r)
-        var terrain_id := str(entry.get("terrain", "plains"))
+        var terrain_id: String = str(entry.get("terrain", "plains"))
         var definition_variant: Variant = _terrain_definitions.get(terrain_id, {})
         var definition: Dictionary = {}
         if definition_variant is Dictionary:
             definition = (definition_variant as Dictionary)
-        var name := str(entry.get("name", definition.get("name", terrain_id.capitalize())))
-        var description := str(entry.get("description", definition.get("description", "")))
-        var movement := float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
+        var name: String = str(entry.get("name", definition.get("name", terrain_id.capitalize())))
+        var description: String = str(entry.get("description", definition.get("description", "")))
+        var movement: float = float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
         _set_tile_terrain(tile_id, terrain_id, name, description, movement)
         applied = true
     if not applied:
@@ -127,14 +127,14 @@ func _apply_default_terrain() -> void:
             continue
         var q: int = int(coords[0])
         var r: int = int(coords[1])
-        var terrain_id := str(keys[(q + r) % count])
+        var terrain_id: String = str(keys[(q + r) % count])
         var definition_variant: Variant = _terrain_definitions.get(terrain_id, {})
         var definition: Dictionary = {}
         if definition_variant is Dictionary:
             definition = (definition_variant as Dictionary)
-        var name := str(definition.get("name", terrain_id.capitalize()))
-        var description := str(definition.get("description", ""))
-        var movement := float(definition.get("movement_cost", 1.0))
+        var name: String = str(definition.get("name", terrain_id.capitalize()))
+        var description: String = str(definition.get("description", ""))
+        var movement: float = float(definition.get("movement_cost", 1.0))
         _set_tile_terrain(tile_id, terrain_id, name, description, movement)
 
 func _set_tile_terrain(tile_id: String, terrain_id: String, name: String, description: String, movement_cost: float) -> void:
@@ -165,10 +165,10 @@ func _on_fog_of_war_updated(payload: Dictionary) -> void:
     for entry in entries:
         if not (entry is Dictionary):
             continue
-        var tile_id := str(entry.get("tile_id", ""))
+        var tile_id: String = str(entry.get("tile_id", ""))
         if tile_id == "":
             continue
-        var visibility := clamp(float(entry.get("visibility", _default_visibility)), 0.0, 1.0)
+        var visibility: float = clamp(float(entry.get("visibility", _default_visibility)), 0.0, 1.0)
         _set_tile_visibility(tile_id, visibility)
         applied[tile_id] = true
     for tile_id in _tiles.keys():

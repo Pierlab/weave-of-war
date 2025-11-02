@@ -19,7 +19,7 @@ var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
 var combat_system: CombatSystem
 var espionage_system: EspionageSystem
-var formation_system: FormationSystem
+var formation_system: Node
 
 var _core_systems_initialised: bool = false
 
@@ -149,7 +149,7 @@ func _build_terrain_lookup(payload: Dictionary) -> Dictionary:
         var descriptor: Dictionary = _build_tile_descriptor(entry, definitions)
         if descriptor.is_empty():
             continue
-        var tile_id := str(descriptor.get("tile_id", ""))
+        var tile_id: String = str(descriptor.get("tile_id", ""))
         if tile_id.is_empty():
             continue
         lookup[tile_id] = descriptor
@@ -171,7 +171,7 @@ func _index_terrain_definitions(entries: Array) -> Dictionary:
             continue
         if str(entry.get("type", "")) != "definition":
             continue
-        var definition_id := str(entry.get("id", ""))
+        var definition_id: String = str(entry.get("id", ""))
         if definition_id.is_empty():
             continue
         definitions[definition_id] = {
@@ -187,17 +187,17 @@ func _build_tile_descriptor(entry: Dictionary, definitions: Dictionary) -> Dicti
     if str(entry.get("type", "")) != "tile":
         return {}
 
-    var q := int(entry.get("q", 0))
-    var r := int(entry.get("r", 0))
-    var tile_id := str(entry.get("id", "%d,%d" % [q, r]))
+    var q: int = int(entry.get("q", 0))
+    var r: int = int(entry.get("r", 0))
+    var tile_id: String = str(entry.get("id", "%d,%d" % [q, r]))
     if tile_id.is_empty():
         tile_id = "%d,%d" % [q, r]
 
-    var terrain_id := str(entry.get("terrain", "plains"))
+    var terrain_id: String = str(entry.get("terrain", "plains"))
     var definition: Dictionary = definitions.get(terrain_id, {})
-    var name := str(entry.get("name", definition.get("name", terrain_id.capitalize())))
-    var description := str(entry.get("description", definition.get("description", "")))
-    var movement := float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
+    var name: String = str(entry.get("name", definition.get("name", terrain_id.capitalize())))
+    var description: String = str(entry.get("description", definition.get("description", "")))
+    var movement: float = float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
 
     return {
         "tile_id": tile_id,

@@ -52,20 +52,20 @@ func _on_order_issued(payload: Dictionary) -> void:
     if _data_loader == null:
         _data_loader = DATA_LOADER.get_instance()
 
-    var order_id := str(payload.get("order_id", payload.get("id", "")))
+    var order_id: String = str(payload.get("order_id", payload.get("id", "")))
     var order_data: Dictionary = {}
     if _data_loader:
         var order_variant: Variant = _data_loader.get_order(order_id)
         if order_variant is Dictionary:
             order_data = (order_variant as Dictionary)
-    var intention := str(order_data.get("intention", "unknown"))
-    var signal_strength := float(order_data.get("intel_profile", {}).get("signal_strength", 0.4))
+    var intention: String = str(order_data.get("intention", "unknown"))
+    var signal_strength: float = float(order_data.get("intel_profile", {}).get("signal_strength", 0.4))
     var pillar_weights_variant: Variant = order_data.get("pillar_weights", {})
     var pillar_weights: Dictionary = {}
     if pillar_weights_variant is Dictionary:
         pillar_weights = (pillar_weights_variant as Dictionary)
-    var competence_alignment := _competence_alignment(pillar_weights)
-    var adjusted_confidence := clamp(signal_strength * competence_alignment, 0.1, 0.95)
+    var competence_alignment: float = _competence_alignment(pillar_weights)
+    var adjusted_confidence: float = clamp(signal_strength * competence_alignment, 0.1, 0.95)
     var enriched_order: Dictionary = payload.duplicate(true)
     enriched_order["order_id"] = order_id
     enriched_order["intention"] = intention
@@ -127,13 +127,13 @@ func _on_competence_reallocated(payload: Dictionary) -> void:
 func _on_data_ready(_payload: Dictionary) -> void:
     if _data_loader == null:
         _data_loader = DATA_LOADER.get_instance()
-    var cache_ready := _data_loader != null and _data_loader.is_ready()
+    var cache_ready: bool = _data_loader != null and _data_loader.is_ready()
     print("[Autoload] AssistantAIAutoload observed data_loader_ready (cache_ready: %s)" % ("true" if cache_ready else "false"))
 
 func _on_espionage_ping(payload: Dictionary) -> void:
     if payload.is_empty():
         return
-    var reasoning := _build_espionage_reasoning(payload)
+    var reasoning: Dictionary = _build_espionage_reasoning(payload)
     if not reasoning.is_empty():
         _record_reasoning("espionage", reasoning)
 
@@ -145,7 +145,7 @@ func _on_logistics_update(payload: Dictionary) -> void:
 func _on_logistics_break(payload: Dictionary) -> void:
     if payload.is_empty():
         return
-    var reasoning := _build_logistics_reasoning(payload)
+    var reasoning: Dictionary = _build_logistics_reasoning(payload)
     if not reasoning.is_empty():
         _record_reasoning("logistics", reasoning)
 
@@ -188,11 +188,11 @@ func _record_reasoning(domain: String, entry: Dictionary) -> void:
     _reasoning_traces[domain] = history
 
 func _record_order_reasoning(order: Dictionary, order_data: Dictionary, adjusted_confidence: float, base_confidence: float) -> void:
-    var order_id := str(order.get("order_id", order.get("id", "")))
-    var target := str(order.get("target", order.get("target_hex", "frontline")))
-    var intention := str(order.get("intention", "unknown"))
-    var competence_alignment := float(order.get("competence_alignment", 1.0))
-    var elan_cost := float(order.get("base_elan_cost", order.get("cost", order_data.get("base_elan_cost", 0.0))))
+    var order_id: String = str(order.get("order_id", order.get("id", "")))
+    var target: String = str(order.get("target", order.get("target_hex", "frontline")))
+    var intention: String = str(order.get("intention", "unknown"))
+    var competence_alignment: float = float(order.get("competence_alignment", 1.0))
+    var elan_cost: float = float(order.get("base_elan_cost", order.get("cost", order_data.get("base_elan_cost", 0.0))))
     var pillar_weights_variant: Variant = order.get("pillar_weights", {})
     var pillar_weights: Dictionary = {}
     if pillar_weights_variant is Dictionary:
@@ -200,7 +200,7 @@ func _record_order_reasoning(order: Dictionary, order_data: Dictionary, adjusted
     var competence_cost: Dictionary = {}
     if order.has("competence_cost") and order.get("competence_cost") is Dictionary:
         competence_cost = (order.get("competence_cost") as Dictionary).duplicate(true)
-    var reasoning := {
+    var reasoning: Dictionary = {
         "timestamp": Time.get_ticks_msec(),
         "order_id": order_id,
         "target": target,
@@ -218,14 +218,14 @@ func _record_order_reasoning(order: Dictionary, order_data: Dictionary, adjusted
     _record_reasoning("orders", reasoning)
 
 func _build_espionage_reasoning(payload: Dictionary) -> Dictionary:
-    var target := str(payload.get("target", payload.get("order_id", "")))
+    var target: String = str(payload.get("target", payload.get("order_id", "")))
     if target.is_empty():
         target = "unknown"
-    var confidence := snapped(float(payload.get("confidence", 0.0)), 0.01)
-    var detection_risk := snapped(float(payload.get("noise", 0.0)), 0.01)
-    var counter_intel := snapped(float(payload.get("counter_intel_after", payload.get("counter_intel", 0.0))), 0.01)
-    var recommendation := _recommend_espionage_follow_up(payload, confidence, counter_intel)
-    var reasoning := {
+    var confidence: float = snapped(float(payload.get("confidence", 0.0)), 0.01)
+    var detection_risk: float = snapped(float(payload.get("noise", 0.0)), 0.01)
+    var counter_intel: float = snapped(float(payload.get("counter_intel_after", payload.get("counter_intel", 0.0))), 0.01)
+    var recommendation: String = _recommend_espionage_follow_up(payload, confidence, counter_intel)
+    var reasoning: Dictionary = {
         "timestamp": Time.get_ticks_msec(),
         "target": target,
         "success": bool(payload.get("success", false)),
@@ -241,13 +241,13 @@ func _build_espionage_reasoning(payload: Dictionary) -> Dictionary:
     return reasoning
 
 func _build_logistics_reasoning(payload: Dictionary) -> Dictionary:
-    var alert_type := str(payload.get("type", ""))
-    var location := ""
+    var alert_type: String = str(payload.get("type", ""))
+    var location: String = ""
     if payload.has("tile_id"):
         location = str(payload.get("tile_id", ""))
     elif payload.has("route_id"):
         location = str(payload.get("route_id", ""))
-    var entry := {
+    var entry: Dictionary = {
         "timestamp": Time.get_ticks_msec(),
         "type": alert_type,
         "location": location,
@@ -257,7 +257,7 @@ func _build_logistics_reasoning(payload: Dictionary) -> Dictionary:
         "weather_id": str(payload.get("weather_id", _last_logistics_payload.get("weather_id", ""))),
         "recommendation": _recommend_logistics_follow_up(alert_type, payload),
     }
-    var context := _logistics_context_for_location(alert_type, location)
+    var context: Dictionary = _logistics_context_for_location(alert_type, location)
     if not context.is_empty():
         entry["context"] = context
     return entry

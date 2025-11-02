@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-04 — Neutralisé la vague de parse errors Godot 4.6 en typant explicitement les chaînes/flottants entiers utilisés par
+  `AssistantAIAutoload`, la carte (`Map`) et l'overlay debug, tout en élargissant la propriété `formation_system` du
+  `GameManager` à `Node` le temps que le cache de classes se recharge. Les warnings-as-errors "Variant inferred" et "Could not
+  find type FormationSystem" ne bloquent plus le démarrage. Les commandes Godot headless restent bloquées faute de binaire
+  provisionné dans ce conteneur.
 - 2026-01-03 — Ajouté un panneau "Télémetrie" filtrable dans l'overlay debug, alimenté par le nouveau signal `Telemetry.event_logged`, avec statut de persistance, rafraîchissement manuel et copie du chemin de session pour faciliter les playtests checklist 53. Les commandes Godot headless restent bloquées faute de binaire provisionné dans ce conteneur.
 - 2026-01-02 — Ajouté des traces de raisonnement Assistant AI couvrant les ordres, les recommandations espionnage et les alertes logistiques : la debug overlay expose les trois flux, un échantillon JSONL (`docs/logs/assistant_ai_reasoning_sample_2026-01-02.jsonl`) sert de référence analytics, et les docs/checklists/mission ont été mis à jour. Les commandes Godot headless restent bloquées faute de binaire provisionné dans ce conteneur.
 - 2025-12-31 — Persisté les buffers `TelemetryAutoload` sur disque via des fichiers JSONL `user://telemetry_sessions/telemetry_session_<horodatage>.jsonl`, ajouté un test gdUnit couvrant la persistance, et documenté le rituel dans le README, la checklist et le mission brief (checklist item 51 bouclé). Godot headless reste bloqué faute de binaire provisionné localement.

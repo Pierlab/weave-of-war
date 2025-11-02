@@ -88,6 +88,10 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Eliminated the latest Godot warnings-as-errors by adding explicit string/float/int hints across `AssistantAI`, the tactical
+  map visibility handlers, and the debug overlay formatters, and by relaxing the `GameManager` formation reference to `Node`
+  while the global `FormationSystem` class cache reloads. Startup no longer aborts on Variant inference or missing type
+  lookups.
 - Restored the tactical map, Assistant AI autoload, and HUD/formation panels by replacing Variant-inferred dictionary assigns
   with explicit casts across `AssistantAI`, `Map`, and `FormationSystem`, and by swapping UI theme overrides to
   `add_theme_constant_override` so Godot 4.6 no longer aborts with warnings-as-errors during startup.
