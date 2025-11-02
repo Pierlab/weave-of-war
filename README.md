@@ -94,6 +94,11 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - **Weather panel** — A compact colour-coded icon sits next to the logistics toggle, updating whenever `WeatherSystem` broadcasts
   a `weather_changed` payload. The label lists the current weather name and remaining turns while the tooltip summarises movement,
   logistics flow, intel noise, and Élan regeneration modifiers for fast reference.
+- **Panneau Télémetrie (overlay debug)** — Le nouvel onglet affiche un compteur d'événements et l'état de persistance (`activée` ou
+  `désactivée`), propose un filtre OptionButton pour cibler un événement précis ou la totalité du buffer, et rafraîchit la liste en
+  direct via le signal `Telemetry.event_logged`. Chaque entrée affiche un horodatage relatif (`t+X.XXXs`) et un aperçu JSON compact.
+  Les boutons `Actualiser` et `Copier chemin` permettent respectivement de forcer une relecture du buffer et d'envoyer le chemin du
+  fichier `user://telemetry_sessions/...` vers le presse-papiers pendant les playtests headless.
 - **Accessibility notes** — Élan totals show both absolute (`Élan : X.X / Y.Y`) and trend indicators (`↗` income, `↘` upkeep). A context-rich tooltip on the Élan label lists base cap, active doctrine bonus, turns spent at cap, and the decay scheduled for the next round so keyboard and screen-reader users receive the same warnings surfaced by colour shifts. All feedback strings avoid colour-only messaging by embedding the validation reason in text, while the paired positive/negative hues exceed WCAG contrast guidelines against the HUD's neutral background.
 
 ### Competence slider usage guide

@@ -2,10 +2,12 @@ extends Control
 
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
+const TELEMETRY := preload("res://scripts/core/telemetry.gd")
 const UTILS := preload("res://scripts/core/utils.gd")
 const MAX_ASSISTANT_LOG_ENTRIES := 10
 const MAX_INTEL_LOG_ENTRIES := 12
 const MAX_REASONING_LOG_ENTRIES := 12
+const MAX_TELEMETRY_LOG_ENTRIES := 120
 
 @onready var next_turn_button: Button = $PanelContainer/MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $PanelContainer/MarginContainer/VBoxContainer/ToggleLogisticsButton
@@ -15,10 +17,16 @@ const MAX_REASONING_LOG_ENTRIES := 12
 @onready var espionage_reasoning_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/EspionageReasoningLog
 @onready var logistics_reasoning_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/LogisticsReasoningLog
 @onready var intel_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/IntelSection/IntelLog
+@onready var telemetry_status_label: Label = $PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryStatus
+@onready var telemetry_event_filter: OptionButton = $PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryControls/TelemetryFilter
+@onready var telemetry_refresh_button: Button = $PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryControls/TelemetryRefreshButton
+@onready var telemetry_copy_session_path_button: Button = $PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryControls/CopySessionPathButton
+@onready var telemetry_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryLog
 
 var event_bus: EventBus
 var assistant_ai: AssistantAI
 var data_loader: DataLoader
+var telemetry: Telemetry
 var _assistant_packets: Array[Dictionary] = []
 var _intel_events: Array[Dictionary] = []
 var _reasoning_history: Dictionary = {
@@ -26,6 +34,7 @@ var _reasoning_history: Dictionary = {
     "espionage": [],
     "logistics": [],
 }
+var _selected_telemetry_event: StringName = StringName("")
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -52,12 +61,18 @@ func _ready() -> void:
     else:
         _refresh_terrain_tooltip([], [])
 
+    telemetry = TELEMETRY.get_instance()
+    if telemetry == null:
+        await get_tree().process_frame
+        telemetry = TELEMETRY.get_instance()
+
     if next_turn_button:
         next_turn_button.pressed.connect(_on_next_turn_pressed)
     if toggle_logistics_button:
         toggle_logistics_button.pressed.connect(_on_toggle_logistics_pressed)
     if spawn_unit_button:
         spawn_unit_button.pressed.connect(_on_spawn_unit_pressed)
+    _initialise_telemetry_section()
 
     if event_bus:
         event_bus.logistics_toggled.connect(_on_logistics_toggled)
@@ -366,3 +381,174 @@ func _refresh_terrain_tooltip(definitions: Array, tiles: Array) -> void:
     if toggle_logistics_button == null:
         return
     toggle_logistics_button.tooltip_text = UTILS.build_terrain_tooltip(definitions, tiles)
+
+func _initialise_telemetry_section() -> void:
+    if telemetry_event_filter:
+        telemetry_event_filter.item_selected.connect(_on_telemetry_event_selected)
+    if telemetry_refresh_button:
+        telemetry_refresh_button.pressed.connect(_on_telemetry_refresh_pressed)
+    if telemetry_copy_session_path_button:
+        telemetry_copy_session_path_button.pressed.connect(_on_copy_session_path_pressed)
+
+    _rebuild_telemetry_event_filter()
+    _refresh_telemetry_status()
+    _refresh_telemetry_log()
+
+    if telemetry and not telemetry.event_logged.is_connected(_on_telemetry_event_logged):
+        telemetry.event_logged.connect(_on_telemetry_event_logged)
+
+func _rebuild_telemetry_event_filter() -> void:
+    if telemetry_event_filter == null:
+        return
+
+    var previous := _selected_telemetry_event
+    telemetry_event_filter.clear()
+    telemetry_event_filter.add_item("Tous les événements")
+    telemetry_event_filter.set_item_metadata(0, StringName(""))
+
+    var event_names: Array[StringName] = []
+    if telemetry:
+        event_names = telemetry.list_event_names()
+    var target_index := 0
+    var index := 1
+    for event_name in event_names:
+        telemetry_event_filter.add_item(String(event_name))
+        telemetry_event_filter.set_item_metadata(index, event_name)
+        if event_name == previous:
+            target_index = index
+        index += 1
+
+    telemetry_event_filter.select(target_index)
+    var metadata: Variant = telemetry_event_filter.get_item_metadata(target_index)
+    if metadata is StringName:
+        _selected_telemetry_event = metadata
+    else:
+        _selected_telemetry_event = StringName("")
+
+func _refresh_telemetry_status(buffer_size: int = -1) -> void:
+    if telemetry_status_label == null:
+        return
+
+    if telemetry == null:
+        telemetry_status_label.text = "Télémetrie indisponible."
+        telemetry_status_label.tooltip_text = "Aucun autoload détecté."
+        if telemetry_copy_session_path_button:
+            telemetry_copy_session_path_button.disabled = true
+            telemetry_copy_session_path_button.tooltip_text = "Aucun fichier de session actif."
+        return
+
+    var total := buffer_size if buffer_size >= 0 else telemetry.get_buffer().size()
+    var persistence_label := "activée" if telemetry.is_persistence_enabled() else "désactivée"
+    var session_path := telemetry.get_session_file_path()
+    telemetry_status_label.text = "Événements : %d · Persistance %s" % [total, persistence_label]
+    telemetry_status_label.tooltip_text = session_path if not session_path.is_empty() else "Session non persistée."
+
+    if telemetry_copy_session_path_button:
+        telemetry_copy_session_path_button.disabled = session_path.is_empty()
+        telemetry_copy_session_path_button.tooltip_text = session_path if not session_path.is_empty() else "Aucun fichier de session actif."
+
+func _refresh_telemetry_log() -> void:
+    if telemetry_log == null:
+        return
+    telemetry_log.clear()
+
+    if telemetry == null:
+        telemetry_log.append_text("La télémétrie n'est pas initialisée.\n")
+        return
+
+    var entries := _collect_filtered_telemetry_entries()
+
+    if entries.is_empty():
+        telemetry_log.append_text("Aucun événement enregistré pour ce filtre.\n")
+        return
+
+    for entry in entries:
+        if not (entry is Dictionary):
+            continue
+        var line := _format_telemetry_entry(entry as Dictionary)
+        if line.is_empty():
+            continue
+        telemetry_log.append_text("%s\n" % line)
+
+    var line_count := telemetry_log.get_line_count()
+    if line_count > 0:
+        telemetry_log.scroll_to_line(line_count - 1)
+
+func _collect_filtered_telemetry_entries() -> Array:
+    if telemetry == null:
+        return []
+
+    var entries: Array = []
+    if _selected_telemetry_event == StringName(""):
+        entries = telemetry.get_buffer()
+    else:
+        entries = telemetry.get_history(_selected_telemetry_event)
+
+    if entries.size() > MAX_TELEMETRY_LOG_ENTRIES:
+        entries = entries.slice(entries.size() - MAX_TELEMETRY_LOG_ENTRIES, entries.size())
+    return entries
+
+func _format_telemetry_entry(entry: Dictionary) -> String:
+    var event_name := String(entry.get("name", ""))
+    var timestamp := int(entry.get("timestamp", 0))
+    var payload_variant: Variant = entry.get("payload", {})
+    var payload_preview := _format_payload_preview(payload_variant)
+    var parts: Array[String] = []
+    parts.append("%s — %s" % [_format_timestamp(timestamp), event_name if not event_name.is_empty() else "(inconnu)"])
+    if not payload_preview.is_empty():
+        parts.append(payload_preview)
+    return " | ".join(parts)
+
+func _format_payload_preview(payload: Variant) -> String:
+    if payload == null:
+        return ""
+    if payload is Dictionary or payload is Array:
+        var json := JSON.stringify(payload)
+        if json.length() > 220:
+            json = "%s…" % json.substr(0, 220)
+        return json
+    return String(payload)
+
+func _format_timestamp(timestamp: int) -> String:
+    if timestamp <= 0:
+        return "t+0.000s"
+    return "t+%.3fs" % (float(timestamp) / 1000.0)
+
+func _on_telemetry_event_selected(index: int) -> void:
+    if telemetry_event_filter == null:
+        return
+    var metadata: Variant = telemetry_event_filter.get_item_metadata(index)
+    if metadata is StringName:
+        _selected_telemetry_event = metadata
+    else:
+        _selected_telemetry_event = StringName("")
+    _refresh_telemetry_log()
+
+func _on_telemetry_refresh_pressed() -> void:
+    _refresh_telemetry_status()
+    _refresh_telemetry_log()
+
+func _on_copy_session_path_pressed() -> void:
+    if telemetry == null:
+        return
+    var session_path := telemetry.get_session_file_path()
+    if session_path.is_empty():
+        return
+    DisplayServer.clipboard_set(session_path)
+
+func _on_telemetry_event_logged(event_name: StringName, _payload: Dictionary, _timestamp: int, buffer_size: int) -> void:
+    _refresh_telemetry_status(buffer_size)
+    if not _has_event_in_filter(event_name):
+        _rebuild_telemetry_event_filter()
+    if _selected_telemetry_event == StringName("") or _selected_telemetry_event == event_name:
+        _refresh_telemetry_log()
+
+func _has_event_in_filter(event_name: StringName) -> bool:
+    if telemetry_event_filter == null:
+        return false
+    var count := telemetry_event_filter.get_item_count()
+    for index in count:
+        var metadata: Variant = telemetry_event_filter.get_item_metadata(index)
+        if metadata is StringName and metadata == event_name:
+            return true
+    return false
