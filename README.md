@@ -79,6 +79,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - The HUD now primes the `AudioStreamPlayer` before fetching the generator playback handle and defers synthesis until the
   playback instance confirms it is ready, eliminating the startup `Player is inactive` errors seen when Godot attempted to queue
   tones before the stream entered an active state (notably on headless or freshly opened sessions).
+- The HUD now caches the active `AudioStreamGeneratorPlayback` reference as soon as the generator spins up so shutdown can stop
+  and drain the buffer without calling `get_stream_playback()` on an inactive player, preventing the lingering
+  `AudioStreamPlayer` "Player is inactive" warning when closing the scene.
 
 ### HUD UX copy & feedback
 - **HUD layout** — The left rail is now a tabbed container grouping the command controls, renseignement feed, competence sliders, formation management, and combat recap (`Commandement` / `Renseignements` / `Compétence` / `Formations` / `Dernier engagement`). Competence and formation panels sit inside scroll containers so long rosters remain accessible without overcrowding the viewport.

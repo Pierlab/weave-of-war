@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-02T14:42:11Z
+- Generated on: 2025-11-02T15:15:16Z
 - Branch: work
-- Commit when generated: c8d92b6eb0b58f177ff3950eb9699d7103f735f3
-- Subject: Merge pull request #98 from Pierlab/codex/fix-gdscript-parse-errors-at-startup
+- Commit when generated: e5cba6db08d0575ed9551c15be45de41271e2ce8
+- Subject: Merge pull request #99 from Pierlab/codex/fix-script-errors-at-game-launch
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 

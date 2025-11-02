@@ -88,6 +88,9 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Godot 4.6 now loads the tactical map without parse failures: `FormationOverlay` initialises its typed arrays via explicit
+  constructors so the script can be preloaded for the map overlay constant, and the HUD caches its generator playback reference
+  before stopping audio to avoid the lingering `AudioStreamPlayer` "Player is inactive" error during shutdown.
 - Restored Godot 4.6 compatibility for the tactical overlays and systems startup: `FormationOverlay` now relies on
   `ThemeDB.fallback_font`, uses the modern `draw_string*` signatures, and types its caches to keep warnings-as-errors quiet;
   `TurnManager`, `FormationSystem`, and `EspionageSystem` add explicit dictionary/array hints (including the

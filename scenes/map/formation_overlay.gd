@@ -218,7 +218,7 @@ func _on_formation_status_updated(payload: Dictionary) -> void:
         token["position"] = _unit_positions.get(unit_id, {}).get("position", Vector2.ZERO)
         token["label"] = _build_label(token)
         _unit_tokens[unit_id] = token
-    var incoming_ids: Array[String] = []
+    var incoming_ids: Array[String] = Array[String]()
     for unit_id_variant in units.keys():
         incoming_ids.append(str(unit_id_variant))
     var stored_ids: Array = _unit_tokens.keys()
@@ -356,7 +356,7 @@ static func abbreviate_label(source: String) -> String:
     if cleaned == "":
         return ""
     var parts := cleaned.split(" ", false)
-    var letters: PackedStringArray = []
+    var letters: PackedStringArray = PackedStringArray()
     for part in parts:
         if part == "":
             continue
