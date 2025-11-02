@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Telemetry sessions now persist to disk: `TelemetryAutoload` writes JSONL logs to `user://telemetry_sessions/telemetry_session_<timestamp>.jsonl`, updates include a persistence gdUnit test plus README/mission guidance to close checklist item 51.
 - Telemetry schema review and dashboard roadmap refresh: `docs/telemetry/dashboard_plan.md` now lists the full event matrix
   across readiness, command, logistics/weather, combat/formation, competence, and intel loops, alongside updated KPI seeds and
   dashboard sketches to guide Phase 7 analytics.

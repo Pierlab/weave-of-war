@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-31 — Persisté les buffers `TelemetryAutoload` sur disque via des fichiers JSONL `user://telemetry_sessions/telemetry_session_<horodatage>.jsonl`, ajouté un test gdUnit couvrant la persistance, et documenté le rituel dans le README, la checklist et le mission brief (checklist item 51 bouclé). Godot headless reste bloqué faute de binaire provisionné localement.
 - 2025-12-30 — Revu l'intégralité des schémas `TelemetryAutoload`, confirmé la duplication profonde des payloads et mis à jour
   `docs/telemetry/dashboard_plan.md` avec une matrice de champs (readiness, commandement, logistique/météo, combat/formation,
   compétence, renseignement) plus un plan KPI/dashboards Phase 7. CHECKLISTS item 50 et mission brief Phase 7 reflètent

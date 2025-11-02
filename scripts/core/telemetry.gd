@@ -8,10 +8,19 @@ static var _instance: Telemetry
 var _buffer: Array = []
 var _event_bus: EventBus
 var _history_by_event: Dictionary = {}
+var _session_file_path: String = ""
+var _session_id: String = ""
+var _persist_enabled := false
+var _persist_error_reported := false
+
+const SESSION_DIRECTORY := "user://telemetry_sessions"
+const SESSION_FILE_PREFIX := "telemetry_session"
+const SESSION_FILE_EXTENSION := ".jsonl"
 
 func _ready() -> void:
     _instance = self
     _event_bus = EVENT_BUS.get_instance()
+    _initialise_persistence()
     _connect_signals()
     var connected := _event_bus != null
     print("[Autoload] TelemetryAutoload ready (event_bus_connected: %s)" % ("true" if connected else "false"))
@@ -32,6 +41,8 @@ func log_event(name: StringName, payload: Dictionary = {}) -> void:
     history.append(entry)
     _history_by_event[event_key] = history
 
+    _persist_entry(entry)
+
 func get_buffer() -> Array:
     return _buffer.duplicate(true)
 
@@ -45,6 +56,12 @@ func get_history(event_name: StringName) -> Array:
 func clear() -> void:
     _buffer.clear()
     _history_by_event.clear()
+
+func get_session_file_path() -> String:
+    return _session_file_path
+
+func is_persistence_enabled() -> bool:
+    return _persist_enabled
 
 func _connect_signals() -> void:
     if _event_bus == null:
@@ -75,6 +92,111 @@ func _capture_event(payload, event_name: StringName) -> void:
         log_event(event_name, payload)
     else:
         log_event(event_name, {"value": payload})
+
+func _initialise_persistence() -> void:
+    _persist_enabled = false
+    _persist_error_reported = false
+    _session_id = _build_session_id()
+    _session_file_path = ""
+
+    var base_dir := DirAccess.open("user://")
+    if base_dir == null:
+        _disable_persistence("TelemetryAutoload could not access user:// for session persistence.")
+        return
+
+    var relative_dir := SESSION_DIRECTORY.replace("user://", "")
+    var mkdir_error := base_dir.make_dir_recursive(relative_dir)
+    if mkdir_error != OK and mkdir_error != ERR_ALREADY_EXISTS:
+        _disable_persistence("TelemetryAutoload failed to create %s (error %s)." % [SESSION_DIRECTORY, error_string(mkdir_error)])
+        return
+
+    var file_name := "%s_%s%s" % [SESSION_FILE_PREFIX, _session_id, SESSION_FILE_EXTENSION]
+    _session_file_path = "%s/%s" % [SESSION_DIRECTORY, file_name]
+
+    var header_entry := {
+        "name": StringName("session_started"),
+        "payload": _build_session_metadata(),
+        "timestamp": Time.get_ticks_msec(),
+    }
+
+    if _write_entry_to_file(header_entry, true, true):
+        _persist_enabled = true
+    else:
+        _session_file_path = ""
+
+func _build_session_metadata() -> Dictionary:
+    var now := Time.get_datetime_dict_from_system()
+    var started_at := "%04d-%02d-%02dT%02d-%02d-%02d" % [
+        int(now.get("year", 0)),
+        int(now.get("month", 0)),
+        int(now.get("day", 0)),
+        int(now.get("hour", 0)),
+        int(now.get("minute", 0)),
+        int(now.get("second", 0)),
+    ]
+
+    var engine_info := Engine.get_version_info()
+    var engine_version := ""
+    if engine_info is Dictionary:
+        engine_version = str((engine_info as Dictionary).get("string", ""))
+
+    var project_version := ""
+    if ProjectSettings.has_setting("application/config/version"):
+        project_version = str(ProjectSettings.get_setting("application/config/version"))
+
+    return {
+        "session_id": _session_id,
+        "started_at": started_at,
+        "storage_path": _session_file_path,
+        "engine_version": engine_version,
+        "project_version": project_version,
+    }
+
+func _build_session_id() -> String:
+    var now := Time.get_datetime_dict_from_system()
+    return "%04d%02d%02d-%02d%02d%02d-%06d" % [
+        int(now.get("year", 0)),
+        int(now.get("month", 0)),
+        int(now.get("day", 0)),
+        int(now.get("hour", 0)),
+        int(now.get("minute", 0)),
+        int(now.get("second", 0)),
+        int(Time.get_ticks_usec() % 1000000),
+    ]
+
+func _persist_entry(entry: Dictionary) -> void:
+    if not _persist_enabled or _session_file_path.is_empty():
+        return
+
+    var to_store := entry.duplicate(true)
+    to_store["session_id"] = _session_id
+    _write_entry_to_file(to_store, false)
+
+func _write_entry_to_file(entry: Dictionary, overwrite: bool, force: bool = false) -> bool:
+    if (not force and not _persist_enabled) or _session_file_path.is_empty():
+        return false
+
+    var mode := FileAccess.WRITE if overwrite else FileAccess.READ_WRITE
+    var file := FileAccess.open(_session_file_path, mode)
+    var open_error := FileAccess.get_open_error()
+    if file == null or open_error != OK:
+        _disable_persistence("TelemetryAutoload failed to open %s (error %s)." % [_session_file_path, error_string(open_error)])
+        return false
+
+    if not overwrite:
+        file.seek_end()
+    file.store_line(JSON.stringify(entry))
+    file.flush()
+    file.close()
+    return true
+
+func _disable_persistence(message: String) -> void:
+    if _persist_error_reported:
+        return
+    _persist_error_reported = true
+    _persist_enabled = false
+    push_warning(message)
+
 
 func _on_combat_resolved(payload: Dictionary) -> void:
     var safe_payload := {

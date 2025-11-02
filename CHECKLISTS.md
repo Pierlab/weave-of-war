@@ -75,7 +75,7 @@ This checklist replaces the earlier milestone summary and expands every delivera
 
 ## Phase 7 — Telemetry, Analytics, and Assistant AI Insights
 50. [x] **Review telemetry schemas.** Cross-check all emitted events for schema consistency and update `docs/telemetry/dashboard_plan.md` with KPI dashboards. *(2025-12-30 — Audited every `TelemetryAutoload` serializer, documented the field matrix (readiness, command, logistics, combat, competence, intel) and refreshed the KPI/dashboard roadmap in `docs/telemetry/dashboard_plan.md`.)*
-51. [ ] **Persist telemetry buffers.** Extend `TelemetryAutoload` to persist session buffers (or stub) and document storage paths in README + mission brief.
+51. [x] **Persist telemetry buffers.** Extend `TelemetryAutoload` to persist session buffers (or stub) and document storage paths in README + mission brief. *(2025-12-31 — TelemetryAutoload now records every session to `user://telemetry_sessions/` as JSONL logs, updates the README with retrieval instructions, and notes the storage path plus persistence ritual in the mission brief.)*
 52. [ ] **Enhance Assistant AI logging.** Record reasoning traces for orders, espionage suggestions, and logistics alerts; provide sample logs.
 53. [ ] **Expose inspection tooling.** Add debug overlay panels or tooling to review telemetry buffers and assistant suggestions during playtests; capture screenshots.
 
