@@ -8,15 +8,15 @@ const FORMATION_OVERLAY := preload("res://scenes/map/formation_overlay.gd")
 const HexTileScene := preload("res://scenes/map/hex_tile.tscn")
 const HexTileScript := preload("res://scenes/map/hex_tile.gd")
 
-@export var columns := 10
-@export var rows := 10
+@export var columns: int = 10
+@export var rows: int = 10
 @export var hex_scene: PackedScene = HexTileScene
 
 var event_bus: EventBus
 var data_loader: DataLoader
 var _terrain_definitions: Dictionary = TERRAIN_DATA.get_default()
 var _tiles: Dictionary = {}
-var _default_visibility := 0.2
+var _default_visibility: float = 0.2
 var _formation_overlay: FormationOverlay
 
 func _ready() -> void:
@@ -54,12 +54,12 @@ func _generate_map() -> void:
     _tiles.clear()
     for q in range(columns):
         for r in range(rows):
-            var hex: Node2D = hex_scene.instantiate()
+            var hex: Node2D = hex_scene.instantiate() as Node2D
             if hex.has_method("set_axial"):
                 hex.set_axial(q, r)
             add_child(hex)
             hex.position = UTILS.axial_to_pixel(q, r)
-            var tile_id := _tile_id(q, r)
+            var tile_id: String = _tile_id(q, r)
             _tiles[tile_id] = hex
             if hex.has_method("apply_visibility"):
                 hex.apply_visibility(_default_visibility)
@@ -68,10 +68,10 @@ func _apply_terrain_from_data_loader() -> void:
     if data_loader == null:
         _apply_default_terrain()
         return
-    var definitions := data_loader.list_terrain_definitions()
+    var definitions: Array = data_loader.list_terrain_definitions()
     if definitions.size() > 0:
         _merge_definitions(definitions)
-    var tiles := data_loader.list_terrain_tiles()
+    var tiles: Array = data_loader.list_terrain_tiles()
     if tiles.size() > 0:
         _apply_terrain_tiles(tiles)
     else:
@@ -84,7 +84,10 @@ func _merge_definitions(entries: Array) -> void:
         var id := str(entry.get("id", ""))
         if id.is_empty():
             continue
-        var current: Dictionary = _terrain_definitions.get(id, {})
+        var current_variant: Variant = _terrain_definitions.get(id, {})
+        var current: Dictionary = {}
+        if current_variant is Dictionary:
+            current = current_variant
         _terrain_definitions[id] = {
             "name": str(entry.get("name", current.get("name", id.capitalize()))),
             "movement_cost": float(entry.get("movement_cost", current.get("movement_cost", 1.0))),
@@ -92,15 +95,18 @@ func _merge_definitions(entries: Array) -> void:
         }
 
 func _apply_terrain_tiles(entries: Array) -> void:
-    var applied := false
+    var applied: bool = false
     for entry in entries:
         if not (entry is Dictionary):
             continue
         var q := int(entry.get("q", 0))
         var r := int(entry.get("r", 0))
-        var tile_id := _tile_id(q, r)
+        var tile_id: String = _tile_id(q, r)
         var terrain_id := str(entry.get("terrain", "plains"))
-        var definition: Dictionary = _terrain_definitions.get(terrain_id, {})
+        var definition_variant: Variant = _terrain_definitions.get(terrain_id, {})
+        var definition: Dictionary = {}
+        if definition_variant is Dictionary:
+            definition = definition_variant
         var name := str(entry.get("name", definition.get("name", terrain_id.capitalize())))
         var description := str(entry.get("description", definition.get("description", "")))
         var movement := float(entry.get("movement_cost", definition.get("movement_cost", 1.0)))
@@ -110,9 +116,9 @@ func _apply_terrain_tiles(entries: Array) -> void:
         _apply_default_terrain()
 
 func _apply_default_terrain() -> void:
-    var keys := _terrain_definitions.keys()
+    var keys: Array = _terrain_definitions.keys()
     keys.sort()
-    var count := keys.size()
+    var count: int = keys.size()
     if count == 0:
         return
     for tile_id in _tiles.keys():
@@ -122,7 +128,10 @@ func _apply_default_terrain() -> void:
         var q: int = int(coords[0])
         var r: int = int(coords[1])
         var terrain_id := str(keys[(q + r) % count])
-        var definition: Dictionary = _terrain_definitions.get(terrain_id, {})
+        var definition_variant: Variant = _terrain_definitions.get(terrain_id, {})
+        var definition: Dictionary = {}
+        if definition_variant is Dictionary:
+            definition = definition_variant
         var name := str(definition.get("name", terrain_id.capitalize()))
         var description := str(definition.get("description", ""))
         var movement := float(definition.get("movement_cost", 1.0))
@@ -131,7 +140,7 @@ func _apply_default_terrain() -> void:
 func _set_tile_terrain(tile_id: String, terrain_id: String, name: String, description: String, movement_cost: float) -> void:
     if not _tiles.has(tile_id):
         return
-    var tile: Node = _tiles.get(tile_id)
+    var tile: Node = _tiles.get(tile_id) as Node
     if tile and tile.has_method("set_terrain"):
         tile.set_terrain({
             "id": terrain_id,
@@ -143,12 +152,15 @@ func _set_tile_terrain(tile_id: String, terrain_id: String, name: String, descri
 func _set_tile_visibility(tile_id: String, visibility: float) -> void:
     if not _tiles.has(tile_id):
         return
-    var tile: Node = _tiles.get(tile_id)
+    var tile: Node = _tiles.get(tile_id) as Node
     if tile and tile.has_method("apply_visibility"):
         tile.apply_visibility(visibility)
 
 func _on_fog_of_war_updated(payload: Dictionary) -> void:
-    var entries: Array = payload.get("visibility", payload.get("visibility_map", []))
+    var entries_variant: Variant = payload.get("visibility", payload.get("visibility_map", []))
+    var entries: Array = []
+    if entries_variant is Array:
+        entries = entries_variant
     var applied: Dictionary = {}
     for entry in entries:
         if not (entry is Dictionary):

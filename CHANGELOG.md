@@ -78,6 +78,8 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Hardened the Assistant AI, map, and HUD scripts with explicit type hints/casts so Godot no longer infers `Variant` for
+  dictionary payloads, restoring autoload startup and resolving the "Could not find type" errors surfaced during project load.
 - Corrected the combat resolution payload to store unit state dictionaries (attacker/defender blocks) instead of forcing them
   into an array, restoring Godot's typed parsing and allowing `GameManager` to instantiate `CombatSystem` without compile
   errors. The HUD feedback audio now primes its `AudioStreamPlayer` before requesting the generator playback to silence the

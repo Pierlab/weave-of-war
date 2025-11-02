@@ -42,13 +42,20 @@ func _on_order_issued(payload: Dictionary) -> void:
         _data_loader = DATA_LOADER.get_instance()
 
     var order_id := str(payload.get("order_id", payload.get("id", "")))
-    var order_data := _data_loader.get_order(order_id) if _data_loader else {}
+    var order_data: Dictionary = {}
+    if _data_loader:
+        var order_variant: Variant = _data_loader.get_order(order_id)
+        if order_variant is Dictionary:
+            order_data = (order_variant as Dictionary)
     var intention := str(order_data.get("intention", "unknown"))
     var signal_strength := float(order_data.get("intel_profile", {}).get("signal_strength", 0.4))
-    var pillar_weights: Dictionary = order_data.get("pillar_weights", {})
+    var pillar_weights_variant: Variant = order_data.get("pillar_weights", {})
+    var pillar_weights: Dictionary = {}
+    if pillar_weights_variant is Dictionary:
+        pillar_weights = (pillar_weights_variant as Dictionary)
     var competence_alignment := _competence_alignment(pillar_weights)
     var adjusted_confidence := clamp(signal_strength * competence_alignment, 0.1, 0.95)
-    var enriched_order := payload.duplicate(true)
+    var enriched_order: Dictionary = payload.duplicate(true)
     enriched_order["order_id"] = order_id
     enriched_order["intention"] = intention
     enriched_order["pillar_weights"] = pillar_weights
@@ -60,7 +67,7 @@ func _on_order_issued(payload: Dictionary) -> void:
     if not enriched_order.has("target") and not enriched_order.has("target_hex"):
         enriched_order["target"] = "frontline"
 
-    var intents := {}
+    var intents: Dictionary = {}
     intents[order_id] = {
         "intention": intention,
         "confidence": adjusted_confidence,
@@ -69,7 +76,7 @@ func _on_order_issued(payload: Dictionary) -> void:
         "target": enriched_order.get("target", enriched_order.get("target_hex", "")),
     }
 
-    var engagement := {
+    var engagement: Dictionary = {
         "engagement_id": "%s-%d" % [order_id if order_id != "" else "order", Time.get_ticks_msec()],
         "order_id": order_id,
         "attacker_unit_ids": enriched_order.get("unit_ids", []),
@@ -79,7 +86,7 @@ func _on_order_issued(payload: Dictionary) -> void:
         "reason": "assistant_prediction",
     }
 
-    var packet := {
+    var packet: Dictionary = {
         "orders": [enriched_order],
         "intents": intents,
         "expected_engagements": [engagement],
@@ -139,7 +146,7 @@ func _competence_ratio(category: String) -> float:
     return clamp(allocation / base_allocation, 0.2, 3.0)
 
 func _competence_alignment(pillar_weights: Dictionary) -> float:
-    var mapping := {
+    var mapping: Dictionary = {
         "position": _competence_ratio("logistics"),
         "impulse": _competence_ratio("tactics"),
         "information": _competence_ratio("strategy"),

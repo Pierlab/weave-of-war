@@ -278,8 +278,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   the singletons via the global scope.
 - When you pull structured data from dictionaries (doctrines, orders, etc.), provide explicit type hints instead of relying on
   `:=` inference. Godot 4.5 infers such values as `Variant`, which now triggers blocking parse errors. Inspect
-  `scripts/core/data_loader.gd`, `scripts/systems/elan_system.gd`, `scripts/systems/combat_system.gd`, and
-  `scripts/ui/hud_manager.gd` for the preferred explicit typing pattern, including casting results from helpers such as `clamp()`.
+  `scripts/core/assistant_ai.gd`, `scripts/core/data_loader.gd`, `scripts/systems/combat_system.gd`,
+  `scripts/systems/elan_system.gd`, `scenes/map/map.gd`, `scenes/map/hex_tile.gd`, and `scripts/ui/hud_manager.gd` for the
+  preferred explicit typing pattern, including casting results from helpers such as `clamp()`.
 
 ### Expected Windows startup warnings
 - **SDL controller mappings** — Godot surfaces `Unrecognized output string "misc2" in mapping` when newer Nintendo/Hori Switch
