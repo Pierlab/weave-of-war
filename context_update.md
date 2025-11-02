@@ -1,6 +1,10 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-06 — Réparé le preload de `FormationOverlay` en initialisant explicitement les tableaux typés (Godot 4.6 charge
+  désormais la carte sans parse error) et mémorisé le playback audio générateur pour que `_stop_feedback_stream()` vide le
+  buffer sans appeler `get_stream_playback()` sur un player inactif. README/CHANGELOG/mission reflètent le correctif ; les
+  commandes Godot headless restent bloquées faute de binaire provisionné dans ce conteneur.
 - 2026-01-05 — Réparé les parse errors Godot apparus au démarrage : `FormationOverlay` s'appuie désormais sur
   `ThemeDB.fallback_font`, adopte les signatures `draw_string*` 4.x et typifie ses caches, `TurnManager`/`FormationSystem`/`EspionageSystem`
   explicitent leurs dictionnaires/tableaux (y compris la connexion `assistant_order_packet`), et la HUD retarde la synthèse audio

@@ -46,6 +46,10 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Phase 0 findings
+- 2026-01-06 — Repris le correctif `FormationOverlay` pour Godot 4.6 : les tableaux typés sont maintenant initialisés via des
+  constructeurs explicites, ce qui permet au `Map` de précharger le script sans erreur, et la HUD mémorise le playback audio
+  générateur afin que `_stop_feedback_stream()` n'appelle plus `get_stream_playback()` lorsque le player est inactif (fin des
+  warnings "Player is inactive" à la fermeture). README, CHANGELOG et context_update détaillent la mise à jour.
 - 2026-01-05 — Stabilisé `FormationOverlay`, `TurnManager`, `FormationSystem` et `EspionageSystem` pour Godot 4.6 : fallback
   `ThemeDB` pour la police, signatures `draw_string*` 4.x et hints explicites sur les dictionnaires/tableaux (dont la connexion
   `assistant_order_packet`) suppriment les warnings-as-errors restants, tandis que la HUD attend désormais le playback audio avant

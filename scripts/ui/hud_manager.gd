@@ -108,6 +108,7 @@ var _elan_state: Dictionary = {
 }
 var _doctrine_state: Dictionary = {}
 var _feedback_generator: AudioStreamGenerator
+var _feedback_playback: AudioStreamGeneratorPlayback
 var _pending_feedback_pitches: Array = []
 var _feedback_flush_scheduled := false
 var _suppress_doctrine_selector_signal := false
@@ -1395,11 +1396,14 @@ func _ensure_feedback_playback() -> AudioStreamGeneratorPlayback:
         _feedback_generator.mix_rate = FEEDBACK_SAMPLE_RATE
         _feedback_generator.buffer_length = FEEDBACK_DURATION * 2.0
         feedback_player.stream = _feedback_generator
+        _feedback_playback = null
     if not feedback_player.playing:
         feedback_player.play()
+        _feedback_playback = null
         return null
     var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
     if playback is AudioStreamGeneratorPlayback:
+        _feedback_playback = playback
         return playback
     return null
 
@@ -1758,11 +1762,11 @@ func _stop_feedback_stream() -> void:
         return
     if feedback_player.playing:
         feedback_player.stop()
-    var playback: AudioStreamPlayback = feedback_player.get_stream_playback()
-    if playback is AudioStreamGeneratorPlayback:
-        playback.stop()
-        if not playback.active:
-            playback.clear_buffer()
+    if _feedback_playback and is_instance_valid(_feedback_playback):
+        _feedback_playback.stop()
+        if not _feedback_playback.active:
+            _feedback_playback.clear_buffer()
+    _feedback_playback = null
 
 func _exit_tree() -> void:
     _stop_feedback_stream()
