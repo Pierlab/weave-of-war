@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-09 — Corrected the `FormationOverlay` drawing helpers to drop trailing commas so Godot 4.5.1 stops throwing
+  `Parse Error: Could not preload resource script` when `map.gd` preloads the overlay. README/CHANGELOG/mission reflect the
+  compatibility fix; the headless Godot commands remain blocked because the binary is not provisioned in this container.
 - 2026-01-08 — Consolidé la compatibilité Godot 4.6 en typant les calculs flottants/booleans de `TurnManager`, `FormationSystem`
   et `EspionageSystem` pour éteindre les warnings-as-errors "Variant inferred", et la HUD remplace l'accès obsolète
   `AudioStreamGeneratorPlayback.active` par `is_active()` avant de vider le buffer afin de supprimer le crash runtime lors de la

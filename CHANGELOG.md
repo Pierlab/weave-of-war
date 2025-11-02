@@ -88,6 +88,9 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Godot 4.5.1 can once again preload the tactical formation overlay: the script's `draw_string*` calls drop their trailing
+  commas so older parser versions stop raising `Parse Error: Could not preload resource script` when `map.gd` instantiates the
+  overlay during startup.
 - Godot 4.6 startup no longer aborts on Variant inference or generator playback property lookups: the competence, formation,
   and espionage systems now annotate their arithmetic helpers with explicit float/bool hints, and the HUD swaps the deprecated
   `AudioStreamGeneratorPlayback.active` property for the supported `is_active()` guard so audio buffers clear without runtime

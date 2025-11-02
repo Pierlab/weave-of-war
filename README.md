@@ -29,6 +29,10 @@ c:\Users\plab7\Downloads\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64
 
 The logs above are mirrored in `errors.log` at the repository root to help future agents diagnose renderer/device warnings.
 
+> 2026-01-09 — The `FormationOverlay` script now avoids trailing commas in its `draw_*` calls so Godot 4.5.1 can preload it
+> without reporting `Parse Error: Could not preload resource script` when `map.gd` loads. Update to this revision if your
+> Windows editor still aborts while parsing the overlay.
+
 By default the project now opens a 1600×900 window (resizable) so the tactical map has more breathing room while keeping the left HUD readable. Adjust these values in `project.godot` if you need a different baseline.
 
 ## Core autoloads

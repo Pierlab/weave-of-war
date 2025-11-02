@@ -118,7 +118,7 @@ func _draw() -> void:
                     -1.0,
                     _lock_font_size,
                     1,
-                    Color(0.0, 0.0, 0.0, 0.85),
+                    Color(0.0, 0.0, 0.0, 0.85)
                 )
                 draw_string(
                     _font,
@@ -127,7 +127,7 @@ func _draw() -> void:
                     HORIZONTAL_ALIGNMENT_LEFT,
                     -1.0,
                     _lock_font_size,
-                    Color(0.95, 0.95, 0.95, 0.95),
+                    Color(0.95, 0.95, 0.95, 0.95)
                 )
         var label := str(token.get("label", ""))
         if label != "" and _font:
@@ -143,7 +143,7 @@ func _draw() -> void:
                 -1.0,
                 _font_size,
                 2,
-                Color(0.0, 0.0, 0.0, 0.85),
+                Color(0.0, 0.0, 0.0, 0.85)
             )
             draw_string(
                 _font,
@@ -152,7 +152,7 @@ func _draw() -> void:
                 HORIZONTAL_ALIGNMENT_LEFT,
                 -1.0,
                 _font_size,
-                Color(1.0, 1.0, 1.0, 0.95),
+                Color(1.0, 1.0, 1.0, 0.95)
             )
 
 func _acquire_sources() -> void:
