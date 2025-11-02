@@ -177,11 +177,11 @@ func _refresh_assistant_log() -> void:
         return
     assistant_log.clear()
     for packet in _assistant_packets:
-        var line := _format_assistant_packet(packet)
+        var line: String = _format_assistant_packet(packet)
         if line.is_empty():
             continue
         assistant_log.append_text("%s\n" % line)
-    var line_count := assistant_log.get_line_count()
+    var line_count: int = assistant_log.get_line_count()
     if line_count > 0:
         assistant_log.scroll_to_line(line_count - 1)
 
@@ -206,11 +206,11 @@ func _render_reasoning_log(target: RichTextLabel, entries: Variant, formatter: C
     for entry in array_entries:
         if not (entry is Dictionary):
             continue
-        var line := formatter.call(entry)
-        if line.is_empty():
+        var line_text: String = str(formatter.call(entry))
+        if line_text.is_empty():
             continue
-        target.append_text("%s\n" % line)
-    var line_count := target.get_line_count()
+        target.append_text("%s\n" % line_text)
+    var line_count: int = target.get_line_count()
     if line_count > 0:
         target.scroll_to_line(line_count - 1)
 
@@ -220,13 +220,13 @@ func _format_assistant_packet(packet: Dictionary) -> String:
         var order_entry: Variant = orders_variant[0]
         if order_entry is Dictionary:
             var order_dict: Dictionary = order_entry
-            var order_id := str(order_dict.get("order_id", order_dict.get("id", "")))
-            var order_name := str(order_dict.get("order_name", order_dict.get("name", order_id)))
-            var target_value := str(order_dict.get("target", order_dict.get("target_hex", "frontline")))
-            var cost_value := float(order_dict.get("cost", order_dict.get("base_elan_cost", 0.0)))
-            var intention := str(order_dict.get("intention", "unknown"))
+            var order_id: String = str(order_dict.get("order_id", order_dict.get("id", "")))
+            var order_name: String = str(order_dict.get("order_name", order_dict.get("name", order_id)))
+            var target_value: String = str(order_dict.get("target", order_dict.get("target_hex", "frontline")))
+            var cost_value: float = float(order_dict.get("cost", order_dict.get("base_elan_cost", 0.0)))
+            var intention: String = str(order_dict.get("intention", "unknown"))
             var intents_variant: Variant = packet.get("intents", {})
-            var confidence_percent := 0
+            var confidence_percent: int = 0
             if intents_variant is Dictionary and order_id != "":
                 var intent_entry: Variant = intents_variant.get(order_id, {})
                 if intent_entry is Dictionary:
@@ -235,17 +235,17 @@ func _format_assistant_packet(packet: Dictionary) -> String:
                         intention = str(intent_dict.get("intention", intention))
                     confidence_percent = roundi(float(intent_dict.get("confidence", 0.0)) * 100.0)
             var engagement_variant: Variant = packet.get("expected_engagements", [])
-            var engagement_id := ""
+            var engagement_id: String = ""
             if engagement_variant is Array and engagement_variant.size() > 0:
                 var engagement_entry: Variant = engagement_variant[0]
                 if engagement_entry is Dictionary:
                     engagement_id = str(engagement_entry.get("engagement_id", ""))
-            var formatted_target := target_value if target_value != "" else "frontline"
+            var formatted_target: String = target_value if target_value != "" else "frontline"
             if confidence_percent < 0:
                 confidence_percent = 0
             if confidence_percent > 100:
                 confidence_percent = 100
-            var parts := [
+            var parts: Array[String] = [
                 "%s (%s)" % [order_name, order_id if order_id != "" else "n/a"],
                 "→ %s" % formatted_target,
                 "Élan %.1f" % cost_value,
@@ -258,14 +258,14 @@ func _format_assistant_packet(packet: Dictionary) -> String:
     return ""
 
 func _format_order_reasoning(entry: Dictionary) -> String:
-    var order_id := str(entry.get("order_id", ""))
-    var target := str(entry.get("target", "frontline"))
-    var confidence_percent := roundi(float(entry.get("confidence", 0.0)) * 100.0)
-    var base_percent := roundi(float(entry.get("base_signal", 0.0)) * 100.0)
-    var alignment := float(entry.get("competence_alignment", 1.0))
-    var elan_cost := float(entry.get("elan_cost", 0.0))
-    var recommendation := str(entry.get("recommendation", ""))
-    var parts := [
+    var order_id: String = str(entry.get("order_id", ""))
+    var target: String = str(entry.get("target", "frontline"))
+    var confidence_percent: int = roundi(float(entry.get("confidence", 0.0)) * 100.0)
+    var base_percent: int = roundi(float(entry.get("base_signal", 0.0)) * 100.0)
+    var alignment: float = float(entry.get("competence_alignment", 1.0))
+    var elan_cost: float = float(entry.get("elan_cost", 0.0))
+    var recommendation: String = str(entry.get("recommendation", ""))
+    var parts: Array[String] = [
         "Ordre %s" % (order_id if order_id != "" else "(n/a)"),
         "→ %s" % (target if target != "" else "frontline"),
         "Confiance %d%% (base %d%%)" % [confidence_percent, base_percent],
@@ -273,9 +273,10 @@ func _format_order_reasoning(entry: Dictionary) -> String:
         "Élan %.1f" % elan_cost,
     ]
     if entry.has("competence_cost") and entry.get("competence_cost") is Dictionary:
-        var cost_parts: Array = []
-        for key in (entry.get("competence_cost") as Dictionary).keys():
-            cost_parts.append("%s %.1f" % [str(key), float((entry.get("competence_cost") as Dictionary).get(key, 0.0))])
+        var cost_parts: Array[String] = []
+        var competence_cost: Dictionary = entry.get("competence_cost")
+        for key in competence_cost.keys():
+            cost_parts.append("%s %.1f" % [str(key), float(competence_cost.get(key, 0.0))])
         if cost_parts.size() > 0:
             parts.append("Compétence %s" % ", ".join(cost_parts))
     if not recommendation.is_empty():
@@ -283,15 +284,15 @@ func _format_order_reasoning(entry: Dictionary) -> String:
     return " | ".join(parts)
 
 func _format_espionage_reasoning(entry: Dictionary) -> String:
-    var target := str(entry.get("target", "unknown"))
-    var confidence_percent := roundi(float(entry.get("confidence", 0.0)) * 100.0)
-    var detection_percent := roundi(float(entry.get("detection_risk", 0.0)) * 100.0)
-    var recommendation := str(entry.get("recommendation", ""))
-    var status := "Succès" if bool(entry.get("success", false)) else "Échec"
-    var intent := str(entry.get("intent", "unknown"))
-    var probe_strength := float(entry.get("probe_strength", 0.0))
-    var counter_intel := float(entry.get("counter_intel", 0.0))
-    var parts := [
+    var target: String = str(entry.get("target", "unknown"))
+    var confidence_percent: int = roundi(float(entry.get("confidence", 0.0)) * 100.0)
+    var detection_percent: int = roundi(float(entry.get("detection_risk", 0.0)) * 100.0)
+    var recommendation: String = str(entry.get("recommendation", ""))
+    var status: String = "Succès" if bool(entry.get("success", false)) else "Échec"
+    var intent: String = str(entry.get("intent", "unknown"))
+    var probe_strength: float = float(entry.get("probe_strength", 0.0))
+    var counter_intel: float = float(entry.get("counter_intel", 0.0))
+    var parts: Array[String] = [
         "%s — %s" % [status, target],
         "Confiance %d%%" % confidence_percent,
         "Détection %d%%" % detection_percent,
@@ -304,14 +305,14 @@ func _format_espionage_reasoning(entry: Dictionary) -> String:
     return " | ".join(parts)
 
 func _format_logistics_reasoning(entry: Dictionary) -> String:
-    var alert_type := str(entry.get("type", ""))
-    var location := str(entry.get("location", ""))
-    var recommendation := str(entry.get("recommendation", ""))
-    var competence_penalty := float(entry.get("competence_penalty", 0.0))
-    var elan_penalty := float(entry.get("elan_penalty", 0.0))
-    var weather := str(entry.get("weather_id", ""))
-    var turn_number := int(entry.get("turn", 0))
-    var parts := [
+    var alert_type: String = str(entry.get("type", ""))
+    var location: String = str(entry.get("location", ""))
+    var recommendation: String = str(entry.get("recommendation", ""))
+    var competence_penalty: float = float(entry.get("competence_penalty", 0.0))
+    var elan_penalty: float = float(entry.get("elan_penalty", 0.0))
+    var weather: String = str(entry.get("weather_id", ""))
+    var turn_number: int = int(entry.get("turn", 0))
+    var parts: Array[String] = [
         "%s @ %s" % [alert_type if alert_type != "" else "alerte", location if location != "" else "n/a"],
         "Tour %d" % turn_number,
         "Compétence %.1f" % competence_penalty,
@@ -340,29 +341,29 @@ func _refresh_intel_log() -> void:
         intel_log.append_text("Aucun ping renseignement enregistré.\n")
         return
     for entry in _intel_events:
-        var line := _format_intel_entry(entry)
+        var line: String = _format_intel_entry(entry)
         if line.is_empty():
             continue
         intel_log.append_text("%s\n" % line)
-    var line_count := intel_log.get_line_count()
+    var line_count: int = intel_log.get_line_count()
     if line_count > 0:
         intel_log.scroll_to_line(line_count - 1)
 
 func _format_intel_entry(entry: Dictionary) -> String:
-    var turn_number := int(entry.get("turn", 0))
-    var order_id := str(entry.get("source", entry.get("order_id", "")))
-    var target := str(entry.get("target", ""))
-    var success := bool(entry.get("success", false))
-    var intention := str(entry.get("intent_category", entry.get("intention", "unknown")))
-    var confidence := float(entry.get("confidence", 0.0))
-    var roll := float(entry.get("roll", 0.0))
-    var detection_bonus := float(entry.get("detection_bonus", 0.0))
-    var noise := float(entry.get("noise", 0.0))
-    var visibility_before := float(entry.get("visibility_before", 0.0))
-    var visibility_after := float(entry.get("visibility_after", entry.get("visibility_before", 0.0)))
-    var label := "succès" if success else "échec"
-    var intention_label := intention if intention != "" else "unknown"
-    var parts := [
+    var turn_number: int = int(entry.get("turn", 0))
+    var order_id: String = str(entry.get("source", entry.get("order_id", "")))
+    var target: String = str(entry.get("target", ""))
+    var success: bool = bool(entry.get("success", false))
+    var intention: String = str(entry.get("intent_category", entry.get("intention", "unknown")))
+    var confidence: float = float(entry.get("confidence", 0.0))
+    var roll: float = float(entry.get("roll", 0.0))
+    var detection_bonus: float = float(entry.get("detection_bonus", 0.0))
+    var noise: float = float(entry.get("noise", 0.0))
+    var visibility_before: float = float(entry.get("visibility_before", 0.0))
+    var visibility_after: float = float(entry.get("visibility_after", entry.get("visibility_before", 0.0)))
+    var label: String = "succès" if success else "échec"
+    var intention_label: String = intention if intention != "" else "unknown"
+    var parts: Array[String] = [
         "T%02d" % turn_number,
         order_id if order_id != "" else "n/a",
         (target if target != "" else "?"),
@@ -401,7 +402,7 @@ func _rebuild_telemetry_event_filter() -> void:
     if telemetry_event_filter == null:
         return
 
-    var previous := _selected_telemetry_event
+    var previous: StringName = _selected_telemetry_event
     telemetry_event_filter.clear()
     telemetry_event_filter.add_item("Tous les événements")
     telemetry_event_filter.set_item_metadata(0, StringName(""))
@@ -409,8 +410,8 @@ func _rebuild_telemetry_event_filter() -> void:
     var event_names: Array[StringName] = []
     if telemetry:
         event_names = telemetry.list_event_names()
-    var target_index := 0
-    var index := 1
+    var target_index: int = 0
+    var index: int = 1
     for event_name in event_names:
         telemetry_event_filter.add_item(String(event_name))
         telemetry_event_filter.set_item_metadata(index, event_name)
@@ -437,9 +438,9 @@ func _refresh_telemetry_status(buffer_size: int = -1) -> void:
             telemetry_copy_session_path_button.tooltip_text = "Aucun fichier de session actif."
         return
 
-    var total := buffer_size if buffer_size >= 0 else telemetry.get_buffer().size()
-    var persistence_label := "activée" if telemetry.is_persistence_enabled() else "désactivée"
-    var session_path := telemetry.get_session_file_path()
+    var total: int = buffer_size if buffer_size >= 0 else telemetry.get_buffer().size()
+    var persistence_label: String = "activée" if telemetry.is_persistence_enabled() else "désactivée"
+    var session_path: String = telemetry.get_session_file_path()
     telemetry_status_label.text = "Événements : %d · Persistance %s" % [total, persistence_label]
     telemetry_status_label.tooltip_text = session_path if not session_path.is_empty() else "Session non persistée."
 
@@ -456,7 +457,7 @@ func _refresh_telemetry_log() -> void:
         telemetry_log.append_text("La télémétrie n'est pas initialisée.\n")
         return
 
-    var entries := _collect_filtered_telemetry_entries()
+    var entries: Array = _collect_filtered_telemetry_entries()
 
     if entries.is_empty():
         telemetry_log.append_text("Aucun événement enregistré pour ce filtre.\n")
@@ -465,12 +466,12 @@ func _refresh_telemetry_log() -> void:
     for entry in entries:
         if not (entry is Dictionary):
             continue
-        var line := _format_telemetry_entry(entry as Dictionary)
+        var line: String = _format_telemetry_entry(entry as Dictionary)
         if line.is_empty():
             continue
         telemetry_log.append_text("%s\n" % line)
 
-    var line_count := telemetry_log.get_line_count()
+    var line_count: int = telemetry_log.get_line_count()
     if line_count > 0:
         telemetry_log.scroll_to_line(line_count - 1)
 
@@ -489,10 +490,10 @@ func _collect_filtered_telemetry_entries() -> Array:
     return entries
 
 func _format_telemetry_entry(entry: Dictionary) -> String:
-    var event_name := String(entry.get("name", ""))
-    var timestamp := int(entry.get("timestamp", 0))
+    var event_name: String = String(entry.get("name", ""))
+    var timestamp: int = int(entry.get("timestamp", 0))
     var payload_variant: Variant = entry.get("payload", {})
-    var payload_preview := _format_payload_preview(payload_variant)
+    var payload_preview: String = _format_payload_preview(payload_variant)
     var parts: Array[String] = []
     parts.append("%s — %s" % [_format_timestamp(timestamp), event_name if not event_name.is_empty() else "(inconnu)"])
     if not payload_preview.is_empty():
@@ -503,7 +504,7 @@ func _format_payload_preview(payload: Variant) -> String:
     if payload == null:
         return ""
     if payload is Dictionary or payload is Array:
-        var json := JSON.stringify(payload)
+        var json: String = JSON.stringify(payload)
         if json.length() > 220:
             json = "%s…" % json.substr(0, 220)
         return json
@@ -531,7 +532,7 @@ func _on_telemetry_refresh_pressed() -> void:
 func _on_copy_session_path_pressed() -> void:
     if telemetry == null:
         return
-    var session_path := telemetry.get_session_file_path()
+    var session_path: String = telemetry.get_session_file_path()
     if session_path.is_empty():
         return
     DisplayServer.clipboard_set(session_path)
@@ -546,7 +547,7 @@ func _on_telemetry_event_logged(event_name: StringName, _payload: Dictionary, _t
 func _has_event_in_filter(event_name: StringName) -> bool:
     if telemetry_event_filter == null:
         return false
-    var count := telemetry_event_filter.get_item_count()
+    var count: int = telemetry_event_filter.get_item_count()
     for index in count:
         var metadata: Variant = telemetry_event_filter.get_item_metadata(index)
         if metadata is StringName and metadata == event_name:
