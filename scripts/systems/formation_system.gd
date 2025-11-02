@@ -195,7 +195,7 @@ func _on_formation_change_requested(payload: Dictionary) -> void:
         return
 
     if cost > 0.0 and event_bus:
-        var remaining := max(_available_elan - cost, 0.0)
+        var remaining: float = max(_available_elan - cost, 0.0)
         event_bus.emit_elan_spent({
             "amount": cost,
             "remaining": remaining,
@@ -204,7 +204,7 @@ func _on_formation_change_requested(payload: Dictionary) -> void:
             "formation_id": formation_id,
         })
 
-    var changed := false
+    var changed: bool = false
     if combat_system:
         changed = combat_system.set_unit_formation(unit_id, formation_id)
     if not changed:
@@ -229,7 +229,7 @@ func _on_formation_changed(payload: Dictionary) -> void:
         var rules: Dictionary = {}
         if rules_variant is Dictionary:
             rules = (rules_variant as Dictionary)
-        var lock_turns := max(int(rules.get("inertia_lock_turns", 0)), 0)
+        var lock_turns: int = max(int(rules.get("inertia_lock_turns", 0)), 0)
         if lock_turns > 0:
             _unit_inertia[unit_id] = {"turns_remaining": lock_turns}
         else:
@@ -255,7 +255,7 @@ func _update_unit_status(unit_id: String, formation_id: String, reason: String, 
     var inertia_state: Dictionary = {}
     if inertia_state_variant is Dictionary:
         inertia_state = (inertia_state_variant as Dictionary)
-    var turns_remaining := max(int(inertia_state.get("turns_remaining", 0)), 0)
+    var turns_remaining: int = max(int(inertia_state.get("turns_remaining", 0)), 0)
     var available_formations: Array = _get_available_formations(unit_id)
     var status := {
         "unit_id": unit_id,
@@ -276,7 +276,7 @@ func _update_unit_status(unit_id: String, formation_id: String, reason: String, 
         for key in context.keys():
             if key in ["unit_id", "formation_id", "reason"]:
                 continue
-            var value := context.get(key)
+            var value: Variant = context.get(key)
             if value is Dictionary:
                 filtered[key] = (value as Dictionary).duplicate(true)
             elif value is Array:

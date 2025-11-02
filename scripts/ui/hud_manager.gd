@@ -1764,7 +1764,7 @@ func _stop_feedback_stream() -> void:
         feedback_player.stop()
     if _feedback_playback and is_instance_valid(_feedback_playback):
         _feedback_playback.stop()
-        if not _feedback_playback.active:
+        if not _feedback_playback.is_active():
             _feedback_playback.clear_buffer()
     _feedback_playback = null
 

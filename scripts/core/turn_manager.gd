@@ -188,7 +188,7 @@ func _validate_allocations(raw_allocations: Dictionary, enforce_inertia := false
 
         if enforce_inertia and not _competence_allocations.is_empty():
             var current: float = float(_competence_allocations.get(category, clamped))
-            var delta := abs(clamped - current)
+            var delta: float = abs(clamped - current)
             if delta <= 0.001:
                 continue
 
@@ -448,7 +448,7 @@ func _duplicate_dictionary(value: Variant) -> Dictionary:
 func _decrement_inertia_locks() -> void:
     for category in COMPETENCE_CATEGORIES:
         var state: Dictionary = _inertia_state.get(category, {}).duplicate(true)
-        var remaining := int(state.get("turns_remaining", 0))
+        var remaining: int = int(state.get("turns_remaining", 0))
         if remaining > 0:
             state["turns_remaining"] = max(remaining - 1, 0)
         _inertia_state[category] = state
@@ -464,7 +464,7 @@ func _default_allocations_for_budget(budget: float) -> Dictionary:
     var total: float = 0.0
     for category in COMPETENCE_CATEGORIES:
         var config: Dictionary = _get_slider_config(category)
-        var base_value := max(float(config.get("base_allocation", DEFAULT_SLIDER_BASE.get(category, budget))), 0.0)
+        var base_value: float = max(float(config.get("base_allocation", DEFAULT_SLIDER_BASE.get(category, budget))), 0.0)
         base_map[category] = base_value
         total += base_value
 
@@ -477,7 +477,7 @@ func _default_allocations_for_budget(budget: float) -> Dictionary:
 
     var scale: float = budget / total
     for category in COMPETENCE_CATEGORIES:
-        var scaled := float(base_map.get(category, 0.0)) * scale
+        var scaled: float = float(base_map.get(category, 0.0)) * scale
         allocations[category] = _clamp_and_snap(category, scaled)
     return allocations
 

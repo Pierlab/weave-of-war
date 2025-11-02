@@ -298,6 +298,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   `scripts/ui/debug_overlay.gd` for the preferred explicit typing pattern, including casting results from helpers such as
   `clamp()` or wrapping `Callable.call()` outputs in `str()`. When a global class name is unavailable at parse time, prefer a
   broader hint (for example typing `formation_system` as `Node` inside `GameManager`) rather than leaving the property untyped.
+- Godot 4.6 removed the legacy `AudioStreamGeneratorPlayback.active` property. Use the `is_active()` check before clearing the
+  generator buffer (see `_stop_feedback_stream()` in `scripts/ui/hud_manager.gd`) to avoid the runtime error `Invalid access to
+  property or key 'active' on a base object of type 'AudioStreamGeneratorPlayback'.`
 - UI theme overrides must use the dedicated helpers (`add_theme_constant_override`, `add_theme_color_override`, etc.). Directly
   mutating `theme_override_constants` on containers throws at runtime in Godot 4.6 when warnings escalate to errors. See
   `scripts/ui/hud_manager.gd` for the canonical panel construction pattern.
