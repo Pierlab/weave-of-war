@@ -281,6 +281,9 @@ to resolve references when scenes or scripts are renamed. Do not delete them unl
   `scripts/core/assistant_ai.gd`, `scripts/core/data_loader.gd`, `scripts/systems/combat_system.gd`,
   `scripts/systems/elan_system.gd`, `scenes/map/map.gd`, `scenes/map/hex_tile.gd`, and `scripts/ui/hud_manager.gd` for the
   preferred explicit typing pattern, including casting results from helpers such as `clamp()`.
+- UI theme overrides must use the dedicated helpers (`add_theme_constant_override`, `add_theme_color_override`, etc.). Directly
+  mutating `theme_override_constants` on containers throws at runtime in Godot 4.6 when warnings escalate to errors. See
+  `scripts/ui/hud_manager.gd` for the canonical panel construction pattern.
 
 ### Expected Windows startup warnings
 - **SDL controller mappings** — Godot surfaces `Unrecognized output string "misc2" in mapping` when newer Nintendo/Hori Switch

@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-02T00:04:55Z
+- Generated on: 2025-11-02T00:16:21Z
 - Branch: work
-- Commit when generated: a0abc6511e619cde9365b8182c1854c435a6ac1d
-- Subject: Merge pull request #91 from Pierlab/codex/refactor-game-screen-for-readability
+- Commit when generated: b3d77172f5f64e5659152ea5f71580343e731c0d
+- Subject: Merge pull request #92 from Pierlab/codex/fix-gdscript-parse-and-load-errors
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 

@@ -62,7 +62,7 @@ func _refresh_catalog() -> void:
     for entry_variant in data_loader.list_formations():
         if not (entry_variant is Dictionary):
             continue
-        var entry: Dictionary = entry_variant
+        var entry: Dictionary = (entry_variant as Dictionary)
         var formation_id := str(entry.get("id", ""))
         if formation_id.is_empty():
             continue
@@ -79,7 +79,7 @@ func _refresh_catalog() -> void:
     for unit_variant in data_loader.list_units():
         if not (unit_variant is Dictionary):
             continue
-        var unit: Dictionary = unit_variant
+        var unit: Dictionary = (unit_variant as Dictionary)
         var unit_id := str(unit.get("id", ""))
         if unit_id.is_empty():
             continue
@@ -87,7 +87,7 @@ func _refresh_catalog() -> void:
         for formation_variant in data_loader.list_formations_for_unit(unit_id):
             if not (formation_variant is Dictionary):
                 continue
-            var formation: Dictionary = formation_variant
+            var formation: Dictionary = (formation_variant as Dictionary)
             var formation_id := str(formation.get("id", ""))
             if formation_id.is_empty() or formations.has(formation_id):
                 continue
@@ -120,7 +120,10 @@ func _on_turn_started(turn_number: int) -> void:
     var keys := _unit_inertia.keys()
     for unit_id_variant in keys:
         var unit_id := str(unit_id_variant)
-        var state: Dictionary = _unit_inertia.get(unit_id, {})
+        var state_variant: Variant = _unit_inertia.get(unit_id, {})
+        var state: Dictionary = {}
+        if state_variant is Dictionary:
+            state = (state_variant as Dictionary)
         var turns_remaining := int(state.get("turns_remaining", 0))
         if turns_remaining <= 0:
             continue
@@ -131,7 +134,10 @@ func _on_turn_started(turn_number: int) -> void:
             state["turns_remaining"] = turns_remaining
             _unit_inertia[unit_id] = state
         updated = true
-        var current_status: Dictionary = _unit_status.get(unit_id, {})
+        var current_status_variant: Variant = _unit_status.get(unit_id, {})
+        var current_status: Dictionary = {}
+        if current_status_variant is Dictionary:
+            current_status = (current_status_variant as Dictionary)
         _update_unit_status(unit_id, str(current_status.get("formation_id", "")), "turn_tick")
     _emit_status_update("turn_tick")
 
@@ -148,7 +154,10 @@ func _on_formation_change_requested(payload: Dictionary) -> void:
         _emit_change_failed(unit_id, formation_id, "formation_not_allowed")
         return
 
-    var inertia_state: Dictionary = _unit_inertia.get(unit_id, {})
+    var inertia_state_variant: Variant = _unit_inertia.get(unit_id, {})
+    var inertia_state: Dictionary = {}
+    if inertia_state_variant is Dictionary:
+        inertia_state = (inertia_state_variant as Dictionary)
     var turns_remaining := int(inertia_state.get("turns_remaining", 0))
     if turns_remaining > 0:
         _emit_change_failed(unit_id, formation_id, "inertia_locked", {
@@ -156,13 +165,19 @@ func _on_formation_change_requested(payload: Dictionary) -> void:
         })
         return
 
-    var current_status: Dictionary = _unit_status.get(unit_id, {})
+    var current_status_variant: Variant = _unit_status.get(unit_id, {})
+    var current_status: Dictionary = {}
+    if current_status_variant is Dictionary:
+        current_status = (current_status_variant as Dictionary)
     var current_id := str(current_status.get("formation_id", ""))
     if formation_id == current_id:
         _emit_status_update("noop")
         return
 
-    var rules: Dictionary = _formation_rules.get(formation_id, {})
+    var rules_variant: Variant = _formation_rules.get(formation_id, {})
+    var rules: Dictionary = {}
+    if rules_variant is Dictionary:
+        rules = (rules_variant as Dictionary)
     var cost: float = max(float(rules.get("elan_cost", 0.0)), 0.0)
     if cost > 0.0 and _available_elan + 0.0001 < cost:
         _emit_change_failed(unit_id, formation_id, "insufficient_elan", {
@@ -209,7 +224,10 @@ func _on_formation_changed(payload: Dictionary) -> void:
     var formation_id := str(payload.get("formation_id", ""))
     var reason := str(payload.get("reason", ""))
     if reason == "manual":
-        var rules: Dictionary = _formation_rules.get(formation_id, {})
+        var rules_variant: Variant = _formation_rules.get(formation_id, {})
+        var rules: Dictionary = {}
+        if rules_variant is Dictionary:
+            rules = (rules_variant as Dictionary)
         var lock_turns := max(int(rules.get("inertia_lock_turns", 0)), 0)
         if lock_turns > 0:
             _unit_inertia[unit_id] = {"turns_remaining": lock_turns}
@@ -224,9 +242,18 @@ func _on_formation_changed(payload: Dictionary) -> void:
     _emit_status_update("change")
 
 func _update_unit_status(unit_id: String, formation_id: String, reason: String, context: Dictionary = {}) -> void:
-    var unit_info: Dictionary = _unit_catalog.get(unit_id, {})
-    var formation_info: Dictionary = _formation_rules.get(formation_id, {})
-    var inertia_state: Dictionary = _unit_inertia.get(unit_id, {})
+    var unit_info_variant: Variant = _unit_catalog.get(unit_id, {})
+    var unit_info: Dictionary = {}
+    if unit_info_variant is Dictionary:
+        unit_info = (unit_info_variant as Dictionary)
+    var formation_info_variant: Variant = _formation_rules.get(formation_id, {})
+    var formation_info: Dictionary = {}
+    if formation_info_variant is Dictionary:
+        formation_info = (formation_info_variant as Dictionary)
+    var inertia_state_variant: Variant = _unit_inertia.get(unit_id, {})
+    var inertia_state: Dictionary = {}
+    if inertia_state_variant is Dictionary:
+        inertia_state = (inertia_state_variant as Dictionary)
     var turns_remaining := max(int(inertia_state.get("turns_remaining", 0)), 0)
     var available_formations := _get_available_formations(unit_id)
     var status := {
@@ -260,13 +287,19 @@ func _update_unit_status(unit_id: String, formation_id: String, reason: String, 
     _unit_status[unit_id] = status
 
 func _get_available_formations(unit_id: String) -> Array:
-    var info: Dictionary = _unit_catalog.get(unit_id, {})
+    var info_variant: Variant = _unit_catalog.get(unit_id, {})
+    var info: Dictionary = {}
+    if info_variant is Dictionary:
+        info = (info_variant as Dictionary)
     var result: Array = []
     var formations_variant: Variant = info.get("formations", [])
     if formations_variant is Array:
         for formation_id_variant in formations_variant:
             var formation_id := str(formation_id_variant)
-            var rules: Dictionary = _formation_rules.get(formation_id, {})
+            var rules_variant: Variant = _formation_rules.get(formation_id, {})
+            var rules: Dictionary = {}
+            if rules_variant is Dictionary:
+                rules = (rules_variant as Dictionary)
             if rules.is_empty():
                 continue
             result.append({
@@ -280,7 +313,10 @@ func _get_available_formations(unit_id: String) -> Array:
     return result
 
 func _is_formation_allowed(unit_id: String, formation_id: String) -> bool:
-    var info: Dictionary = _unit_catalog.get(unit_id, {})
+    var info_variant: Variant = _unit_catalog.get(unit_id, {})
+    var info: Dictionary = {}
+    if info_variant is Dictionary:
+        info = (info_variant as Dictionary)
     var formations_variant: Variant = info.get("formations", [])
     if formations_variant is Array:
         return (formations_variant as Array).has(formation_id)
@@ -291,8 +327,9 @@ func _emit_status_update(reason: String) -> void:
         return
     var payload_units: Dictionary = {}
     for unit_id in _unit_status.keys():
-        var status: Dictionary = _unit_status.get(unit_id, {})
-        payload_units[unit_id] = status.duplicate(true)
+        var status_variant: Variant = _unit_status.get(unit_id, {})
+        if status_variant is Dictionary:
+            payload_units[unit_id] = (status_variant as Dictionary).duplicate(true)
     event_bus.emit_formation_status({
         "reason": reason,
         "turn": _current_turn,
@@ -309,9 +346,11 @@ func _emit_change_failed(unit_id: String, formation_id: String, reason: String, 
         "reason": reason,
     }
     if _formation_rules.has(formation_id):
-        var rules: Dictionary = _formation_rules.get(formation_id, {})
-        payload["elan_cost"] = float(rules.get("elan_cost", 0.0))
-        payload["inertia_lock_turns"] = int(rules.get("inertia_lock_turns", 0))
+        var rules_variant: Variant = _formation_rules.get(formation_id, {})
+        if rules_variant is Dictionary:
+            var rules: Dictionary = (rules_variant as Dictionary)
+            payload["elan_cost"] = float(rules.get("elan_cost", 0.0))
+            payload["inertia_lock_turns"] = int(rules.get("inertia_lock_turns", 0))
     if not extras.is_empty():
         for key in extras.keys():
             payload[key] = extras.get(key)

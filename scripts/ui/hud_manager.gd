@@ -353,12 +353,12 @@ func _build_competence_row(category: String, config: Dictionary) -> void:
     var wrapper := VBoxContainer.new()
     wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     wrapper.size_flags_vertical = Control.SIZE_FILL
-    wrapper.theme_override_constants["separation"] = 4
+    wrapper.add_theme_constant_override("separation", 4)
     panel.add_child(wrapper)
 
     var header := HBoxContainer.new()
     header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    header.theme_override_constants["separation"] = 6
+    header.add_theme_constant_override("separation", 6)
     wrapper.add_child(header)
 
     var hotkey_label := Label.new()
@@ -455,7 +455,7 @@ func _build_formation_row(unit_entry: Dictionary) -> void:
 
     var wrapper := VBoxContainer.new()
     wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    wrapper.theme_override_constants["separation"] = 4
+    wrapper.add_theme_constant_override("separation", 4)
     panel.add_child(wrapper)
 
     var name_label := Label.new()

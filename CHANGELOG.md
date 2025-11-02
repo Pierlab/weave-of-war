@@ -78,6 +78,9 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Restored the tactical map, Assistant AI autoload, and HUD/formation panels by replacing Variant-inferred dictionary assigns
+  with explicit casts across `AssistantAI`, `Map`, and `FormationSystem`, and by swapping UI theme overrides to
+  `add_theme_constant_override` so Godot 4.6 no longer aborts with warnings-as-errors during startup.
 - Hardened the Assistant AI, map, and HUD scripts with explicit type hints/casts so Godot no longer infers `Variant` for
   dictionary payloads, restoring autoload startup and resolving the "Could not find type" errors surfaced during project load.
 - Corrected the combat resolution payload to store unit state dictionaries (attacker/defender blocks) instead of forcing them

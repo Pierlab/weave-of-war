@@ -157,6 +157,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   que la documentation (README, CHANGELOG, checklist) reflète les nouveaux contrats.
 
 ### Phase 6 progress
+- 2025-12-29 — Nettoyé les scripts formations/HUD/assistant en ajoutant des casts explicites sur les dictionnaires et en
+  migrant les overrides de thème vers `add_theme_constant_override`, supprimant les arrêts Godot "Variant" et restaurant la
+  carte tactique dans l'éditeur.
 - 2025-12-27 — Reorganised the HUD left rail into a tabbed layout (`Commandement` / `Renseignements` / `Compétence` / `Formations` / `Dernier engagement`) with scrollable competence and formation panels, and expanded the default window to 1600×900 so the tactical map shares the screen more comfortably while keeping the controls accessible.
 - 2025-12-26 — Added a dataset-grounded gdUnit scenario (`test_formation_system_dataset_swap_consumes_elan_and_modifies_pillars`) validating Élan deductions, status locks, and pillar swings when swapping from « Shield Wall » to « Advance Column », archiving evidence for checklist item 49.
 - 2025-12-24 — `CombatSystem` republie chaque formation active après `combat_resolved` avec `reason: "combat"`, en joignant l'id d'engagement, l'ordre et le `unit_result`. `FormationSystem` préserve désormais les verrous d'inertie lors de ces instantanés, stocke le contexte de combat dans `formation_status_updated`, et les tests gdUnit couvrent la télémétrie + la persistance des locks, clôturant l'item 48.

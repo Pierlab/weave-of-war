@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2025-12-29 — Corrigé les arrêts de chargement Godot : cast explicite des dictionnaires dans `AssistantAI`, `Map`,
+  `FormationSystem` et `HUDManager`, remplacement des overrides `theme_override_constants` par
+  `add_theme_constant_override`, ce qui restaure l'affichage de la carte et des panneaux HUD sans warnings-as-errors.
 - 2025-12-28 — Restauré le chargement des scripts Assistant AI / carte / HUD en ajoutant des hints explicites sur les
   dictionnaires (`Variant` → `Dictionary`), supprimant les erreurs Godot "Variant inferred" et les types manquants. README et
   CHANGELOG documentent le pattern.
