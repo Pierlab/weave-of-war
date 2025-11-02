@@ -35,7 +35,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
   livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
 - [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work; 2025-12-28 — Consolidated dictionary typing across Assistant AI, map overlays, and HUD panels so warnings-as-errors no longer block the formation visualisation pipeline.)*
-- [ ] Phase 7 — Telemetry dashboards and Assistant AI insights.
+- [~] Phase 7 — Telemetry dashboards and Assistant AI insights. *(2025-12-30 — Checklist item 50 complete: telemetry schema audit + refreshed KPI/dashboard plan.)*
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 
 ## Deliverables
@@ -177,6 +177,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   HUD/tests disposent d'un état consolidé. Un nouveau test gdUnit vérifie le parcours succès/échec (coût/inertie) et documente
   le comportement.
 - 2025-12-20 — `DataLoader` dérive automatiquement les archétypes compatibles pour chaque entrée [`data/formations.json`](../../data/formations.json) (`line`, `mobile`, `ranged`, `support`) et expose des helpers (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `CombatSystem` s'appuie sur ce mapping pour tolérer des fallbacks de formation par archétype, `tests/gdunit/test_data_integrity.gd` vérifie la cartographie, et README/CHECKLISTS/mission brief documentent la répartition.
+
+### Phase 7 progress
+- 2025-12-30 — Passé en revue tous les serializers de `TelemetryAutoload`, aligné les schémas (readiness, boucle commandement, logistique/météo, combat/formation, compétence, renseignement) et étoffé `docs/telemetry/dashboard_plan.md` avec une matrice de champs par événement plus une feuille de route KPI/dashboards pour la Phase 7.
 
 ### Delivery timeline (Semaine 0–6)
 - **Semaine 0 — Kickoff & alignment**: Finalise mission scope review, confirm SDS owners, et mettre en place le socle d'autoloads (`EventBus`, `DataLoader`, `Telemetry`, `AssistantAI`) pour que les systèmes Checklist C puissent consommer les données/événements dès le sprint 1. Validate onboarding rituals with the latest `AGENTS.md` updates.
