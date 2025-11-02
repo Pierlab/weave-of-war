@@ -20,3 +20,11 @@ EventBusAutoload="*res://scripts/core/event_bus.gd"
 DataLoaderAutoload="*res://scripts/core/data_loader.gd"
 TelemetryAutoload="*res://scripts/core/telemetry.gd"
 AssistantAIAutoload="*res://scripts/core/assistant_ai.gd"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/size/resizable=true
