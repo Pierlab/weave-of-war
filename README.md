@@ -29,6 +29,8 @@ c:\Users\plab7\Downloads\Godot_v4.5.1-stable_win64.exe\Godot_v4.5.1-stable_win64
 
 The logs above are mirrored in `errors.log` at the repository root to help future agents diagnose renderer/device warnings.
 
+By default the project now opens a 1600×900 window (resizable) so the tactical map has more breathing room while keeping the left HUD readable. Adjust these values in `project.godot` if you need a different baseline.
+
 ## Core autoloads
 
 | Autoload (project.godot) | Class name | Script | Responsibilities |
@@ -75,6 +77,7 @@ Startup instrumentation now prints readiness logs for all four services; the lat
   headless or freshly opened sessions).
 
 ### HUD UX copy & feedback
+- **HUD layout** — The left rail is now a tabbed container grouping the command controls, renseignement feed, competence sliders, formation management, and combat recap (`Commandement` / `Renseignements` / `Compétence` / `Formations` / `Dernier engagement`). Competence and formation panels sit inside scroll containers so long rosters remain accessible without overcrowding the viewport.
 - **Doctrine selector** — Each entry mirrors the doctrine `name` from `data/doctrines.json`. Selecting a doctrine updates the status label with the template `Doctrine : {Nom} — Inertie {N} tour(s)` so players see how many turns remain before the stance can change again, while the tooltip lists remaining swap tokens and the current Élan cap bonus granted by the doctrine. When the selector is locked by inertia, the HUD now restores the previous choice automatically and surfaces the validation message inline instead of silently ignoring the input.
 - **Inertie label** — A dedicated `Inertie : {N} tour(s) · x{M}` line surfaces the doctrine multiplier qui sera appliquée au prochain ordre, avec une infobulle rappelant que toute commande ajoutera au minimum la durée d'inertie affichée.
 - **Order selector** — Orders are rendered as `{Nom} (X.X Élan · Tactics 1.0, Strategy 0.5…)` when a `competence_cost` is defined, appending the categories and amounts pulled from `data/orders.json` so reconnaissance/espionnage commands advertise both their Élan drain and required competence budget. The HUD refreshes the list whenever the doctrine changes so only authorised orders appear.

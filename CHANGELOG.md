@@ -73,6 +73,10 @@ All notable changes to this project will be documented in this file.
 - Added gdUnit data integrity tests to load and validate the JSON data assets before gameplay systems consume them.
 - Bootstraped the agent-driven workflow: root `AGENTS.md`, refreshed vibe-coding playbook, and mission workspace.
 
+### Changed
+- Rebuilt the HUD left column around a tabbed container (`Commandement` / `Renseignements` / `Compétence` / `Formations` / `Dernier engagement`) with scrollable competence and formation panels so the control surface remains readable even as datasets grow.
+- Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
+
 ### Fixed
 - Corrected the combat resolution payload to store unit state dictionaries (attacker/defender blocks) instead of forcing them
   into an array, restoring Godot's typed parsing and allowing `GameManager` to instantiate `CombatSystem` without compile

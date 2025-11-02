@@ -14,275 +14,377 @@ script = ExtResource("1")
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 1
-offset_right = 240.0
-offset_bottom = 320.0
+offset_right = 336.0
+offset_bottom = 520.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="RootColumn" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 8
 
-[node name="NextTurnButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ActionColumn" type="VBoxContainer" parent="MarginContainer/RootColumn"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="NextTurnButton" type="Button" parent="MarginContainer/RootColumn/ActionColumn"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Next Turn"
 
-[node name="ToggleLogisticsButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ToggleLogisticsButton" type="Button" parent="MarginContainer/RootColumn/ActionColumn"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Show Logistics"
 
-[node name="WeatherPanel" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 28)
-
-[node name="WeatherIcon" type="ColorRect" parent="MarginContainer/VBoxContainer/WeatherPanel"]
-layout_mode = 2
-custom_minimum_size = Vector2(24, 24)
-size_flags_horizontal = 0
-color = Color(0.800000, 0.800000, 0.800000, 1)
-
-[node name="WeatherLabel" type="Label" parent="MarginContainer/VBoxContainer/WeatherPanel"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Weather : —"
-autowrap_mode = 3
-
-[node name="DoctrineSelector" type="OptionButton" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Doctrine"
-
-[node name="DoctrineStatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Doctrine : —"
-autowrap_mode = 3
-tooltip_text = "Sélectionnez une doctrine pour voir l'inertie restante."
-
-[node name="InertiaLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Inertie : 0 tour"
-autowrap_mode = 3
-
-[node name="OrderSelector" type="OptionButton" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Ordres"
-
-[node name="ExecuteOrderButton" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Exécuter l'ordre"
-
-[node name="ElanLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Élan : 0.0 / 0.0 (↗ 0.0 | ↘ 0.0)"
-tooltip_text = "Suivi du total d'Élan, du plafond et des décays."
-
-[node name="FeedbackLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="FeedbackLabel" type="Label" parent="MarginContainer/RootColumn"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
 text = ""
 
-[node name="IntelPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HudTabs" type="TabContainer" parent="MarginContainer/RootColumn"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 120)
+size_flags_vertical = 3
+theme_override_constants/tab_h_separation = 12
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/IntelPanel"]
+[node name="CommandTab" type="MarginContainer" parent="MarginContainer/RootColumn/HudTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tab_title = "Commandement"
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CommandTab"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 6
 
-[node name="IntelTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/IntelPanel/VBoxContainer"]
+[node name="CommandTitleLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Renseignements"
 theme_override_font_sizes/font_size = 16
+text = "Commandement"
 
-[node name="IntelSummaryLabel" type="Label" parent="MarginContainer/VBoxContainer/IntelPanel/VBoxContainer"]
+[node name="WeatherPanel" type="HBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 28)
+theme_override_constants/separation = 8
+
+[node name="WeatherIcon" type="ColorRect" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer/WeatherPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(24, 24)
+size_flags_horizontal = 0
+color = Color(0.800000, 0.800000, 0.800000, 1)
+
+[node name="WeatherLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer/WeatherPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Weather : —"
+
+[node name="DoctrineSelector" type="OptionButton" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Doctrine"
+
+[node name="DoctrineStatusLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Doctrine : —"
+tooltip_text = "Sélectionnez une doctrine pour voir l'inertie restante."
+
+[node name="InertiaLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Inertie : 0 tour"
+
+[node name="OrderSelector" type="OptionButton" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ordres"
+
+[node name="ExecuteOrderButton" type="Button" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Exécuter l'ordre"
+
+[node name="ElanLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CommandTab/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Élan : 0.0 / 0.0 (↗ 0.0 | ↘ 0.0)"
+tooltip_text = "Suivi du total d'Élan, du plafond et des décays."
+
+[node name="IntelTab" type="MarginContainer" parent="MarginContainer/RootColumn/HudTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tab_title = "Renseignements"
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="IntelPanel" type="PanelContainer" parent="MarginContainer/RootColumn/HudTabs/IntelTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/IntelTab/IntelPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="IntelTitleLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/IntelTab/IntelPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Renseignements"
+
+[node name="IntelSummaryLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/IntelTab/IntelPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
 text = "Aucun ping renseignement disponible."
 
-[node name="IntelLog" type="RichTextLabel" parent="MarginContainer/VBoxContainer/IntelPanel/VBoxContainer"]
+[node name="IntelLog" type="RichTextLabel" parent="MarginContainer/RootColumn/HudTabs/IntelTab/IntelPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 80)
+custom_minimum_size = Vector2(0, 160)
 autowrap_mode = 2
 scroll_active = true
 selection_enabled = true
 
-[node name="CompetencePanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="CompetenceTab" type="MarginContainer" parent="MarginContainer/RootColumn/HudTabs"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 180)
+size_flags_vertical = 3
+tab_title = "Compétence"
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CompetencePanel"]
+[node name="CompetenceScroll" type="ScrollContainer" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab/CompetenceScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CompetencePanel" type="PanelContainer" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab/CompetenceScroll/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab/CompetenceScroll/VBoxContainer/CompetencePanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 6
 
-[node name="CompetenceTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer"]
+[node name="CompetenceTitleLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab/CompetenceScroll/VBoxContainer/CompetencePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Compétence"
 theme_override_font_sizes/font_size = 16
+text = "Compétence"
 
-[node name="CompetenceAvailableLabel" type="Label" parent="MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer"]
+[node name="CompetenceAvailableLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab/CompetenceScroll/VBoxContainer/CompetencePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
 text = "Budget : —"
 
-[node name="CompetenceRows" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CompetencePanel/VBoxContainer"]
+[node name="CompetenceRows" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CompetenceTab/CompetenceScroll/VBoxContainer/CompetencePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="FormationPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="FormationsTab" type="MarginContainer" parent="MarginContainer/RootColumn/HudTabs"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 160)
+size_flags_vertical = 3
+tab_title = "Formations"
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/FormationPanel"]
+[node name="FormationScroll" type="ScrollContainer" parent="MarginContainer/RootColumn/HudTabs/FormationsTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/FormationsTab/FormationScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FormationPanel" type="PanelContainer" parent="MarginContainer/RootColumn/HudTabs/FormationsTab/FormationScroll/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/FormationsTab/FormationScroll/VBoxContainer/FormationPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 6
 
-[node name="FormationTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/FormationPanel/VBoxContainer"]
+[node name="FormationTitleLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/FormationsTab/FormationScroll/VBoxContainer/FormationPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Formations"
 theme_override_font_sizes/font_size = 16
+text = "Formations"
 
-[node name="FormationHintLabel" type="Label" parent="MarginContainer/VBoxContainer/FormationPanel/VBoxContainer"]
+[node name="FormationHintLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/FormationsTab/FormationScroll/VBoxContainer/FormationPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
 text = "Choisissez une posture pour chaque unité. Les coûts d'Élan et l'inertie sont indiqués pour chaque option."
 
-[node name="FormationRows" type="VBoxContainer" parent="MarginContainer/VBoxContainer/FormationPanel/VBoxContainer"]
+[node name="FormationRows" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/FormationsTab/FormationScroll/VBoxContainer/FormationPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="CombatPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="CombatTab" type="MarginContainer" parent="MarginContainer/RootColumn/HudTabs"]
 layout_mode = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 180)
+size_flags_vertical = 3
+tab_title = "Dernier engagement"
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CombatPanel"]
+[node name="CombatPanel" type="PanelContainer" parent="MarginContainer/RootColumn/HudTabs/CombatTab"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 6
 
-[node name="CombatTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer"]
+[node name="CombatTitleLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Dernier engagement"
 theme_override_font_sizes/font_size = 16
+text = "Dernier engagement"
 
-[node name="CombatSummaryLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer"]
+[node name="CombatSummaryLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
 text = "Aucun engagement résolu pour l'instant."
 
-[node name="PillarContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer"]
+[node name="PillarContainer" type="VBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="PositionRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer"]
+[node name="PositionRow" type="HBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="PositionLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/PositionRow"]
+[node name="PositionLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/PositionRow"]
 layout_mode = 2
 size_flags_horizontal = 1
 text = "Position"
 
-[node name="PositionMeter" type="ProgressBar" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/PositionRow"]
+[node name="PositionMeter" type="ProgressBar" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/PositionRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 18)
 max_value = 100.0
 show_percentage = false
 
-[node name="PositionResultLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/PositionRow"]
+[node name="PositionResultLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/PositionRow"]
 layout_mode = 2
 size_flags_horizontal = 1
-text = "—"
 autowrap_mode = 3
+text = "—"
 
-[node name="ImpulseRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer"]
+[node name="ImpulseRow" type="HBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="ImpulseLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow"]
+[node name="ImpulseLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow"]
 layout_mode = 2
 size_flags_horizontal = 1
 text = "Impulsion"
 
-[node name="ImpulseMeter" type="ProgressBar" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow"]
+[node name="ImpulseMeter" type="ProgressBar" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 18)
 max_value = 100.0
 show_percentage = false
 
-[node name="ImpulseResultLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow"]
+[node name="ImpulseResultLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/ImpulseRow"]
 layout_mode = 2
 size_flags_horizontal = 1
-text = "—"
 autowrap_mode = 3
+text = "—"
 
-[node name="InformationRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer"]
+[node name="InformationRow" type="HBoxContainer" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="InformationLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/InformationRow"]
+[node name="InformationLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/InformationRow"]
 layout_mode = 2
 size_flags_horizontal = 1
 text = "Information"
 
-[node name="InformationMeter" type="ProgressBar" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/InformationRow"]
+[node name="InformationMeter" type="ProgressBar" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/InformationRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 18)
 max_value = 100.0
 show_percentage = false
 
-[node name="InformationResultLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer/PillarContainer/InformationRow"]
+[node name="InformationResultLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer/PillarContainer/InformationRow"]
 layout_mode = 2
 size_flags_horizontal = 1
-text = "—"
 autowrap_mode = 3
+text = "—"
 
-[node name="CombatLogisticsLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer"]
+[node name="CombatLogisticsLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
 text = "Logistique : en attente de données."
 
-[node name="CombatElanLabel" type="Label" parent="MarginContainer/VBoxContainer/CombatPanel/VBoxContainer"]
+[node name="CombatElanLabel" type="Label" parent="MarginContainer/RootColumn/HudTabs/CombatTab/CombatPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 autowrap_mode = 3
@@ -290,3 +392,4 @@ text = "Élan : aucune variation enregistrée."
 
 [node name="FeedbackPlayer" type="AudioStreamPlayer" parent="."]
 bus = &"Master"
+
