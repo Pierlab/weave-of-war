@@ -76,9 +76,9 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - The procedural audio generator now queues tone requests, waits for the playback instance to go inactive, then clears and
   refills the buffer before replaying. This deferred guard removes the recurring `AudioStreamGeneratorPlayback.clear_buffer`
   warnings/leaks that previously spammed the console during rapid doctrine/order swaps and on shutdown.
-- The HUD now primes the `AudioStreamPlayer` before fetching the generator playback handle, eliminating the startup
-  `Player is inactive` errors seen when Godot attempted to queue tones before the stream entered an active state (notably on
-  headless or freshly opened sessions).
+- The HUD now primes the `AudioStreamPlayer` before fetching the generator playback handle and defers synthesis until the
+  playback instance confirms it is ready, eliminating the startup `Player is inactive` errors seen when Godot attempted to queue
+  tones before the stream entered an active state (notably on headless or freshly opened sessions).
 
 ### HUD UX copy & feedback
 - **HUD layout** — The left rail is now a tabbed container grouping the command controls, renseignement feed, competence sliders, formation management, and combat recap (`Commandement` / `Renseignements` / `Compétence` / `Formations` / `Dernier engagement`). Competence and formation panels sit inside scroll containers so long rosters remain accessible without overcrowding the viewport.
@@ -231,6 +231,9 @@ avant/après) pour valider rapidement les tirages pendant les sessions QA, tandi
 - The hex map renders live formation badges above each unit: posture colours and initials update instantly when
   `formation_changed` fires, a white inertia ring and remaining-turn counter appear while a unit is locked, and recent swaps emit
   a brief highlight pulse so formation changes are visible without opening the HUD panel.
+- `FormationOverlay` now sources its font from `ThemeDB.fallback_font`, uses the Godot 4.x `draw_string*` signatures, and caches
+  typed unit dictionaries so warnings-as-errors no longer break the overlay when the project loads in headless or strict parser
+  environments.
 - `DataLoader` exposes the formations dataset, maps each formation to the archetypes that can field it, and offers helper
   lookups (`get_unit_classes_for_formation`, `list_formations_for_unit_class`, `list_formations_for_unit`). `Telemetry` records
   competence and formation events with the enriched before/after snapshots so gdUnit tests and dashboards can assert on the

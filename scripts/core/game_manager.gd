@@ -19,7 +19,7 @@ var logistics_system: LogisticsSystem
 var weather_system: WeatherSystem
 var combat_system: CombatSystem
 var espionage_system: EspionageSystem
-var formation_system: Node
+var formation_system: FormationSystem
 
 var _core_systems_initialised: bool = false
 

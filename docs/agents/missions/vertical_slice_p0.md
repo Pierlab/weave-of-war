@@ -46,6 +46,10 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Phase 0 findings
+- 2026-01-05 — Stabilisé `FormationOverlay`, `TurnManager`, `FormationSystem` et `EspionageSystem` pour Godot 4.6 : fallback
+  `ThemeDB` pour la police, signatures `draw_string*` 4.x et hints explicites sur les dictionnaires/tableaux (dont la connexion
+  `assistant_order_packet`) suppriment les warnings-as-errors restants, tandis que la HUD attend désormais le playback audio avant
+  de synthétiser les tons afin d'éliminer l'erreur `AudioStreamPlayer inactive` au démarrage.
 - 2026-01-04 — Stabilisé à nouveau le démarrage Godot en typant explicitement les variables `String`/`float`/`int` dans
   `AssistantAI`, `Map` et `debug_overlay`, et en typant `GameManager.formation_system` comme `Node` tant que le cache de classes
   ne publie pas `FormationSystem`. Les avertissements "Variant inferred"/"Could not find type" ne bloquent plus les autoloads.

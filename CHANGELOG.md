@@ -88,6 +88,11 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Restored Godot 4.6 compatibility for the tactical overlays and systems startup: `FormationOverlay` now relies on
+  `ThemeDB.fallback_font`, uses the modern `draw_string*` signatures, and types its caches to keep warnings-as-errors quiet;
+  `TurnManager`, `FormationSystem`, and `EspionageSystem` add explicit dictionary/array hints (including the
+  `assistant_order_packet` signal hookup) so compilation no longer aborts; and the HUD feedback audio defers synthesis until the
+  generator playback is ready, preventing `AudioStreamPlayer` runtime errors.
 - Eliminated the latest Godot warnings-as-errors by adding explicit string/float/int hints across `AssistantAI`, the tactical
   map visibility handlers, and the debug overlay formatters, and by relaxing the `GameManager` formation reference to `Node`
   while the global `FormationSystem` class cache reloads. Startup no longer aborts on Variant inference or missing type
