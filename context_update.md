@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-11 — Restored startup stability by registering `FormationOverlay` in the global script cache, hardening the HUD's
+  competence failure toast to sum dictionary payloads instead of calling the missing `float()` constructor, and teaching
+  `_stop_feedback_stream()` to fall back to `is_playing()`/`active` when `is_active()` is unavailable. README/CHANGELOG/mission
+  reflect the compatibility guard; the headless Godot commands remain blocked because the binary is not provisioned in this
+  container.
 - 2026-01-10 — Replaced the `FormationOverlay` typed `Array[String]` cache with an untyped `Array` so Godot 4.5.1's parser no
   longer aborts with "Could not resolve script" during preload. README/CHANGELOG/mission reflect the fix; the headless Godot
   commands remain blocked because the binary is not provisioned in this container.

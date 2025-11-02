@@ -88,6 +88,15 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Competence allocation failures no longer crash the HUD: `_on_competence_allocation_failed()` now sums dictionary payloads,
+  formats the per-category breakdown, and skips the nonexistent `float()` constructor that older Godot builds surface when
+  the failure payload preserves the requested allocations.
+- `_stop_feedback_stream()` tolerates both legacy and modern audio APIs by preferring `is_active()`, falling back to
+  `is_playing()`/`active`, and only clearing the generator buffer once playback has stopped, eliminating the
+  `Invalid call. Nonexistent function 'is_active' in base 'AudioStreamGeneratorPlayback'.` error raised on engines that still
+  expose the legacy property instead of the new method.
+- `FormationOverlay` is registered again in `.godot/global_script_class_cache.cfg`, so `map.gd` can preload the overlay without
+  emitting "Could not resolve script" on editor start.
 - Godot 4.5.1 parses the formation overlay again on Windows: the script now falls back to plain `Array` caches instead of
   instantiating typed `Array[String]` helpers that the older parser rejects during preload, eliminating the "Could not resolve
   script" failure when `map.gd` loads the overlay.

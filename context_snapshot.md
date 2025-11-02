@@ -1,9 +1,9 @@
 # Context Snapshot
 
-- Generated on: 2025-11-02T18:27:51Z
+- Generated on: 2025-11-02T18:45:22Z
 - Branch: work
-- Commit when generated: 154f765eac6f9632ac2b97b77aa11bc3f142567f
-- Subject: Merge pull request #104 from Pierlab/codex/fix-console-errors-at-game-launch
+- Commit when generated: d932296745ecea77a61fa2d8c857750af642288c
+- Subject: Merge pull request #105 from Pierlab/codex/fix-launch-errors-in-game
 - Working tree dirty: True
 - Note: commit hash may differ once this file is included in a new commit.
 

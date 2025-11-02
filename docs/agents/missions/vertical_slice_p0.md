@@ -34,7 +34,7 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
   `data/competence_sliders.json`, applique des caps de réallocation/inertie par catégorie, expose l'état des modificateurs et la
   télémétrie `competence_reallocated` publie les deltas restants pour la HUD et l'Assistant AI. 2025-12-15 — HUD « Compétence »
   livrée avec sliders interactifs, raccourcis clavier/manette et feedback inline.)*
-- [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work; 2025-12-28 — Consolidated dictionary typing across Assistant AI, map overlays, and HUD panels so warnings-as-errors no longer block the formation visualisation pipeline; 2026-01-08 — Typed the residual formation/competence/espionage calculations and swapped the HUD generator playback check to `is_active()` so the formation overlay and audio feedback survive Godot 4.6 warnings-as-errors.)*
+- [x] Phase 6 — Unit formations/postures influencing combat outcomes. *(2025-12-26 — Dataset-driven gdUnit coverage now proves Élan spend, inertia locks, and combat pillar deltas after manual formation swaps, closing item 49 alongside the previously shipped HUD and telemetry work; 2025-12-28 — Consolidated dictionary typing across Assistant AI, map overlays, and HUD panels so warnings-as-errors no longer block the formation visualisation pipeline; 2026-01-08 — Typed the residual formation/competence/espionage calculations and swapped the HUD generator playback check to `is_active()` so the formation overlay and audio feedback survive Godot 4.6 warnings-as-errors; 2026-01-11 — Added a compatibility guard that falls back to `is_playing()`/`active` when `is_active()` is unavailable and re-registered `FormationOverlay` in the script cache so Windows builds stop emitting "Could not resolve script".)*
 - [x] Phase 7 — Telemetry dashboards and Assistant AI insights. *(2026-01-03 — L'overlay debug embarque désormais un panneau « Télémetrie » filtrable relié au signal `Telemetry.event_logged`, avec statut de persistance et copie rapide du chemin de session pour faciliter l'inspection terrain.)*
 - [ ] Phase 8 — QA rituals, acceptance coverage, and release documentation.
 
@@ -46,6 +46,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Phase 0 findings
+- 2026-01-11 — Ajouté une garde de compatibilité audio (`is_active()` → `is_playing()`/`active`) et réinscrit `FormationOverlay`
+  dans `global_script_class_cache.cfg` afin que les démarrages Godot plus anciens n'échouent plus avec « Could not resolve
+  script » et que `_stop_feedback_stream()` ignore l'API manquante avant de purger le buffer.
 - 2026-01-10 — Simplifié le cache `FormationOverlay` en utilisant un `Array` non typé pour les identifiants d'unités entrants,
   afin que Godot 4.5.1 n'essaie plus de parser `Array[String]()` pendant le preload. La carte tactique se charge à nouveau
   sans l'erreur « Could not resolve script » signalée sur Windows.
