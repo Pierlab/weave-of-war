@@ -1,6 +1,8 @@
 class_name Telemetry
 extends Node
 
+signal event_logged(event_name: StringName, payload: Dictionary, timestamp: int, buffer_size: int)
+
 const EVENT_BUS := preload("res://scripts/core/event_bus.gd")
 
 static var _instance: Telemetry
@@ -43,6 +45,9 @@ func log_event(name: StringName, payload: Dictionary = {}) -> void:
 
     _persist_entry(entry)
 
+    var timestamp := int(entry.get("timestamp", 0))
+    event_logged.emit(name, entry.get("payload", {}), timestamp, _buffer.size())
+
 func get_buffer() -> Array:
     return _buffer.duplicate(true)
 
@@ -52,6 +57,17 @@ func get_history(event_name: StringName) -> Array:
     if events is Array:
         return (events as Array).duplicate(true)
     return []
+
+func list_event_names() -> Array[StringName]:
+    var ordered: Array[String] = []
+    for key in _history_by_event.keys():
+        ordered.append(str(key))
+    ordered.sort()
+
+    var result: Array[StringName] = []
+    for name in ordered:
+        result.append(StringName(name))
+    return result
 
 func clear() -> void:
     _buffer.clear()

@@ -115,3 +115,42 @@ custom_minimum_size = Vector2(0, 140)
 autowrap_mode = 2
 scroll_active = true
 selection_enabled = true
+
+[node name="TelemetrySection" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TelemetryLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection"]
+layout_mode = 2
+text = "Télémetrie"
+
+[node name="TelemetryStatus" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection"]
+layout_mode = 2
+text = "Événements : 0 · Persistance désactivée"
+
+[node name="TelemetryControls" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TelemetryFilter" type="OptionButton" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Tous les événements"
+
+[node name="TelemetryRefreshButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryControls"]
+layout_mode = 2
+text = "Actualiser"
+
+[node name="CopySessionPathButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection/TelemetryControls"]
+layout_mode = 2
+text = "Copier chemin"
+
+[node name="TelemetryLog" type="RichTextLabel" parent="PanelContainer/MarginContainer/VBoxContainer/TelemetrySection"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 160)
+autowrap_mode = 2
+scroll_active = true
+selection_enabled = true

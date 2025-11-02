@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Debug overlay telemetry inspection panel: `TelemetryAutoload` exposes an `event_logged` signal and the debug overlay gains a
+  filterable "Télémetrie" section with live updates, manual refresh, and clipboard export of the persisted session path to
+  support checklist item 53 playtests.
 - Assistant AI reasoning telemetry: the autoload now logs command order drivers, espionage probe follow-ups, and logistics
   break recommendations, exposes them in the debug overlay, and ships a sample JSONL log under
   `docs/logs/assistant_ai_reasoning_sample_2026-01-02.jsonl` to guide analytics tooling (checklist item 52).
