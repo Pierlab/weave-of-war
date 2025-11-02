@@ -88,7 +88,7 @@ func ingest_logistics_payload(payload: Dictionary) -> void:
             continue
         var level := str(zone.get("supply_level", "isolated"))
         var tile_state: Dictionary = _fog_by_tile.get(tile_id, _new_tile_state())
-        var visibility := SUPPLY_VISIBILITY.get(level, DEFAULT_TILE_VISIBILITY)
+        var visibility: float = SUPPLY_VISIBILITY.get(level, DEFAULT_TILE_VISIBILITY)
         tile_state["visibility"] = max(float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY)), visibility)
         tile_state["counter_intel"] = max(float(tile_state.get("counter_intel", 0.0)) - COUNTER_INTEL_DECAY, 0.0)
         _fog_by_tile[tile_id] = tile_state
@@ -101,8 +101,8 @@ func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadat
     var tile_state: Dictionary = _fog_by_tile.get(target, _new_tile_state())
     _fog_by_tile[target] = tile_state
 
-    var weather_noise := _current_weather_noise()
-    var detection_bonus := float(metadata.get("detection_bonus", 0.0))
+    var weather_noise: float = _current_weather_noise()
+    var detection_bonus: float = float(metadata.get("detection_bonus", 0.0))
     var intention_context: Dictionary = {}
     var intention_context_variant: Variant = _intentions_by_target.get(target, {})
     if intention_context_variant is Dictionary:
@@ -112,11 +112,11 @@ func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadat
         if fallback_variant is Dictionary:
             intention_context = fallback_variant
 
-    var base_visibility := float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY))
-    var counter_intel := float(tile_state.get("counter_intel", 0.0))
-    var effective_confidence := clamp(base_visibility + probe_strength + detection_bonus - (weather_noise + counter_intel), 0.0, 1.0)
-    var roll := _rng.randf()
-    var success := roll <= effective_confidence
+    var base_visibility: float = float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY))
+    var counter_intel: float = float(tile_state.get("counter_intel", 0.0))
+    var effective_confidence: float = clamp(base_visibility + probe_strength + detection_bonus - (weather_noise + counter_intel), 0.0, 1.0)
+    var roll: float = _rng.randf()
+    var success: bool = roll <= effective_confidence
 
     var revealed_intention := "unknown"
     if success and not intention_context.is_empty():
@@ -126,9 +126,9 @@ func perform_ping(target: String, probe_strength := BASE_PROBE_STRENGTH, metadat
     tile_state["counter_intel"] = clamp(counter_intel + (COUNTER_INTEL_GROWTH if not success else COUNTER_INTEL_GROWTH * 0.25), 0.0, 1.0)
     _fog_by_tile[target] = tile_state
 
-    var visibility_after := float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY))
-    var counter_intel_after := float(tile_state.get("counter_intel", 0.0))
-    var intention_confidence := 0.0
+    var visibility_after: float = float(tile_state.get("visibility", DEFAULT_TILE_VISIBILITY))
+    var counter_intel_after: float = float(tile_state.get("counter_intel", 0.0))
+    var intention_confidence: float = 0.0
     if not intention_context.is_empty():
         intention_confidence = float(intention_context.get("confidence", intention_confidence))
 

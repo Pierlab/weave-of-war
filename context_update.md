@@ -1,6 +1,11 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-08 — Consolidé la compatibilité Godot 4.6 en typant les calculs flottants/booleans de `TurnManager`, `FormationSystem`
+  et `EspionageSystem` pour éteindre les warnings-as-errors "Variant inferred", et la HUD remplace l'accès obsolète
+  `AudioStreamGeneratorPlayback.active` par `is_active()` avant de vider le buffer afin de supprimer le crash runtime lors de la
+  fermeture du flux de feedback. README/CHANGELOG/mission reflètent le correctif ; les commandes Godot headless restent bloquées
+  faute de binaire provisionné dans ce conteneur.
 - 2026-01-07 — Corrigé l'échec de preload `FormationOverlay` sur Godot 4.6 en remplaçant la syntaxe d'arguments nommés
   invalide sur les appels `draw_string*` par des paramètres positionnels et en redonnant à `GameManager` une garde générique
   (`Node.has_method`) avant d'appeler `FormationSystem.setup`. La carte se charge à nouveau sans erreurs de parsing ni
