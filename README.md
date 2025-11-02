@@ -38,7 +38,7 @@ By default the project now opens a 1600×900 window (resizable) so the tactical 
 | `EventBusAutoload` | `EventBus` | `scripts/core/event_bus.gd` | Global signal hub for turn flow, checklist C system events (Élan, logistics, combat, espionage, weather, competence sliders) and new data-loader notifications. |
 | `DataLoaderAutoload` | `DataLoader` | `scripts/core/data_loader.gd` | Loads the JSON datasets in `data/`, enforces schema/enum validation via `validate_collection()`, caches collections by id, and defers its readiness/error payloads so telemetry + assistant hooks capture the initial `data_loader_ready` signal (see `tests/gdunit/test_autoload_preparation.gd`). |
 | `TelemetryAutoload` | `Telemetry` | `scripts/core/telemetry.gd` | Records gameplay telemetry with normalised payloads for doctrine selection, order issuance/rejection, Élan spend/gain, logistics, combat, espionage, competence, and formation signals. Exposes `log_event`, `get_buffer`, and `clear` helpers so tests can assert Checklist C flows, and persists each session to JSONL files under `user://telemetry_sessions/` (`telemetry_session_<timestamp>.jsonl`) for analytics review. |
-| `AssistantAIAutoload` | `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence signals and publishes placeholder `assistant_order_packet` payloads that future iterations will enrich with simulations. |
+| `AssistantAIAutoload` | `AssistantAI` | `scripts/core/assistant_ai.gd` | Subscribes to doctrine/order/competence/logistics/espionage signals, emits enriched `assistant_order_packet` payloads, and now records reasoning traces for command orders, espionage probes, and logistics alerts surfaced in the debug overlay. |
 
 The autoloads initialise automatically when the project starts (and during headless test runs). Systems being developed for
 Checklist C should request dependencies from these singletons instead of reading JSON files or crafting their own signal buses.
@@ -57,6 +57,10 @@ Startup instrumentation now prints readiness logs for all four services; the lat
 - `AssistantAI` now records the latest order packets, emits enriched `assistant_order_packet` payloads, and the debug overlay
   surfaces a scrollable log (order, target, intent, confidence) so designers can verify the propagation loop without leaving
   the HUD.
+- The Assistant AI debug panel now layers reasoning traces for command orders, espionage probes, and logistics alerts with
+  follow-up recommendations; sample JSONL output lives in
+  [`docs/logs/assistant_ai_reasoning_sample_2026-01-02.jsonl`](docs/logs/assistant_ai_reasoning_sample_2026-01-02.jsonl) for
+  analytics tooling.
 - Targeted gdUnit coverage in [`tests/gdunit/test_command_elan_loop.gd`](tests/gdunit/test_command_elan_loop.gd) now exercises doctrine swap failures, Élan spend success/error states, and the Assistant AI acknowledgement to keep the command loop locked while the HUD evolves.
 - Doctrine swaps and order execution now scale inertia using the SDS multipliers (`command_profile.inertia_multiplier` plus
   `orders[].inertia_profile.doctrine_multipliers`), guaranteeing at least one full turn of lock when orders are issued while

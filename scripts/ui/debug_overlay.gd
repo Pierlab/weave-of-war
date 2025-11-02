@@ -5,11 +5,15 @@ const DATA_LOADER := preload("res://scripts/core/data_loader.gd")
 const UTILS := preload("res://scripts/core/utils.gd")
 const MAX_ASSISTANT_LOG_ENTRIES := 10
 const MAX_INTEL_LOG_ENTRIES := 12
+const MAX_REASONING_LOG_ENTRIES := 12
 
 @onready var next_turn_button: Button = $PanelContainer/MarginContainer/VBoxContainer/NextTurnButton
 @onready var toggle_logistics_button: Button = $PanelContainer/MarginContainer/VBoxContainer/ToggleLogisticsButton
 @onready var spawn_unit_button: Button = $PanelContainer/MarginContainer/VBoxContainer/SpawnUnitButton
 @onready var assistant_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/AssistantLog
+@onready var command_reasoning_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/CommandReasoningLog
+@onready var espionage_reasoning_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/EspionageReasoningLog
+@onready var logistics_reasoning_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/AssistantSection/LogisticsReasoningLog
 @onready var intel_log: RichTextLabel = $PanelContainer/MarginContainer/VBoxContainer/IntelSection/IntelLog
 
 var event_bus: EventBus
@@ -17,6 +21,11 @@ var assistant_ai: AssistantAI
 var data_loader: DataLoader
 var _assistant_packets: Array[Dictionary] = []
 var _intel_events: Array[Dictionary] = []
+var _reasoning_history: Dictionary = {
+    "orders": [],
+    "espionage": [],
+    "logistics": [],
+}
 
 func _ready() -> void:
     event_bus = EVENT_BUS.get_instance()
@@ -31,6 +40,8 @@ func _ready() -> void:
     if assistant_ai:
         _ingest_assistant_history(assistant_ai.get_recent_packets())
         _refresh_assistant_log()
+        _ingest_reasoning_history(assistant_ai.get_reasoning_history())
+        _refresh_reasoning_logs()
 
     data_loader = DATA_LOADER.get_instance()
     if data_loader == null:
@@ -58,6 +69,8 @@ func _ready() -> void:
             event_bus.espionage_ping.connect(_on_espionage_ping)
         if not event_bus.intel_intent_revealed.is_connected(_on_intel_intent_revealed):
             event_bus.intel_intent_revealed.connect(_on_intel_intent_revealed)
+        if not event_bus.logistics_break.is_connected(_on_logistics_break):
+            event_bus.logistics_break.connect(_on_logistics_break)
 
     _refresh_intel_log()
 
@@ -91,6 +104,7 @@ func _on_assistant_packet(packet: Dictionary) -> void:
     while _assistant_packets.size() > MAX_ASSISTANT_LOG_ENTRIES:
         _assistant_packets.remove_at(0)
     _refresh_assistant_log()
+    _refresh_reasoning_logs()
 
 func _on_espionage_ping(payload: Dictionary) -> void:
     if payload.is_empty():
@@ -100,6 +114,7 @@ func _on_espionage_ping(payload: Dictionary) -> void:
     while _intel_events.size() > MAX_INTEL_LOG_ENTRIES:
         _intel_events.remove_at(0)
     _refresh_intel_log()
+    _refresh_reasoning_logs()
 
 func _on_intel_intent_revealed(payload: Dictionary) -> void:
     if payload.is_empty():
@@ -114,6 +129,10 @@ func _on_intel_intent_revealed(payload: Dictionary) -> void:
     while _intel_events.size() > MAX_INTEL_LOG_ENTRIES:
         _intel_events.remove_at(0)
     _refresh_intel_log()
+    _refresh_reasoning_logs()
+
+func _on_logistics_break(_payload: Dictionary) -> void:
+    _refresh_reasoning_logs()
 
 func _ingest_assistant_history(entries: Array) -> void:
     _assistant_packets.clear()
@@ -122,6 +141,21 @@ func _ingest_assistant_history(entries: Array) -> void:
             _assistant_packets.append((entry as Dictionary).duplicate(true))
     while _assistant_packets.size() > MAX_ASSISTANT_LOG_ENTRIES:
         _assistant_packets.remove_at(0)
+
+func _ingest_reasoning_history(history: Dictionary) -> void:
+    for key in _reasoning_history.keys():
+        _reasoning_history[key] = []
+    for domain in history.keys():
+        var entries_variant: Variant = history.get(domain, [])
+        if not (entries_variant is Array):
+            continue
+        var collected: Array = []
+        for entry in (entries_variant as Array):
+            if entry is Dictionary:
+                collected.append((entry as Dictionary).duplicate(true))
+        while collected.size() > MAX_REASONING_LOG_ENTRIES:
+            collected.remove_at(0)
+        _reasoning_history[domain] = collected
 
 func _refresh_assistant_log() -> void:
     if assistant_log == null:
@@ -135,6 +169,35 @@ func _refresh_assistant_log() -> void:
     var line_count := assistant_log.get_line_count()
     if line_count > 0:
         assistant_log.scroll_to_line(line_count - 1)
+
+func _refresh_reasoning_logs() -> void:
+    if assistant_ai == null:
+        return
+    _ingest_reasoning_history(assistant_ai.get_reasoning_history())
+    _render_reasoning_log(command_reasoning_log, _reasoning_history.get("orders", []), Callable(self, "_format_order_reasoning"))
+    _render_reasoning_log(espionage_reasoning_log, _reasoning_history.get("espionage", []), Callable(self, "_format_espionage_reasoning"))
+    _render_reasoning_log(logistics_reasoning_log, _reasoning_history.get("logistics", []), Callable(self, "_format_logistics_reasoning"))
+
+func _render_reasoning_log(target: RichTextLabel, entries: Variant, formatter: Callable) -> void:
+    if target == null:
+        return
+    target.clear()
+    if not (entries is Array):
+        return
+    var array_entries: Array = entries
+    if array_entries.is_empty():
+        target.append_text("Aucune entrée enregistrée.\n")
+        return
+    for entry in array_entries:
+        if not (entry is Dictionary):
+            continue
+        var line := formatter.call(entry)
+        if line.is_empty():
+            continue
+        target.append_text("%s\n" % line)
+    var line_count := target.get_line_count()
+    if line_count > 0:
+        target.scroll_to_line(line_count - 1)
 
 func _format_assistant_packet(packet: Dictionary) -> String:
     var orders_variant: Variant = packet.get("orders", [])
@@ -178,6 +241,81 @@ func _format_assistant_packet(packet: Dictionary) -> String:
                 parts.append("Engagement %s" % engagement_id)
             return " | ".join(parts)
     return ""
+
+func _format_order_reasoning(entry: Dictionary) -> String:
+    var order_id := str(entry.get("order_id", ""))
+    var target := str(entry.get("target", "frontline"))
+    var confidence_percent := roundi(float(entry.get("confidence", 0.0)) * 100.0)
+    var base_percent := roundi(float(entry.get("base_signal", 0.0)) * 100.0)
+    var alignment := float(entry.get("competence_alignment", 1.0))
+    var elan_cost := float(entry.get("elan_cost", 0.0))
+    var recommendation := str(entry.get("recommendation", ""))
+    var parts := [
+        "Ordre %s" % (order_id if order_id != "" else "(n/a)"),
+        "→ %s" % (target if target != "" else "frontline"),
+        "Confiance %d%% (base %d%%)" % [confidence_percent, base_percent],
+        "Align %.2f" % alignment,
+        "Élan %.1f" % elan_cost,
+    ]
+    if entry.has("competence_cost") and entry.get("competence_cost") is Dictionary:
+        var cost_parts: Array = []
+        for key in (entry.get("competence_cost") as Dictionary).keys():
+            cost_parts.append("%s %.1f" % [str(key), float((entry.get("competence_cost") as Dictionary).get(key, 0.0))])
+        if cost_parts.size() > 0:
+            parts.append("Compétence %s" % ", ".join(cost_parts))
+    if not recommendation.is_empty():
+        parts.append(recommendation)
+    return " | ".join(parts)
+
+func _format_espionage_reasoning(entry: Dictionary) -> String:
+    var target := str(entry.get("target", "unknown"))
+    var confidence_percent := roundi(float(entry.get("confidence", 0.0)) * 100.0)
+    var detection_percent := roundi(float(entry.get("detection_risk", 0.0)) * 100.0)
+    var recommendation := str(entry.get("recommendation", ""))
+    var status := "Succès" if bool(entry.get("success", false)) else "Échec"
+    var intent := str(entry.get("intent", "unknown"))
+    var probe_strength := float(entry.get("probe_strength", 0.0))
+    var counter_intel := float(entry.get("counter_intel", 0.0))
+    var parts := [
+        "%s — %s" % [status, target],
+        "Confiance %d%%" % confidence_percent,
+        "Détection %d%%" % detection_percent,
+        "Intention %s" % intent,
+        "Probe %.2f" % probe_strength,
+        "Counter-intel %.2f" % counter_intel,
+    ]
+    if not recommendation.is_empty():
+        parts.append(recommendation)
+    return " | ".join(parts)
+
+func _format_logistics_reasoning(entry: Dictionary) -> String:
+    var alert_type := str(entry.get("type", ""))
+    var location := str(entry.get("location", ""))
+    var recommendation := str(entry.get("recommendation", ""))
+    var competence_penalty := float(entry.get("competence_penalty", 0.0))
+    var elan_penalty := float(entry.get("elan_penalty", 0.0))
+    var weather := str(entry.get("weather_id", ""))
+    var turn_number := int(entry.get("turn", 0))
+    var parts := [
+        "%s @ %s" % [alert_type if alert_type != "" else "alerte", location if location != "" else "n/a"],
+        "Tour %d" % turn_number,
+        "Compétence %.1f" % competence_penalty,
+        "Élan %.1f" % elan_penalty,
+    ]
+    if not weather.is_empty():
+        parts.append("Météo %s" % weather)
+    if entry.has("context") and entry.get("context") is Dictionary:
+        var context: Dictionary = entry.get("context")
+        if context.has("supply_level"):
+            parts.append("Niveau %s" % str(context.get("supply_level")))
+        if context.has("logistics_flow"):
+            parts.append("Flux %.2f" % float(context.get("logistics_flow", 0.0)))
+        if context.has("intercept_risk") and context.get("intercept_risk") is Dictionary:
+            var risk: Dictionary = context.get("intercept_risk")
+            parts.append("Risque %.0f%%" % roundi(float(risk.get("effective", 0.0)) * 100.0))
+    if not recommendation.is_empty():
+        parts.append(recommendation)
+    return " | ".join(parts)
 
 func _refresh_intel_log() -> void:
     if intel_log == null:
