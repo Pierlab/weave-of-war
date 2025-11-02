@@ -46,6 +46,10 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Phase 0 findings
+- 2026-01-07 — Nouvelle passe Godot 4.6 : les appels `draw_string*` de `FormationOverlay` utilisent désormais des paramètres
+  positionnels, ce qui supprime l'erreur de parsing "Could not preload resource" déclenchée par la syntaxe d'arguments
+  nommés. `GameManager` vérifie aussi dynamiquement la présence de `setup` sur `FormationSystem` avant de l'invoquer pour
+  contourner les caches de classes parfois incomplets.
 - 2026-01-06 — Repris le correctif `FormationOverlay` pour Godot 4.6 : les tableaux typés sont maintenant initialisés via des
   constructeurs explicites, ce qui permet au `Map` de précharger le script sans erreur, et la HUD mémorise le playback audio
   générateur afin que `_stop_feedback_stream()` n'appelle plus `get_stream_playback()` lorsque le player est inactif (fin des
