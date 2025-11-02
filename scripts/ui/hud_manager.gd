@@ -1218,13 +1218,19 @@ func _on_competence_allocation_failed(payload: Dictionary) -> void:
             _focus_competence_slider(category)
         "delta_exceeds_cap":
             var category_delta := str(payload.get("category", ""))
-            var max_delta := float(payload.get("max_delta", 0.0))
+            var max_delta := _safe_to_float(payload.get("max_delta", 0.0))
             message = "Delta maximal dépassé pour %s (≤ %.2f pts/ tour)." % [_competence_display_name(category_delta), max_delta]
             _focus_competence_slider(category_delta)
         "over_budget":
-            var requested := float(payload.get("requested", 0.0))
-            var budget := float(payload.get("budget", 0.0))
-            message = "Budget compétence dépassé : %.2f / %.2f pts." % [requested, budget]
+            var requested_variant: Variant = payload.get("requested", 0.0)
+            var requested_total := _sum_competence_allocations(requested_variant)
+            var budget := _safe_to_float(payload.get("budget", 0.0))
+            var breakdown := ""
+            if requested_variant is Dictionary:
+                breakdown = _format_competence_cost(requested_variant)
+            message = "Budget compétence dépassé : %.2f / %.2f pts." % [requested_total, budget]
+            if not breakdown.is_empty():
+                message += " (%s)" % breakdown
         _:
             message = "Réallocation compétence refusée (%s)." % reason
     _set_feedback(message, false)
@@ -1749,11 +1755,34 @@ func _format_competence_cost(cost_variant: Variant) -> String:
         return ""
     var parts: Array[String] = []
     for category in costs.keys():
-        var amount: float = float(costs.get(category, 0.0))
+        var amount := _safe_to_float(costs.get(category, 0.0))
         if amount <= 0.0:
             continue
         parts.append("%s %.1f" % [String(category).capitalize(), amount])
     return ", ".join(parts)
+
+func _sum_competence_allocations(value: Variant) -> float:
+    if value is Dictionary:
+        var total := 0.0
+        var allocations: Dictionary = value as Dictionary
+        for allocation in allocations.values():
+            total += _safe_to_float(allocation)
+        return total
+    return _safe_to_float(value)
+
+static func _safe_to_float(value: Variant, fallback: float = 0.0) -> float:
+    match typeof(value):
+        TYPE_FLOAT, TYPE_INT:
+            return float(value)
+        TYPE_BOOL:
+            return 1.0 if value else 0.0
+        TYPE_STRING:
+            var text := String(value)
+            if text.is_empty():
+                return fallback
+            return text.to_float()
+        _:
+            return fallback
 
 func _stop_feedback_stream() -> void:
     _pending_feedback_pitches.clear()
@@ -1764,7 +1793,16 @@ func _stop_feedback_stream() -> void:
         feedback_player.stop()
     if _feedback_playback and is_instance_valid(_feedback_playback):
         _feedback_playback.stop()
-        if not _feedback_playback.is_active():
+        var allow_clear := true
+        if _feedback_playback.has_method("is_active"):
+            allow_clear = not _feedback_playback.is_active()
+        elif _feedback_playback.has_method("is_playing"):
+            allow_clear = not _feedback_playback.is_playing()
+        else:
+            var active_property := _feedback_playback.get("active")
+            if active_property != null:
+                allow_clear = not bool(active_property)
+        if allow_clear and _feedback_playback.has_method("clear_buffer"):
             _feedback_playback.clear_buffer()
     _feedback_playback = null
 
