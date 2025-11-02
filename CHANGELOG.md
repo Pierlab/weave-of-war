@@ -88,6 +88,9 @@ All notable changes to this project will be documented in this file.
 - Increased the default window size to 1600×900 and left the window resizable to give the tactical map more space while keeping the HUD accessible.
 
 ### Fixed
+- Godot 4.5.1 parses the formation overlay again on Windows: the script now falls back to plain `Array` caches instead of
+  instantiating typed `Array[String]` helpers that the older parser rejects during preload, eliminating the "Could not resolve
+  script" failure when `map.gd` loads the overlay.
 - Godot 4.5.1 can once again preload the tactical formation overlay: the script's `draw_string*` calls drop their trailing
   commas so older parser versions stop raising `Parse Error: Could not preload resource script` when `map.gd` instantiates the
   overlay during startup.
