@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Assistant AI reasoning telemetry: the autoload now logs command order drivers, espionage probe follow-ups, and logistics
+  break recommendations, exposes them in the debug overlay, and ships a sample JSONL log under
+  `docs/logs/assistant_ai_reasoning_sample_2026-01-02.jsonl` to guide analytics tooling (checklist item 52).
 - Telemetry sessions now persist to disk: `TelemetryAutoload` writes JSONL logs to `user://telemetry_sessions/telemetry_session_<timestamp>.jsonl`, updates include a persistence gdUnit test plus README/mission guidance to close checklist item 51.
 - Telemetry schema review and dashboard roadmap refresh: `docs/telemetry/dashboard_plan.md` now lists the full event matrix
   across readiness, command, logistics/weather, combat/formation, competence, and intel loops, alongside updated KPI seeds and

@@ -1,6 +1,7 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-02 — Ajouté des traces de raisonnement Assistant AI couvrant les ordres, les recommandations espionnage et les alertes logistiques : la debug overlay expose les trois flux, un échantillon JSONL (`docs/logs/assistant_ai_reasoning_sample_2026-01-02.jsonl`) sert de référence analytics, et les docs/checklists/mission ont été mis à jour. Les commandes Godot headless restent bloquées faute de binaire provisionné dans ce conteneur.
 - 2025-12-31 — Persisté les buffers `TelemetryAutoload` sur disque via des fichiers JSONL `user://telemetry_sessions/telemetry_session_<horodatage>.jsonl`, ajouté un test gdUnit couvrant la persistance, et documenté le rituel dans le README, la checklist et le mission brief (checklist item 51 bouclé). Godot headless reste bloqué faute de binaire provisionné localement.
 - 2025-12-30 — Revu l'intégralité des schémas `TelemetryAutoload`, confirmé la duplication profonde des payloads et mis à jour
   `docs/telemetry/dashboard_plan.md` avec une matrice de champs (readiness, commandement, logistique/météo, combat/formation,
