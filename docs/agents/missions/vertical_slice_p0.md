@@ -46,6 +46,9 @@ Deliver the Weave of War vertical slice across the eight foundational systems (C
 - Follow-up task list for remaining polish or stretch items.
 
 ### Phase 0 findings
+- 2026-01-10 — Simplifié le cache `FormationOverlay` en utilisant un `Array` non typé pour les identifiants d'unités entrants,
+  afin que Godot 4.5.1 n'essaie plus de parser `Array[String]()` pendant le preload. La carte tactique se charge à nouveau
+  sans l'erreur « Could not resolve script » signalée sur Windows.
 - 2026-01-09 — Ajusté `FormationOverlay` pour supprimer les virgules terminales dans les appels `draw_string*`, ce qui rend à
   nouveau le préchargement compatible avec Godot 4.5.1 et supprime l'erreur de parsing observée lors du chargement de `map.gd`
   sur Windows.

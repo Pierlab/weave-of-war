@@ -1,6 +1,9 @@
 # Context Update — Current Branch
 
 ## Summary
+- 2026-01-10 — Replaced the `FormationOverlay` typed `Array[String]` cache with an untyped `Array` so Godot 4.5.1's parser no
+  longer aborts with "Could not resolve script" during preload. README/CHANGELOG/mission reflect the fix; the headless Godot
+  commands remain blocked because the binary is not provisioned in this container.
 - 2026-01-09 — Corrected the `FormationOverlay` drawing helpers to drop trailing commas so Godot 4.5.1 stops throwing
   `Parse Error: Could not preload resource script` when `map.gd` preloads the overlay. README/CHANGELOG/mission reflect the
   compatibility fix; the headless Godot commands remain blocked because the binary is not provisioned in this container.
